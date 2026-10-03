@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Organisation Setup | Kind Compliance{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-lg-8">
+    <h1 class="h3">Organisation Setup</h1>
+    <p class="text-secondary">
+      Your account has been created. This is the starter onboarding page for the prototype.
+    </p>
+
+    <div class="card card-body shadow-sm">
+      <h2 class="h5">Planned setup steps</h2>
+      <ol class="mb-0">
+        <li>Organisation Profile</li>
+        <li>Insurance Details</li>
+        <li>Registration Groups</li>
+        <li>Key Staff</li>
+        <li>Operating Rules</li>
+      </ol>
+    </div>
+
+    <a class="btn btn-primary mt-3" href="{{ url_for('dashboard.index') }}">
+      Continue to dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

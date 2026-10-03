@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Kind Compliance{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="h3">Executive Compliance Dashboard</h1>
+    <p class="text-secondary mb-0">Skeleton dashboard — connect these cards to real module data next.</p>
+  </div>
+  {% if membership %}
+    <span class="badge text-bg-secondary">{{ membership.role }}</span>
+  {% endif %}
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card card-body h-100">
+      <div class="text-secondary">Audit Readiness Score</div>
+      <div class="display-6">Not Yet Assessed</div>
+      <small class="text-secondary">Scoring rules still need client confirmation.</small>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card card-body h-100">
+      <div class="text-secondary">Compliance Health Score</div>
+      <div class="display-6">Not Yet Assessed</div>
+      <small class="text-secondary">Will combine documents, evidence and worker compliance.</small>
+    </div>
+  </div>
+</div>
+
+<div class="card card-body mt-4">
+  <h2 class="h5">Next implementation targets</h2>
+  <ul class="mb-0">
+    <li>Staff credential register and expiry rules</li>
+    <li>Document/evidence linking</li>
+    <li>Incident workflow and corrective actions</li>
+    <li>Organisation onboarding / registration groups</li>
+    <li>Spreadsheet migration preview and validation</li>
+  </ul>
+</div>
+{% endblock %}

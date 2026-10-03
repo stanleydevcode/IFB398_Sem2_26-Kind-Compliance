@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: kind_compliance
+      POSTGRES_USER: kind
+      POSTGRES_PASSWORD: kind
+    ports:
+      - "5432:5432"
+    volumes:
+      - kind_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  kind_postgres_data:

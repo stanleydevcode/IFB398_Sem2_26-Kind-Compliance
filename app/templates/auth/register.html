@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Register | Kind Compliance{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-6 col-lg-5">
+    <div class="text-center mb-4">
+      <h1 class="h3">Create your Kind Compliance account</h1>
+      <p class="text-secondary">Register your organisation to get started.</p>
+    </div>
+
+    <form method="post" class="card card-body shadow-sm">
+      <label class="form-label">Organisation name</label>
+      <input class="form-control mb-3" name="organisation_name" required>
+
+      <label class="form-label">Email</label>
+      <input class="form-control mb-3" name="email" type="email" required>
+
+      <label class="form-label">Password</label>
+      <input class="form-control mb-3" name="password" type="password" minlength="8" required>
+
+      <label class="form-label">Confirm password</label>
+      <input class="form-control mb-4" name="confirm_password" type="password" minlength="8" required>
+
+      <button class="btn btn-primary">Create account</button>
+    </form>
+
+    <p class="text-center mt-3">
+      Already have an account?
+      <a href="{{ url_for('auth.login') }}">Sign in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
