@@ -9,7 +9,5 @@ bp = Blueprint("staff", __name__, url_prefix="/staff")
 @manager_required
 def index():
     return render_template(
-        "placeholders/module.html",
-        title="Staff Register",
-        module_name="staff",
+        "staff/index.html",
     )

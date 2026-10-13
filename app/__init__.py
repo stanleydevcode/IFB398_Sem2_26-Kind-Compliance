@@ -51,4 +51,7 @@ def create_app(config_object=Config):
     from app.cli import register_commands
     register_commands(app)
 
+    from app.services.ui import shell_context
+    app.context_processor(shell_context)
+
     return app
