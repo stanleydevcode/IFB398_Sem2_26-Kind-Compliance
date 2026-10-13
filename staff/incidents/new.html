@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Report an incident · Kind Compliance</title>
+  <link rel="icon" type="image/png" href="../../static/img/favicon.png">
+  <link rel="stylesheet" href="../../static/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="../../static/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../../static/css/theme.css">
+</head>
+<body>
+
+
+<header class="kc-header">
+  
+  <div class="kc-top">
+    <div class="kc-top-inner">
+      <a class="kc-logo" href="../my-compliance.html" aria-label="Kind Compliance home">
+        <img src="../../static/img/kind-compliance-logo.png" alt="Kind Compliance" width="157" height="40">
+      </a>
+
+      <div class="kc-search dropdown">
+        <i class="bi bi-search"></i>
+        <label for="kc-search-input" class="visually-hidden">Search</label>
+        <input id="kc-search-input" type="search" class="form-control" autocomplete="off"
+               placeholder="Search workers, documents, participants" aria-controls="kc-search-results">
+        <div class="dropdown-menu w-100" id="kc-search-results"></div>
+      </div>
+
+      <div class="kc-tools">
+        <div class="dropdown">
+          <button class="kc-icon-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+            <i class="bi bi-bell"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-0" style="width:360px">
+            <div class="px-3 py-2 border-bottom fw-semibold small">Notifications</div>
+            
+            
+              <div class="px-3 py-2 ">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-file-earmark-check text-secondary mt-1"></i>
+                  <div>
+                    <div class="fw-medium small">First Aid renewal sent for verification</div>
+                    <div class="small text-secondary">Sarah Chen will check it. You can still be deployed until 5 Oct.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">2 days ago</div>
+                  </div>
+                </div>
+              </div>
+            
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="kc-user" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="kc-avatar">MW</span>
+            <span class="who"><b>Marcus Webb</b><span>Support Worker</span></span>
+            <i class="bi bi-chevron-down small"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" style="min-width:260px">
+            <li><h6 class="dropdown-header">Switch account</h6></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 " href="../../admin/dashboard.html">
+                <span class="kc-avatar" style="width:30px;height:30px">DO</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Douglas Okafor</span><span class="small text-secondary">Organization Administrator</span></span>
+              </a></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 " href="../../manager/dashboard.html">
+                <span class="kc-avatar" style="width:30px;height:30px">SC</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Sarah Chen</span><span class="small text-secondary">Compliance Manager</span></span>
+              </a></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 active" href="../my-compliance.html">
+                <span class="kc-avatar" style="width:30px;height:30px">MW</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Marcus Webb</span><span class="small text-secondary">Staff Member</span></span>
+              </a></li>
+            
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item small" href="../../index.html"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <nav class="kc-nav" aria-label="Main">
+    <div class="kc-nav-inner">
+      
+        <a href="../my-compliance.html" class=""
+           >My compliance</a>
+      
+        <a href="../participants.html" class=""
+           >Participants</a>
+      
+        <a href="../incidents.html" class="active"
+           aria-current="page">Incidents</a>
+      
+      
+    </div>
+  </nav>
+</header>
+
+
+<script id="kc-search-index" type="application/json">
+[{"label": "J. Tallis (P-1042)", "kind": "Participant", "url": "../participants.html"},{"label": "A. Mercado (P-1088)", "kind": "Participant", "url": "../participants.html"},{"label": "R. Whitlock (P-1103)", "kind": "Participant", "url": "../participants.html"},{"label": "M. Delacroix (P-1130)", "kind": "Participant", "url": "../participants.html"},{"label": "INC-2026-0044 Serious injury", "kind": "Incident", "url": "../incidents.html"},{"label": "INC-2026-0043 Abuse or neglect", "kind": "Incident", "url": "../incidents.html"}]
+</script>
+<main class="kc-page">
+  
+
+
+<div class="kc-head">
+  <div>
+    <div class="kc-crumb"><a href="../incidents.html">Incidents</a> / New report</div>
+    <h1>Report an incident or complaint</h1>
+    <p>Fill in what you know now; you can add more later.</p>
+  </div>
+</div>
+
+<div class="alert alert-light border small gap-2 align-items-start kc-alert" id="from-note" style="max-width:960px" hidden>
+  <i class="bi bi-journal-check mt-1"></i><span>Details copied from your progress note. Check them and add anything missing.</span>
+</div>
+
+<form id="inc-form" class="kc-form-col" novalidate>
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">1</span>What happened</h2></div>
+    <div class="kc-panel-body row g-3">
+      <div class="col-12">
+        <span class="form-label d-block">This is</span>
+        <div class="kc-seg" role="radiogroup">
+          <input type="radio" class="btn-check" name="ctype" id="ct-inc" value="Incident" checked><label class="btn btn-sm btn-outline-kc rounded-0 border-0" for="ct-inc">An incident</label>
+          <input type="radio" class="btn-check" name="ctype" id="ct-com" value="Complaint"><label class="btn btn-sm btn-outline-kc rounded-0 border-0 border-start" for="ct-com">A complaint</label>
+        </div>
+      </div>
+      <div class="col-md-3"><label class="form-label" for="i-date">Date</label><input id="i-date" type="date" class="form-control" value="2026-09-27" required></div>
+      <div class="col-md-3"><label class="form-label" for="i-time">Time</label><input id="i-time" type="time" class="form-control" value="14:10"></div>
+      <div class="col-md-6"><label class="form-label" for="i-p">Participant</label>
+        <select id="i-p" class="form-select" required><option value="">Choose a participant</option>
+          <option value="P-1042">Jordan Tallis (P-1042)</option><option value="P-1103">Rhys Whitlock (P-1103)</option><option value="none">No participant involved</option></select>
+        <div class="invalid-feedback">Choose a participant, or "No participant involved".</div></div>
+      <div class="col-md-6"><label class="form-label" for="i-loc">Where</label><input id="i-loc" class="form-control"></div>
+      <div class="col-md-6"><label class="form-label" for="i-cat">Category</label>
+        <select id="i-cat" class="form-select" required><option value="">Choose a category</option><option>Death of a participant</option><option>Serious injury</option><option>Abuse or neglect</option><option>Unlawful sexual or physical contact or assault</option><option>Sexual misconduct</option><option>Unauthorised restrictive practice</option><option>Medication error</option><option>Near miss</option><option>Property damage</option><option>Service quality (complaint)</option><option>Communication (complaint)</option></select>
+        <div class="invalid-feedback">Choose the closest category.</div></div>
+      <div class="col-12"><label class="form-label" for="i-what">What happened</label>
+        <textarea id="i-what" class="form-control" rows="4" placeholder="Describe what you saw or were told, in order" required></textarea>
+        <div class="invalid-feedback">Describe what happened.</div></div>
+    </div>
+  </section>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">2</span>Immediate response</h2></div>
+    <div class="kc-panel-body row g-3">
+      <div class="col-12"><label class="form-label" for="i-resp">What was done straight away</label><textarea id="i-resp" class="form-control" rows="3"></textarea></div>
+      
+        <div class="col-md-4"><label class="form-label" for="i-ems">Emergency services contacted?</label>
+          <select id="i-ems" class="form-select"><option value="">Choose</option><option>Yes</option><option>No</option><option>Unsure</option></select></div>
+      
+        <div class="col-md-4"><label class="form-label" for="i-safe">Is the participant safe now?</label>
+          <select id="i-safe" class="form-select"><option value="">Choose</option><option>Yes</option><option>No</option><option>Unsure</option></select></div>
+      
+        <div class="col-md-4"><label class="form-label" for="i-inj">Was anyone injured?</label>
+          <select id="i-inj" class="form-select"><option value="">Choose</option><option>Yes</option><option>No</option><option>Unsure</option></select></div>
+      
+      <div class="col-12"><label class="form-label" for="i-wit">Witnesses</label><input id="i-wit" class="form-control" placeholder="Names and roles"></div>
+    </div>
+  </section>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">3</span>Reporter</h2></div>
+    <div class="kc-panel-body row g-3">
+      <div class="col-md-5"><label class="form-label" for="i-by">Reported by</label><input id="i-by" class="form-control" value="Marcus Webb, Support Worker" readonly></div>
+      <div class="col-md-4"><label class="form-label" for="i-phone">Best contact number</label><input id="i-phone" class="form-control" value="0412 884 019"></div>
+      <div class="col-md-3"><label class="form-label" for="i-reported">Date reported</label><input id="i-reported" type="date" class="form-control" value="2026-09-27"></div>
+    </div>
+  </section>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">4</span>Severity</h2></div>
+    <div class="kc-panel-body row g-3">
+      <div class="col-md-4"><label class="form-label" for="i-sev">How serious is it?</label>
+        <select id="i-sev" class="form-select"><option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option></select></div>
+      
+    </div>
+  </section>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">5</span>Evidence</h2></div>
+    <div class="kc-panel-body">
+      <label class="kc-drop" for="i-files" id="i-drop"><i class="bi bi-images"></i>
+        <span class="fw-medium" id="i-files-name">Add photos, statements or documents</span><span class="small">Optional</span>
+        <input type="file" id="i-files" class="visually-hidden" multiple></label>
+    </div>
+  </section>
+
+  
+  <p class="small text-secondary mb-0"><i class="bi bi-info-circle me-1"></i>Your manager reviews every report and decides whether it must be reported to the NDIS Commission.</p>
+  
+
+  <div class="d-flex justify-content-end gap-2">
+    <a class="btn btn-outline-kc" href="../incidents.html">Cancel</a>
+    <button type="button" class="btn btn-outline-kc" data-toast="Draft saved">Save draft</button>
+    <button type="submit" class="btn btn-kc">Submit report</button>
+  </div>
+</form>
+
+</main>
+
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+  <div id="kc-toast" class="toast align-items-center text-bg-dark border-0" role="status" aria-live="polite" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center gap-2"><i class="bi bi-check-circle"></i><span></span></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="../../static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+<script src="../../static/js/kc.js"></script>
+
+<script>
+(function () {
+  // fill in details from a progress note
+  try {
+    const raw = sessionStorage.getItem('kc-note-incident');
+    if (raw) {
+      const n = JSON.parse(raw); sessionStorage.removeItem('kc-note-incident');
+      if (n.pid) document.getElementById('i-p').value = n.pid;
+      if (n.text) document.getElementById('i-what').value = n.text;
+      if (n.date) document.getElementById('i-date').value = n.date;
+      document.getElementById('from-note').hidden = false;
+    }
+  } catch (e) {  }
+
+  document.getElementById('i-files').addEventListener('change', (e) => {
+    const n = e.target.files.length; if (!n) return;
+    document.getElementById('i-files-name').textContent = n === 1 ? e.target.files[0].name : n + ' files added';
+    document.getElementById('i-drop').classList.add('has-file');
+  });
+  document.querySelectorAll('input[name=rep]').forEach((r) => r.addEventListener('change', () => {
+    document.getElementById('rep-reason').hidden = r.value !== 'no' || !r.checked;
+  }));
+
+  document.getElementById('inc-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    let bad = false;
+    ['i-p', 'i-cat', 'i-what'].forEach((id) => { const el = document.getElementById(id); const b = !el.value.trim(); el.classList.toggle('is-invalid', b); bad = bad || b; });
+    const rep = document.querySelector('input[name=rep]:checked'), reason = document.getElementById('i-reason');
+    if (rep && rep.value === 'no') { const b = !reason.value.trim(); reason.classList.toggle('is-invalid', b); bad = bad || b; }
+    if (bad) { document.querySelector('.is-invalid').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    const isComplaint = document.getElementById('ct-com').checked;
+    kcToast((isComplaint ? 'CAS' : 'INC') + '-2026-0046 submitted' + (rep && rep.value === 'yes' ? ', 24-hour countdown started' : ''));
+    setTimeout(() => { window.location.href = '../incidents.html'; }, 1400);
+  });
+})();
+</script>
+
+
+</body>
+</html>

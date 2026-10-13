@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · Kind Compliance</title>
+  <link rel="icon" type="image/png" href="static/img/favicon.png">
+  <link rel="stylesheet" href="static/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="static/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="static/css/theme.css">
+</head>
+<body>
+
+<main class="auth">
+  <img class="auth-logo" src="static/img/kind-compliance-logo.png"
+       alt="Kind Compliance" width="600" height="153">
+
+  <!-- Sign in -->
+  <section class="auth-card" id="panel-signin" aria-labelledby="signin-title">
+    <h1 id="signin-title">Sign in</h1>
+    <p class="lede">Use your work email to access your organisation.</p>
+
+    <div class="alert alert-danger py-2 px-3 small kc-alert" id="signin-error" role="alert" hidden>
+      <i class="bi bi-exclamation-circle mt-1"></i>
+      <span>The email or password is incorrect. Check them and try again.</span>
+    </div>
+
+    <form id="signin-form" novalidate>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" name="email" autocomplete="username"
+               value="d.okafor@brightwatercare.com.au" required>
+        <div class="invalid-feedback">Enter your work email address.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <div class="pw-wrap">
+          <input type="password" class="form-control" id="password" name="password"
+                 autocomplete="current-password" value="compliance2026" required>
+          <button type="button" class="pw-toggle" id="pw-toggle" aria-label="Show password" aria-pressed="false">
+            <i class="bi bi-eye"></i>
+          </button>
+          <div class="invalid-feedback">Enter your password.</div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-4 auth-meta">
+        <div class="form-check m-0">
+          <input class="form-check-input" type="checkbox" id="remember" checked>
+          <label class="form-check-label" for="remember">Remember me</label>
+        </div>
+        <a href="#" id="to-reset">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-kc w-100" id="signin-btn">
+        <span class="label">Sign in</span>
+        <span class="spinner-border spinner-border-sm ms-2" aria-hidden="true" hidden></span>
+      </button>
+    </form>
+
+  </section>
+
+  <!-- Reset password -->
+  <section class="auth-card" id="panel-reset" aria-labelledby="reset-title" hidden>
+    <h1 id="reset-title">Reset your password</h1>
+    <p class="lede">Enter your work email and we'll send you a link to set a new password.</p>
+
+    <div id="reset-done" class="alert alert-success py-2 px-3 small kc-alert" role="status" hidden>
+      <i class="bi bi-check-circle mt-1"></i>
+      <span>If an account exists for that email, a reset link is on its way. The link expires in 30 minutes.</span>
+    </div>
+
+    <form id="reset-form" novalidate>
+      <div class="mb-4">
+        <label for="reset-email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="reset-email" autocomplete="username" required>
+        <div class="invalid-feedback">Enter your work email address.</div>
+      </div>
+      <button type="submit" class="btn btn-kc w-100">Send reset link</button>
+    </form>
+    <p class="text-center mt-4 mb-0 auth-meta"><a href="#" id="to-signin"><i class="bi bi-arrow-left me-1"></i>Back to sign in</a></p>
+  </section>
+
+  <footer class="auth-foot">
+    <p class="mb-1">&copy; 2026 Kind Compliance. All rights reserved.</p>
+    <a href="#">Terms of Use</a> <span class="mx-1">|</span> <a href="#">Privacy Policy</a>
+  </footer>
+</main>
+
+<script src="static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+<script>
+  const form = document.getElementById('signin-form');
+  const email = document.getElementById('email');
+  const pw = document.getElementById('password');
+  const err = document.getElementById('signin-error');
+  const btn = document.getElementById('signin-btn');
+
+  // each account opens its own home page
+  const accounts = {
+    'd.okafor@brightwatercare.com.au': 'admin/dashboard.html',
+    's.chen@brightwatercare.com.au': 'manager/dashboard.html',
+    'm.webb@brightwatercare.com.au': 'staff/my-compliance.html',
+    
+  };
+
+  document.getElementById('pw-toggle').addEventListener('click', (e) => {
+    const b = e.currentTarget, show = pw.type === 'password';
+    pw.type = show ? 'text' : 'password';
+    b.setAttribute('aria-pressed', String(show));
+    b.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    b.querySelector('i').className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    err.hidden = true;
+    email.classList.toggle('is-invalid', !email.checkValidity());
+    pw.classList.toggle('is-invalid', !pw.value);
+    if (!email.checkValidity() || !pw.value) return;
+
+    const target = accounts[email.value.trim().toLowerCase()];
+    btn.disabled = true;
+    btn.querySelector('.label').textContent = 'Signing in';
+    btn.querySelector('.spinner-border').hidden = false;
+    setTimeout(() => {
+      if (target) { window.location.href = target; return; }
+      btn.disabled = false;
+      btn.querySelector('.label').textContent = 'Sign in';
+      btn.querySelector('.spinner-border').hidden = true;
+      err.hidden = false;
+    }, 600);
+  });
+
+  // forgot password
+  const signin = document.getElementById('panel-signin'), reset = document.getElementById('panel-reset');
+  document.getElementById('to-reset').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('reset-email').value = email.value;
+    signin.hidden = true; reset.hidden = false;
+    document.getElementById('reset-email').focus();
+  });
+  document.getElementById('to-signin').addEventListener('click', (e) => {
+    e.preventDefault();
+    reset.hidden = true; signin.hidden = false;
+    document.getElementById('reset-done').hidden = true;
+  });
+  document.getElementById('reset-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const r = document.getElementById('reset-email');
+    r.classList.toggle('is-invalid', !r.checkValidity());
+    if (r.checkValidity()) document.getElementById('reset-done').hidden = false;
+  });
+</script>
+
+</body>
+</html>

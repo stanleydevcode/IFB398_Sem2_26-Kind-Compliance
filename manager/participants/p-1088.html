@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ana Mercado · Kind Compliance</title>
+  <link rel="icon" type="image/png" href="../../static/img/favicon.png">
+  <link rel="stylesheet" href="../../static/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="../../static/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../../static/css/theme.css">
+</head>
+<body>
+
+
+<header class="kc-header">
+  
+  <div class="kc-top">
+    <div class="kc-top-inner">
+      <a class="kc-logo" href="../dashboard.html" aria-label="Kind Compliance home">
+        <img src="../../static/img/kind-compliance-logo.png" alt="Kind Compliance" width="157" height="40">
+      </a>
+
+      <div class="kc-search dropdown">
+        <i class="bi bi-search"></i>
+        <label for="kc-search-input" class="visually-hidden">Search</label>
+        <input id="kc-search-input" type="search" class="form-control" autocomplete="off"
+               placeholder="Search workers, documents, participants" aria-controls="kc-search-results">
+        <div class="dropdown-menu w-100" id="kc-search-results"></div>
+      </div>
+
+      <div class="kc-tools">
+        <div class="dropdown">
+          <button class="kc-icon-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+            <i class="bi bi-bell"></i><span class="dot"></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-0" style="width:360px">
+            <div class="px-3 py-2 border-bottom fw-semibold small">Notifications</div>
+            
+              <a class="d-block px-3 py-2 border-bottom text-decoration-none text-reset" href="../my-compliance.html">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-person-badge text-warning mt-1"></i>
+                  <div><div class="fw-medium small">Your NDIS Worker Screening expires in 12 days</div><div class="small text-secondary">Upload the renewal before 9 Oct 2026.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">Your record</div></div>
+                </div>
+              </a>
+            
+            
+              <div class="px-3 py-2 ">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-exclamation-octagon text-danger mt-1"></i>
+                  <div>
+                    <div class="fw-medium small">Daniel Hughes can&#39;t be deployed</div>
+                    <div class="small text-secondary">Police Check lapsed 4 days ago. Daniel, his manager and rostering have been told.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">4 days ago</div>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="px-3 py-2 border-top">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-clock text-warning mt-1"></i>
+                  <div>
+                    <div class="fw-medium small">Public Liability renews in 26 days</div>
+                    <div class="small text-secondary">Upload the new certificate of currency once CGU issues it.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">Today</div>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="px-3 py-2 border-top">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-file-earmark-check text-secondary mt-1"></i>
+                  <div>
+                    <div class="fw-medium small">Privacy Policy v2.2 awaiting your sign-off</div>
+                    <div class="small text-secondary">Uploaded by S. Chen. It stays in draft until approved.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">Yesterday</div>
+                  </div>
+                </div>
+              </div>
+            
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="kc-user" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="kc-avatar">SC</span>
+            <span class="who"><b>Sarah Chen</b><span>Compliance Manager</span></span>
+            <i class="bi bi-chevron-down small"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" style="min-width:260px">
+            <li><h6 class="dropdown-header">Switch account</h6></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 " href="../../admin/dashboard.html">
+                <span class="kc-avatar" style="width:30px;height:30px">DO</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Douglas Okafor</span><span class="small text-secondary">Organization Administrator</span></span>
+              </a></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 active" href="../dashboard.html">
+                <span class="kc-avatar" style="width:30px;height:30px">SC</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Sarah Chen</span><span class="small text-secondary">Compliance Manager</span></span>
+              </a></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 " href="../../staff/my-compliance.html">
+                <span class="kc-avatar" style="width:30px;height:30px">MW</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Marcus Webb</span><span class="small text-secondary">Staff Member</span></span>
+              </a></li>
+            
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item small" href="../../index.html"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <nav class="kc-nav" aria-label="Main">
+    <div class="kc-nav-inner">
+      
+        <a href="../dashboard.html" class=""
+           >Dashboard</a>
+      
+        <a href="../documents.html" class=""
+           >Documents</a>
+      
+        <a href="../workers.html" class=""
+           >Workers</a>
+      
+        <a href="../participants.html" class="active"
+           aria-current="page">Participants</a>
+      
+        <a href="../incidents.html" class=""
+           >Incidents</a>
+      
+      
+        <a href="../my-compliance.html" class="kc-nav-mine "
+           >My compliance<span class="kc-nav-dot" title="Something needs your attention"></span></a>
+      
+    </div>
+  </nav>
+</header>
+
+
+<script id="kc-search-index" type="application/json">
+[{"label": "Daniel Hughes", "kind": "Worker", "url": "../workers.html"},{"label": "Sarah Chen", "kind": "Worker", "url": "../workers.html"},{"label": "Marcus Webb", "kind": "Worker", "url": "../workers.html"},{"label": "Priya Nair", "kind": "Worker", "url": "../workers.html"},{"label": "Amelia Torres", "kind": "Worker", "url": "../workers.html"},{"label": "Liam Petersen", "kind": "Worker", "url": "../workers.html"},{"label": "Code of Conduct Policy", "kind": "Policy", "url": "../documents.html"},{"label": "Privacy and Confidentiality Policy", "kind": "Policy", "url": "../documents.html"},{"label": "Incident Management Policy", "kind": "Policy", "url": "../documents.html"},{"label": "Risk Management Policy", "kind": "Policy", "url": "../documents.html"},{"label": "Work Health and Safety Policy", "kind": "Policy", "url": "../documents.html"},{"label": "Complaints Handling Procedure", "kind": "Procedure", "url": "../documents.html"},{"label": "Audit Evidence Register", "kind": "Register", "url": "../documents.html"},{"label": "Business Plan", "kind": "Document", "url": "../documents.html"},{"label": "J. Tallis (P-1042)", "kind": "Participant", "url": "../participants.html"},{"label": "A. Mercado (P-1088)", "kind": "Participant", "url": "../participants.html"},{"label": "R. Whitlock (P-1103)", "kind": "Participant", "url": "../participants.html"},{"label": "M. Delacroix (P-1130)", "kind": "Participant", "url": "../participants.html"},{"label": "INC-2026-0044 Serious injury", "kind": "Incident", "url": "../incidents.html"},{"label": "INC-2026-0043 Abuse or neglect", "kind": "Incident", "url": "../incidents.html"}]
+</script>
+<main class="kc-page">
+  
+
+<div class="kc-head">
+  <div class="d-flex gap-3 align-items-center">
+    <span class="kc-avatar" style="width:56px;height:56px;font-size:1.05rem">AM</span>
+    <div>
+      <div class="kc-crumb"><a href="../participants.html">Participants</a> / Ana Mercado</div>
+      <h1>Ana Mercado</h1>
+      <div class="kc-meta">
+        <span>P-1088</span><span>Supported independent living</span><span>SIL, 14 Kembla St</span><span>Key worker: Sarah Chen</span>
+        <span class="kc-pill warn">Restrictive practice</span>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-kc" data-bs-toggle="modal" data-bs-target="#handover-modal" data-pid="P-1088"><i class="bi bi-arrow-left-right me-1"></i>Handover</button>
+    <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#note-modal" data-pid="P-1088"><i class="bi bi-journal-plus me-1"></i>Add progress note</button>
+  </div>
+</div>
+
+
+
+<div class="row g-4">
+  <div class="col-lg-8 d-flex flex-column gap-4">
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Care requirements</h2>
+        <button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#care-modal">Edit</button></div>
+      <div class="kc-panel-body">
+        <ul class="kc-care"><li>Behaviour support plan in place. Follow de-escalation steps in section 4.</li><li>Authorised restrictive practice: locked kitchen cupboard (environmental). Record each use.</li><li>Prefers female support workers for personal care.</li></ul>
+        
+          <div class="small text-secondary border-top pt-3 mt-3">
+            <div class="fw-medium text-body mb-1">Change history</div>
+            <div class="kc-parts"><span>20 Jul 2026</span><span>Sarah Chen</span><span>Restrictive practice authorisation renewed until July 2027.</span></div>
+          </div>
+        
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Recent notes</h2>
+        <a href="../participants.html#notes">All notes</a></div>
+      
+        <div class="kc-task">
+          <div class="body">
+            <div class="small text-secondary kc-parts"><span>25 Sep 2026</span><span>Sarah Chen</span><span>Progress note</span></div>
+            <div class="mt-1">Calm day. Kitchen cupboard lock used once at 6:10 pm and recorded.</div>
+            
+          </div>
+        </div>
+      
+        <div class="kc-task">
+          <div class="body">
+            <div class="small text-secondary kc-parts"><span>25 Sep 2026</span><span>Ethan Brooks</span><span>Handover to Sarah Chen</span></div>
+            <div class="mt-1">Ana asked twice about her sister&#39;s visit. Please confirm the date with the guardian.</div>
+            <div class="d-flex gap-2 mt-1">
+              <span class="kc-pill warn">Needs follow-up</span>
+              </div>
+          </div>
+        </div>
+      
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Support plans</h2></div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Plan</th><th>Status</th><th>Last reviewed</th><th>Next review</th></tr></thead>
+          <tbody>
+          
+            <tr><td class="fw-medium">Core support plan</td>
+              <td><span class="kc-pill warn">Review due</span></td>
+              <td>2 Oct 2025</td><td class="text-nowrap">2 Oct 2026</td></tr>
+          
+            <tr><td class="fw-medium">Behaviour support plan</td>
+              <td><span class="kc-pill warn">Review due</span></td>
+              <td>2 Oct 2025</td><td class="text-nowrap">2 Oct 2026</td></tr>
+          
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Linked risks</h2></div>
+      
+        <div class="kc-task">
+          <div class="body"><div class="title">Participant aggression</div><div class="meta kc-parts"><span>RSK-2026-0114</span><span>High</span><span>Behaviour support plan review and de-escalation training</span></div></div>
+          <span class="kc-pill bad">Review overdue</span>
+        </div>
+      
+        <div class="kc-task">
+          <div class="body"><div class="title">Unauthorised use of restrictive practice</div><div class="meta kc-parts"><span>RSK-2026-0064</span><span>High</span><span>Monthly restrictive practice reporting and staff briefing</span></div></div>
+          <span class="kc-pill bad">Escalated</span>
+        </div>
+      
+    </section>
+    
+  </div>
+
+  <div class="col-lg-4 d-flex flex-column gap-4">
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Consent</h2>
+        <button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#consent-modal">Update</button></div>
+      <div class="kc-panel-body py-2">
+        
+          <div class="kc-file">
+            <i class="bi bi-check-circle-fill"
+               style="font-size:1.05rem;color:var(--kc-ok)"></i>
+            <div class="small">
+              <div class="fw-medium">Collect and store personal information</div>
+              <div class="text-secondary">Given 2 Oct 2025 by Public guardian</div>
+            </div>
+          </div>
+        
+          <div class="kc-file">
+            <i class="bi bi-dash-circle"
+               style="font-size:1.05rem;color:var(--kc-ink-3)"></i>
+            <div class="small">
+              <div class="fw-medium">Share with family</div>
+              <div class="text-secondary">Not asked yet</div>
+            </div>
+          </div>
+        
+          <div class="kc-file">
+            <i class="bi bi-check-circle-fill"
+               style="font-size:1.05rem;color:var(--kc-ok)"></i>
+            <div class="small">
+              <div class="fw-medium">Share with GP: Dr L. Huang</div>
+              <div class="text-secondary">Given 2 Oct 2025 by Public guardian</div>
+            </div>
+          </div>
+        
+          <div class="kc-file">
+            <i class="bi bi-check-circle-fill"
+               style="font-size:1.05rem;color:var(--kc-ok)"></i>
+            <div class="small">
+              <div class="fw-medium">Share with behaviour support practitioner</div>
+              <div class="text-secondary">Given 2 Oct 2025 by Public guardian</div>
+            </div>
+          </div>
+        
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Documents</h2></div>
+      <div class="kc-panel-body py-2">
+        <div class="kc-file">
+          <i class="bi bi-file-earmark-text" style="font-size:1.2rem;color:var(--kc-ink-3)"></i>
+          <div class="small flex-grow-1"><div class="fw-medium">Service agreement</div>
+            <div class="text-secondary">Signed 28 Sep 2025</div></div>
+          <span class="kc-pill ok">Signed</span>
+        </div>
+        <div class="kc-file">
+          <i class="bi bi-file-earmark-text" style="font-size:1.2rem;color:var(--kc-ink-3)"></i>
+          <div class="small flex-grow-1"><div class="fw-medium">Support plan</div><div class="text-secondary">On file</div></div>
+        </div>
+        <div class="kc-file">
+          <i class="bi bi-file-earmark-text" style="font-size:1.2rem;color:var(--kc-ink-3)"></i>
+          <div class="small flex-grow-1"><div class="fw-medium">Consent form</div><div class="text-secondary">Signed 2 Oct 2025</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Support team</h2></div>
+      <div class="kc-panel-body small">
+        <div class="d-flex justify-content-between py-1"><span>Sarah Chen</span><span class="text-secondary">Key worker</span></div><div class="d-flex justify-content-between py-1"><span>Ethan Brooks</span><span class="text-secondary">Support worker</span></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="note-modal" tabindex="-1" aria-labelledby="nt-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="note-form" novalidate>
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="nt-title">Add progress note</h5>
+        <div class="small text-secondary">Signed as Sarah Chen</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="nt-p">Participant</label>
+            <select id="nt-p" class="form-select" required><option value="">Choose a participant</option>
+              <option value="P-1042">Jordan Tallis (P-1042)</option><option value="P-1088">Ana Mercado (P-1088)</option><option value="P-1103">Rhys Whitlock (P-1103)</option><option value="P-1119">Thi Ngo (P-1119)</option><option value="P-1130">Margot Delacroix (P-1130)</option></select>
+            <div class="invalid-feedback">Choose who this note is about.</div></div>
+          <div class="col-md-3"><label class="form-label" for="nt-date">Date</label><input id="nt-date" type="date" class="form-control" value="2026-09-27"></div>
+          <div class="col-md-3"><label class="form-label" for="nt-hours">Hours</label><input id="nt-hours" type="number" step="0.5" min="0" class="form-control" value="3"></div>
+          <div class="col-12"><label class="form-label" for="nt-text">Support provided</label>
+            <textarea id="nt-text" class="form-control" rows="4" placeholder="What you did and how it went" required></textarea>
+            <div class="invalid-feedback">Describe the support provided.</div></div>
+          <div class="col-md-6"><label class="form-label" for="nt-mood">Mood</label>
+            <select id="nt-mood" class="form-select"><option>Settled</option><option>Happy</option><option>Anxious</option><option>Distressed</option><option>Unwell</option></select></div>
+          <div class="col-md-6"><label class="form-label" for="nt-part">Participation</label>
+            <select id="nt-part" class="form-select"><option>Fully engaged</option><option>Partly engaged</option><option>Declined</option></select></div>
+        </div>
+        <div class="mt-3 d-grid gap-2">
+          <label class="kc-choice m-0"><input class="form-check-input mt-1" type="checkbox" id="nt-follow">
+            <span><span class="fw-medium d-block">Needs follow-up</span><span class="small text-secondary">Flags the note for the key worker and Compliance Manager.</span></span></label>
+          <label class="kc-choice m-0"><input class="form-check-input mt-1" type="checkbox" id="nt-incident">
+            <span><span class="fw-medium d-block">Report this as an incident</span><span class="small text-secondary">Starts an incident report with these details filled in.</span></span></label>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal" data-toast="Draft saved">Save draft</button>
+        <button type="submit" class="btn btn-kc">Submit note</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="handover-modal" tabindex="-1" aria-labelledby="ho-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="handover-form" novalidate>
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="ho-title">Shift handover</h5>
+        <div class="small text-secondary">Signed as Sarah Chen</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="ho-p">Participant</label>
+            <select id="ho-p" class="form-select" required><option value="">Choose a participant</option>
+              <option value="P-1042">Jordan Tallis (P-1042)</option><option value="P-1088">Ana Mercado (P-1088)</option><option value="P-1103">Rhys Whitlock (P-1103)</option><option value="P-1119">Thi Ngo (P-1119)</option><option value="P-1130">Margot Delacroix (P-1130)</option></select>
+            <div class="invalid-feedback">Choose a participant.</div></div>
+          <div class="col-md-6"><label class="form-label" for="ho-shift">Shift</label>
+            <select id="ho-shift" class="form-select"><option>Morning, 6 am to 2 pm</option><option>Afternoon, 2 pm to 10 pm</option><option>Night, 10 pm to 6 am</option></select></div>
+          <div class="col-md-6"><label class="form-label" for="ho-to">Hand over to</label>
+            <select id="ho-to" class="form-select"><option>Daniel Hughes</option><option>Marcus Webb</option><option>Priya Nair</option><option>Douglas Okafor</option><option>Amelia Torres</option><option>Liam Petersen</option><option>Ruby Nguyen</option><option>Ethan Brooks</option><option>Chloe Sandhu</option><option>Noah Whitfield</option><option>Grace Ellery</option></select></div>
+          <div class="col-12"><label class="form-label" for="ho-text">What the next worker needs to know</label>
+            <textarea id="ho-text" class="form-control" rows="4" placeholder="Changes, unfinished tasks, things to watch" required></textarea>
+            <div class="invalid-feedback">Add the handover details.</div></div>
+          <div class="col-12"><span class="form-label d-block">Flags</span>
+            <div class="d-flex flex-wrap gap-2">
+              
+                <input type="checkbox" class="btn-check" id="ho-f1"><label class="btn btn-sm btn-outline-kc" for="ho-f1">Medication change</label>
+              
+                <input type="checkbox" class="btn-check" id="ho-f2"><label class="btn btn-sm btn-outline-kc" for="ho-f2">Behaviour</label>
+              
+                <input type="checkbox" class="btn-check" id="ho-f3"><label class="btn btn-sm btn-outline-kc" for="ho-f3">Health concern</label>
+              
+                <input type="checkbox" class="btn-check" id="ho-f4"><label class="btn btn-sm btn-outline-kc" for="ho-f4">Family contact</label>
+              
+                <input type="checkbox" class="btn-check" id="ho-f5"><label class="btn btn-sm btn-outline-kc" for="ho-f5">Equipment</label>
+              
+            </div></div>
+        </div>
+        <div class="form-check mt-3"><input class="form-check-input" type="checkbox" id="ho-follow"><label class="form-check-label" for="ho-follow">Needs follow-up</label></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-kc">Complete handover</button></div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  const pre = (modalId, selectId) => document.getElementById(modalId).addEventListener('show.bs.modal', (e) => {
+    const form = e.target.querySelector('form'); form.reset();
+    form.querySelectorAll('.is-invalid').forEach((x) => x.classList.remove('is-invalid'));
+    if (e.relatedTarget && e.relatedTarget.dataset.pid) document.getElementById(selectId).value = e.relatedTarget.dataset.pid;
+  });
+  pre('note-modal', 'nt-p'); pre('handover-modal', 'ho-p');
+  const check = (ids) => ids.map((id) => { const el = document.getElementById(id); const bad = !el.value.trim(); el.classList.toggle('is-invalid', bad); return bad; }).some(Boolean);
+
+  document.getElementById('note-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (check(['nt-p', 'nt-text'])) return;
+    const inc = document.getElementById('nt-incident').checked, fu = document.getElementById('nt-follow').checked;
+    if (inc) {
+      try { sessionStorage.setItem('kc-note-incident', JSON.stringify({ pid: document.getElementById('nt-p').value,
+        text: document.getElementById('nt-text').value, date: document.getElementById('nt-date').value })); } catch (err) {  }
+      window.location.href = '../incidents/new.html';
+      return;
+    }
+    bootstrap.Modal.getInstance(document.getElementById('note-modal')).hide();
+    kcToast('Progress note submitted' + (inc ? ', incident report started' : fu ? ', flagged for follow-up' : ''));
+  });
+  document.getElementById('handover-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (check(['ho-p', 'ho-text'])) return;
+    bootstrap.Modal.getInstance(document.getElementById('handover-modal')).hide();
+    kcToast('Handover sent to ' + document.getElementById('ho-to').value);
+  });
+})();
+</script>
+
+
+<div class="modal fade" id="care-modal" tabindex="-1" aria-labelledby="cr-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="care-form" novalidate>
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="cr-title">Edit care requirements</h5><div class="small text-secondary">Ana Mercado</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="cr-text">Care requirements</label>
+        <textarea id="cr-text" class="form-control" rows="6">Behaviour support plan in place. Follow de-escalation steps in section 4.
+Authorised restrictive practice: locked kitchen cupboard (environmental). Record each use.
+Prefers female support workers for personal care.</textarea>
+        <label class="form-label mt-3" for="cr-why">Reason for change</label>
+        <input id="cr-why" class="form-control" required>
+        <div class="invalid-feedback">A reason is required. It's kept in the change history.</div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Save and record change</button></div>
+    </form>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="consent-modal" tabindex="-1" aria-labelledby="cs-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" id="consent-form">
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="cs-title">Record consent</h5><div class="small text-secondary">Ana Mercado</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="cs-what">Consent for</label>
+        <select id="cs-what" class="form-select mb-3">
+          <option>Collect and store personal information</option><option>Share with family</option><option>Share with GP</option><option>Share with other providers</option>
+        </select>
+        <div class="row g-3">
+          <div class="col-6"><label class="form-label" for="cs-status">Status</label><select id="cs-status" class="form-select"><option>Given</option><option>Withdrawn</option></select></div>
+          <div class="col-6"><label class="form-label" for="cs-date">Date</label><input id="cs-date" type="date" class="form-control" value="2026-09-27"></div>
+          <div class="col-12"><label class="form-label" for="cs-who">Given by</label>
+            <select id="cs-who" class="form-select"><option>Ana (participant)</option><option>Nominee</option><option>Guardian</option></select></div>
+        </div>
+        <label class="kc-drop mt-3"><i class="bi bi-paperclip"></i><span class="fw-medium">Attach the signed form</span><input type="file" class="visually-hidden"></label>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" data-bs-dismiss="modal" data-toast="Consent recorded">Save</button></div>
+    </form>
+  </div>
+</div>
+
+
+</main>
+
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+  <div id="kc-toast" class="toast align-items-center text-bg-dark border-0" role="status" aria-live="polite" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center gap-2"><i class="bi bi-check-circle"></i><span></span></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="../../static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+<script src="../../static/js/kc.js"></script>
+
+<script>
+  const cf = document.getElementById('care-form');
+  if (cf) cf.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const why = document.getElementById('cr-why');
+    why.classList.toggle('is-invalid', !why.value.trim()); if (!why.value.trim()) return;
+    bootstrap.Modal.getInstance(document.getElementById('care-modal')).hide();
+    kcToast('Care requirements updated, change recorded');
+  });
+</script>
+
+
+</body>
+</html>

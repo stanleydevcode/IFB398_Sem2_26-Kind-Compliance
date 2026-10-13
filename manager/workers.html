@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Workers · Kind Compliance</title>
+  <link rel="icon" type="image/png" href="../static/img/favicon.png">
+  <link rel="stylesheet" href="../static/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="../static/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../static/css/theme.css">
+</head>
+<body>
+
+
+<header class="kc-header">
+  
+  <div class="kc-top">
+    <div class="kc-top-inner">
+      <a class="kc-logo" href="dashboard.html" aria-label="Kind Compliance home">
+        <img src="../static/img/kind-compliance-logo.png" alt="Kind Compliance" width="157" height="40">
+      </a>
+
+      <div class="kc-search dropdown">
+        <i class="bi bi-search"></i>
+        <label for="kc-search-input" class="visually-hidden">Search</label>
+        <input id="kc-search-input" type="search" class="form-control" autocomplete="off"
+               placeholder="Search workers, documents, participants" aria-controls="kc-search-results">
+        <div class="dropdown-menu w-100" id="kc-search-results"></div>
+      </div>
+
+      <div class="kc-tools">
+        <div class="dropdown">
+          <button class="kc-icon-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+            <i class="bi bi-bell"></i><span class="dot"></span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-0" style="width:360px">
+            <div class="px-3 py-2 border-bottom fw-semibold small">Notifications</div>
+            
+              <a class="d-block px-3 py-2 border-bottom text-decoration-none text-reset" href="my-compliance.html">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-person-badge text-warning mt-1"></i>
+                  <div><div class="fw-medium small">Your NDIS Worker Screening expires in 12 days</div><div class="small text-secondary">Upload the renewal before 9 Oct 2026.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">Your record</div></div>
+                </div>
+              </a>
+            
+            
+              <div class="px-3 py-2 ">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-exclamation-octagon text-danger mt-1"></i>
+                  <div>
+                    <div class="fw-medium small">Daniel Hughes can&#39;t be deployed</div>
+                    <div class="small text-secondary">Police Check lapsed 4 days ago. Daniel, his manager and rostering have been told.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">4 days ago</div>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="px-3 py-2 border-top">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-clock text-warning mt-1"></i>
+                  <div>
+                    <div class="fw-medium small">Public Liability renews in 26 days</div>
+                    <div class="small text-secondary">Upload the new certificate of currency once CGU issues it.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">Today</div>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="px-3 py-2 border-top">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-file-earmark-check text-secondary mt-1"></i>
+                  <div>
+                    <div class="fw-medium small">Privacy Policy v2.2 awaiting your sign-off</div>
+                    <div class="small text-secondary">Uploaded by S. Chen. It stays in draft until approved.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">Yesterday</div>
+                  </div>
+                </div>
+              </div>
+            
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="kc-user" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="kc-avatar">SC</span>
+            <span class="who"><b>Sarah Chen</b><span>Compliance Manager</span></span>
+            <i class="bi bi-chevron-down small"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" style="min-width:260px">
+            <li><h6 class="dropdown-header">Switch account</h6></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 " href="../admin/dashboard.html">
+                <span class="kc-avatar" style="width:30px;height:30px">DO</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Douglas Okafor</span><span class="small text-secondary">Organization Administrator</span></span>
+              </a></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 active" href="dashboard.html">
+                <span class="kc-avatar" style="width:30px;height:30px">SC</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Sarah Chen</span><span class="small text-secondary">Compliance Manager</span></span>
+              </a></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 " href="../staff/my-compliance.html">
+                <span class="kc-avatar" style="width:30px;height:30px">MW</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Marcus Webb</span><span class="small text-secondary">Staff Member</span></span>
+              </a></li>
+            
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item small" href="../index.html"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <nav class="kc-nav" aria-label="Main">
+    <div class="kc-nav-inner">
+      
+        <a href="dashboard.html" class=""
+           >Dashboard</a>
+      
+        <a href="documents.html" class=""
+           >Documents</a>
+      
+        <a href="workers.html" class="active"
+           aria-current="page">Workers</a>
+      
+        <a href="participants.html" class=""
+           >Participants</a>
+      
+        <a href="incidents.html" class=""
+           >Incidents</a>
+      
+      
+        <a href="my-compliance.html" class="kc-nav-mine "
+           >My compliance<span class="kc-nav-dot" title="Something needs your attention"></span></a>
+      
+    </div>
+  </nav>
+</header>
+
+
+<script id="kc-search-index" type="application/json">
+[{"label": "Daniel Hughes", "kind": "Worker", "url": "workers.html"},{"label": "Sarah Chen", "kind": "Worker", "url": "workers.html"},{"label": "Marcus Webb", "kind": "Worker", "url": "workers.html"},{"label": "Priya Nair", "kind": "Worker", "url": "workers.html"},{"label": "Amelia Torres", "kind": "Worker", "url": "workers.html"},{"label": "Liam Petersen", "kind": "Worker", "url": "workers.html"},{"label": "Code of Conduct Policy", "kind": "Policy", "url": "documents.html"},{"label": "Privacy and Confidentiality Policy", "kind": "Policy", "url": "documents.html"},{"label": "Incident Management Policy", "kind": "Policy", "url": "documents.html"},{"label": "Risk Management Policy", "kind": "Policy", "url": "documents.html"},{"label": "Work Health and Safety Policy", "kind": "Policy", "url": "documents.html"},{"label": "Complaints Handling Procedure", "kind": "Procedure", "url": "documents.html"},{"label": "Audit Evidence Register", "kind": "Register", "url": "documents.html"},{"label": "Business Plan", "kind": "Document", "url": "documents.html"},{"label": "J. Tallis (P-1042)", "kind": "Participant", "url": "participants.html"},{"label": "A. Mercado (P-1088)", "kind": "Participant", "url": "participants.html"},{"label": "R. Whitlock (P-1103)", "kind": "Participant", "url": "participants.html"},{"label": "M. Delacroix (P-1130)", "kind": "Participant", "url": "participants.html"},{"label": "INC-2026-0044 Serious injury", "kind": "Incident", "url": "incidents.html"},{"label": "INC-2026-0043 Abuse or neglect", "kind": "Incident", "url": "incidents.html"}]
+</script>
+<main class="kc-page">
+  
+<div class="kc-head">
+  <div>
+    <h1>Workers</h1>
+    <p>Screening, credentials and training for every worker</p>
+  </div>
+  <div class="d-flex gap-2">
+    
+    <button class="btn btn-outline-kc" data-toast="Worker register exported"><i class="bi bi-download me-1"></i>Export</button>
+    <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#add-modal"><i class="bi bi-person-plus me-1"></i>Add worker</button>
+  </div>
+</div>
+
+
+  
+  <div class="kc-alert-row">
+    <i class="bi bi-person-x"></i>
+    <div class="txt">
+      <b>Daniel Hughes can't be deployed</b>
+      <div class="sub">Police Check lapsed 4 days ago. Daniel, their manager and rostering have been notified.
+        A renewal is waiting for verification.</div>
+    </div>
+    <button class="btn btn-sm btn-outline-kc bg-white" data-toast="Rostering asked to reassign Daniel's shifts">Reassign shifts</button>
+    <a class="btn btn-sm btn-kc-danger" href="workers/daniel-hughes.html">Resolve</a>
+  </div>
+  
+
+
+<nav class="kc-counters four" aria-label="Worker status">
+  <a class="kc-counter" href="#register" data-filter-status=""><b>12</b><span>Active workers</span></a>
+  <a class="kc-counter" href="#register" data-filter-status="ok"><b>8</b><span>Fully compliant</span></a>
+  <a class="kc-counter" href="#register" data-filter-status="soon"><b>2</b><span>Expiring within 30 days</span></a>
+  <a class="kc-counter urgent" href="#register" data-filter-status="blocked"><b>1</b><span>Can't be deployed</span></a>
+</nav>
+
+<section>
+  <div class="kc-tabs" role="tablist">
+    <button role="tab" data-tab="register">Register</button>
+    <button role="tab" data-tab="verify">Awaiting verification<span class="count" id="verify-count">2</span></button>
+    
+  </div>
+
+  
+  <div class="kc-tabpane pt-4" data-pane="register">
+    <div class="kc-panel">
+      <div class="kc-toolbar">
+        <label class="search">
+          <i class="bi bi-search"></i><span class="visually-hidden">Search workers</span>
+          <input type="search" class="form-control form-control-sm" id="w-search" placeholder="Search by name or email">
+        </label>
+        <select class="form-select form-select-sm" id="w-cred" aria-label="Credential">
+          <option value="">All credentials</option>
+          <option value="screening">NDIS Worker Screening</option><option value="police">Police Check</option><option value="bluecard">Blue Card</option><option value="firstaid">First Aid</option>
+        </select>
+        <select class="form-select form-select-sm" id="w-status" aria-label="Status">
+          <option value="">All statuses</option>
+          <option value="ok">Fully compliant</option>
+          <option value="action">Action needed</option>
+          <option value="soon">Expiring within 30 days</option>
+          <option value="blocked">Can't be deployed</option>
+        </select>
+        <select class="form-select form-select-sm" id="w-position" aria-label="Position">
+          <option value="">All positions</option>
+          <option>Support Worker</option><option>Compliance Manager</option><option>Team Leader</option><option>Director</option>
+        </select>
+      </div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Worker</th><th>NDIS Worker Screening</th><th>Police Check</th><th>Blue Card</th><th>First Aid</th><th>Status</th></tr></thead>
+          <tbody>
+          
+            <tr data-status="blocked" data-soon="0" data-position="Support Worker" data-c-screening="ok" data-c-police="bad" data-c-bluecard="ok" data-c-firstaid="ok" data-q="daniel hughes d.hughes@brightwatercare.com.au" class="flag">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/daniel-hughes.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">DH</span>
+                  <span><span class="kc-doc-link d-block">Daniel Hughes</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>14 Jun 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot bad"></span>23 Sep 2026</span><div class="kc-cred-sub bad">Lapsed 4 days ago</div>
+                  <div class="kc-cred-sub info">Renewal awaiting verification</div></td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>2 Feb 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>19 Aug 2027</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill bad">Can't be deployed</span>
+                
+              </td>
+            </tr>
+          
+            <tr data-status="action" data-soon="0" data-position="Support Worker" data-c-screening="ok" data-c-police="ok" data-c-bluecard="bad" data-c-firstaid="ok" data-q="amelia torres a.torres@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/amelia-torres.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">AT</span>
+                  <span><span class="kc-doc-link d-block">Amelia Torres</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>12 Aug 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>30 Jun 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot bad"></span><span>Missing</span></span><div class="kc-cred-sub bad">No record</div>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>18 Apr 2028</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill warn">Action needed</span>
+                
+              </td>
+            </tr>
+          
+            <tr data-status="action" data-soon="1" data-position="Support Worker" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="soon" data-q="marcus webb m.webb@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/marcus-webb.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">MW</span>
+                  <span><span class="kc-doc-link d-block">Marcus Webb</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>7 Apr 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>15 Nov 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>22 Mar 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot warn"></span>5 Oct 2026</span><div class="kc-cred-sub warn">8 days left</div>
+                  <div class="kc-cred-sub info">Renewal awaiting verification</div></td>
+              
+              <td>
+                <span class="kc-pill warn">Action needed</span>
+                
+              </td>
+            </tr>
+          
+            <tr data-status="action" data-soon="1" data-position="Compliance Manager" data-c-screening="soon" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="sarah chen s.chen@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/sarah-chen.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">SC</span>
+                  <span><span class="kc-doc-link d-block">Sarah Chen</span><span class="small text-secondary">Compliance Manager</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot warn"></span>9 Oct 2026</span><div class="kc-cred-sub warn">12 days left</div>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>21 Jan 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>30 May 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>11 Dec 2027</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill warn">Action needed</span>
+                
+              </td>
+            </tr>
+          
+            <tr data-status="ok" data-soon="0" data-position="Team Leader" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="priya nair p.nair@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/priya-nair.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">PN</span>
+                  <span><span class="kc-doc-link d-block">Priya Nair</span><span class="small text-secondary">Team Leader</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>28 Feb 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>3 Jul 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>13 Nov 2026</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>9 Jan 2028</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill ok">Compliant</span>
+              </td>
+            </tr>
+          
+            <tr data-status="ok" data-soon="0" data-position="Support Worker" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="ruby nguyen r.nguyen@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/ruby-nguyen.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">RN</span>
+                  <span><span class="kc-doc-link d-block">Ruby Nguyen</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>4 Dec 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>17 Feb 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>11 Jun 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>23 Jan 2027</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill ok">Compliant</span>
+              </td>
+            </tr>
+          
+            <tr data-status="ok" data-soon="0" data-position="Support Worker" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="chloe sandhu c.sandhu@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/chloe-sandhu.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">CS</span>
+                  <span><span class="kc-doc-link d-block">Chloe Sandhu</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>21 May 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>2 Oct 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>8 Aug 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>30 Dec 2027</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill ok">Compliant</span>
+              </td>
+            </tr>
+          
+            <tr data-status="ok" data-soon="0" data-position="Support Worker" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="liam petersen l.petersen@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/liam-petersen.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">LP</span>
+                  <span><span class="kc-doc-link d-block">Liam Petersen</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>25 Oct 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>8 Sep 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>19 Jul 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>2 Mar 2028</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill ok">Compliant</span>
+              </td>
+            </tr>
+          
+            <tr data-status="ok" data-soon="0" data-position="Support Worker" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="ethan brooks e.brooks@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/ethan-brooks.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">EB</span>
+                  <span><span class="kc-doc-link d-block">Ethan Brooks</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>9 Mar 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>26 Jul 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>15 Apr 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>7 Nov 2027</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill ok">Compliant</span>
+              </td>
+            </tr>
+          
+            <tr data-status="ok" data-soon="0" data-position="Support Worker" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="noah whitfield n.whitfield@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/noah-whitfield.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">NW</span>
+                  <span><span class="kc-doc-link d-block">Noah Whitfield</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>13 Jan 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>29 Apr 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>6 Sep 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>24 Jun 2028</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill ok">Compliant</span>
+              </td>
+            </tr>
+          
+            <tr data-status="ok" data-soon="0" data-position="Director" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="douglas okafor d.okafor@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/douglas-okafor.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">DO</span>
+                  <span><span class="kc-doc-link d-block">Douglas Okafor</span><span class="small text-secondary">Director</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>16 Sep 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>5 May 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>27 Oct 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>14 Feb 2028</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill ok">Compliant</span>
+              </td>
+            </tr>
+          
+            <tr data-status="ok" data-soon="0" data-position="Support Worker" data-c-screening="ok" data-c-police="ok" data-c-bluecard="ok" data-c-firstaid="ok" data-q="grace ellery g.ellery@brightwatercare.com.au" class="">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="workers/grace-ellery.html">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">GE</span>
+                  <span><span class="kc-doc-link d-block">Grace Ellery</span><span class="small text-secondary">Support Worker</span></span>
+                </a>
+              </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>18 Jul 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>1 Nov 2027</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>20 Feb 2028</span>
+                  </td>
+              
+                <td class="text-nowrap"><span class="kc-cred"><span class="kc-dot ok"></span>5 May 2028</span>
+                  </td>
+              
+              <td>
+                <span class="kc-pill ok">Compliant</span>
+              </td>
+            </tr>
+          
+          </tbody>
+        </table>
+      </div>
+      <div class="kc-empty" id="w-empty" hidden><i class="bi bi-people"></i><p class="fw-medium mt-2 mb-0">No workers found.</p></div>
+    </div>
+  </div>
+
+  
+  <div class="kc-tabpane pt-4" data-pane="verify" hidden>
+    <p class="text-secondary mb-3">
+      Renewals uploaded by workers. Check the certificate, then verify it to update their record.
+      
+    </p>
+    <section class="kc-panel">
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Worker</th><th>Credential</th><th>Current expiry</th><th>New expiry</th><th>Uploaded</th><th></th></tr></thead>
+          <tbody id="verify-body">
+          
+            <tr>
+              <td><a class="kc-doc-link" href="workers/daniel-hughes.html">Daniel Hughes</a></td>
+              <td>Police Check</td>
+              <td><span class="kc-cred"><span class="kc-dot bad"></span>23 Sep 2026</span><div class="kc-cred-sub bad">Lapsed 4 days ago</div></td>
+              <td class="text-nowrap">25 Sep 2029</td>
+              <td class="text-nowrap text-secondary">26 Sep 2026</td>
+              <td class="text-end text-nowrap">
+                <button class="btn btn-sm btn-outline-kc me-1" data-toast="Certificate opened">View file</button>
+                
+                  <button class="btn btn-sm btn-kc" data-verify="Daniel Hughes|Police Check|blocked">Verify</button>
+                
+              </td>
+            </tr>
+          
+            <tr>
+              <td><a class="kc-doc-link" href="workers/marcus-webb.html">Marcus Webb</a></td>
+              <td>First Aid</td>
+              <td><span class="kc-cred"><span class="kc-dot warn"></span>5 Oct 2026</span><div class="kc-cred-sub warn">8 days left</div></td>
+              <td class="text-nowrap">24 Sep 2029</td>
+              <td class="text-nowrap text-secondary">25 Sep 2026</td>
+              <td class="text-end text-nowrap">
+                <button class="btn btn-sm btn-outline-kc me-1" data-toast="Certificate opened">View file</button>
+                
+                  <button class="btn btn-sm btn-kc" data-verify="Marcus Webb|First Aid|action">Verify</button>
+                
+              </td>
+            </tr>
+          
+          </tbody>
+        </table>
+      </div>
+      <div class="kc-empty" id="verify-empty" hidden><i class="bi bi-check2-circle"></i><p class="fw-medium mt-2 mb-0">Nothing to verify.</p></div>
+    </section>
+  </div>
+
+  
+  
+</section>
+
+
+<div class="modal fade" id="add-modal" tabindex="-1" aria-labelledby="add-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="add-form" novalidate>
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="add-title">Add worker</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="aw-name">Full name</label><input id="aw-name" class="form-control" required><div class="invalid-feedback">Enter their name.</div></div>
+          <div class="col-md-6"><label class="form-label" for="aw-email">Work email</label><input id="aw-email" type="email" class="form-control"></div>
+          <div class="col-md-4"><label class="form-label" for="aw-pos">Position</label><select id="aw-pos" class="form-select"><option>Support Worker</option><option>Team Leader</option><option>Coordinator</option></select></div>
+          <div class="col-md-4"><label class="form-label" for="aw-emp">Employment</label><select id="aw-emp" class="form-select"><option>Casual</option><option>Permanent part time</option><option>Permanent full time</option><option>Contractor</option></select></div>
+          <div class="col-md-4"><label class="form-label" for="aw-start">Start date</label><input id="aw-start" type="date" class="form-control" value="2026-10-05"></div>
+        </div>
+        
+        <div class="form-text mt-2">You can add their screening checks and certificates from their worker page.</div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Add worker</button></div>
+    </form>
+  </div>
+</div>
+
+
+
+</main>
+
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+  <div id="kc-toast" class="toast align-items-center text-bg-dark border-0" role="status" aria-live="polite" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center gap-2"><i class="bi bi-check-circle"></i><span></span></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="../static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+<script src="../static/js/kc.js"></script>
+
+<script>
+// tabs
+const tabs = document.querySelectorAll('[data-tab]');
+const panes = document.querySelectorAll('[data-pane]');
+
+function showTab(name) {
+  let exists = false;
+  panes.forEach(function (pane) {
+    if (pane.dataset.pane === name) exists = true;
+  });
+  if (!exists) name = 'register';
+  tabs.forEach(function (tab) {
+    tab.classList.toggle('active', tab.dataset.tab === name);
+  });
+  panes.forEach(function (pane) {
+    pane.hidden = pane.dataset.pane !== name;
+  });
+}
+
+tabs.forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    showTab(tab.dataset.tab);
+    history.replaceState(null, '', '#' + tab.dataset.tab);
+  });
+});
+showTab(location.hash.slice(1));
+
+// register filters
+const searchBox = document.getElementById('w-search');
+const statusFilter = document.getElementById('w-status');
+const positionFilter = document.getElementById('w-position');
+const credFilter = document.getElementById('w-cred');
+
+function matchesStatus(row) {
+  const status = statusFilter.value;
+  // if a credential is picked, the status filter checks only that credential
+  if (credFilter.value) {
+    const state = row.getAttribute('data-c-' + credFilter.value);
+    if (status === '') return state !== 'ok';
+    if (status === 'ok') return state === 'ok';
+    if (status === 'soon') return state === 'soon';
+    if (status === 'blocked') return state === 'bad';
+    if (status === 'action') return state === 'soon' || state === 'bad';
+  }
+  if (status === '') return true;
+  if (status === 'soon') return row.dataset.soon === '1';
+  return row.dataset.status === status;
+}
+
+function filterWorkers() {
+  let shown = 0;
+  document.querySelectorAll('[data-pane=register] tbody tr').forEach(function (row) {
+    let show = true;
+    if (searchBox.value && !row.dataset.q.includes(searchBox.value.toLowerCase())) show = false;
+    if (positionFilter.value && row.dataset.position !== positionFilter.value) show = false;
+    if (!matchesStatus(row)) show = false;
+    row.hidden = !show;
+    if (show) shown++;
+  });
+  document.getElementById('w-empty').hidden = shown > 0;
+}
+
+searchBox.addEventListener('input', filterWorkers);
+statusFilter.addEventListener('change', filterWorkers);
+positionFilter.addEventListener('change', filterWorkers);
+credFilter.addEventListener('change', filterWorkers);
+
+document.querySelectorAll('[data-filter-status]').forEach(function (link) {
+  link.addEventListener('click', function (e) {
+    e.preventDefault();
+    showTab('register');
+    statusFilter.value = link.dataset.filterStatus;
+    filterWorkers();
+  });
+});
+
+// verify renewals
+document.querySelectorAll('[data-verify]').forEach(function (button) {
+  button.addEventListener('click', function () {
+    const parts = button.dataset.verify.split('|');
+    const name = parts[0], cred = parts[1], status = parts[2];
+    const list = document.getElementById('verify-body');
+    button.closest('tr').remove();
+    document.getElementById('verify-count').textContent = list.children.length;
+    document.getElementById('verify-empty').hidden = list.children.length > 0;
+    if (status === 'blocked') {
+      kcToast(cred + ' verified. ' + name + ' can be deployed again');
+    } else {
+      kcToast(cred + ' verified for ' + name);
+    }
+  });
+});
+
+// add worker
+document.getElementById('add-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const nameField = document.getElementById('aw-name');
+  const name = nameField.value.trim();
+  nameField.classList.toggle('is-invalid', name === '');
+  if (name === '') return;
+  bootstrap.Modal.getInstance(document.getElementById('add-modal')).hide();
+  const invite = document.getElementById('aw-invite');
+  if (invite && invite.checked) {
+    kcToast(name + ' added, invitation sent');
+  } else {
+    kcToast(name + ' added');
+  }
+  e.target.reset();
+});
+
+// admin only
+document.querySelectorAll('[data-role-select]').forEach(function (select) {
+  select.addEventListener('change', function () { kcToast('Platform role updated'); });
+});
+
+const inviteModal = document.getElementById('invite-modal');
+if (inviteModal) {
+  inviteModal.addEventListener('show.bs.modal', function (e) {
+    document.getElementById('inv-name').textContent = e.relatedTarget.dataset.name;
+    document.getElementById('inv-email').value = e.relatedTarget.dataset.email;
+  });
+}
+
+const deactivateModal = document.getElementById('deactivate-modal');
+if (deactivateModal) {
+  deactivateModal.addEventListener('show.bs.modal', function (e) {
+    document.getElementById('de-name').textContent = e.relatedTarget.dataset.name;
+  });
+}
+
+const importModal = document.getElementById('import-modal');
+if (importModal) {
+  function importStep(n) {
+    importModal.querySelectorAll('[data-im-step]').forEach(function (step) {
+      step.hidden = step.dataset.imStep !== String(n);
+    });
+    if (n === 1) {
+      document.getElementById('im-step-label').textContent = 'Step 1 of 2: Upload your file';
+    } else {
+      document.getElementById('im-step-label').textContent = 'Step 2 of 2: Check before importing';
+    }
+    document.getElementById('im-confirm').hidden = n === 1;
+  }
+  importModal.addEventListener('show.bs.modal', function () { importStep(1); });
+  document.getElementById('im-sample').addEventListener('click', function (e) {
+    e.preventDefault();
+    importStep(2);
+  });
+}
+</script>
+
+
+</body>
+</html>
