@@ -3,7 +3,7 @@ from flask_login import current_user, login_user, logout_user
 
 from app.constants import Roles
 from app.extensions import db
-from app.models.identity import Membership, Organisation, User
+from app.models.identity import Membership, Organisation, Role, User
 from app.services.tenant import provision_tenant_schema
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
@@ -77,10 +77,14 @@ def register():
         db.session.add_all([organisation, user])
         db.session.flush()
 
+        admin_role = Role.query.filter_by(name=Roles.ORGANISATION_ADMIN).first()
+        if admin_role is None:
+            admin_role = Role(name=Roles.ORGANISATION_ADMIN)
+
         membership = Membership(
             organisation_id=organisation.id,
             user_id=user.id,
-            role=Roles.ORGANISATION_ADMIN,
+            role_record=admin_role,
         )
         db.session.add(membership)
         db.session.commit()
