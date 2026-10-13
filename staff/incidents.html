@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Incidents · Kind Compliance</title>
+  <link rel="icon" type="image/png" href="../static/img/favicon.png">
+  <link rel="stylesheet" href="../static/vendor/bootstrap/bootstrap.min.css">
+  <link rel="stylesheet" href="../static/vendor/bootstrap-icons/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="../static/css/theme.css">
+</head>
+<body>
+
+
+<header class="kc-header">
+  
+  <div class="kc-top">
+    <div class="kc-top-inner">
+      <a class="kc-logo" href="my-compliance.html" aria-label="Kind Compliance home">
+        <img src="../static/img/kind-compliance-logo.png" alt="Kind Compliance" width="157" height="40">
+      </a>
+
+      <div class="kc-search dropdown">
+        <i class="bi bi-search"></i>
+        <label for="kc-search-input" class="visually-hidden">Search</label>
+        <input id="kc-search-input" type="search" class="form-control" autocomplete="off"
+               placeholder="Search workers, documents, participants" aria-controls="kc-search-results">
+        <div class="dropdown-menu w-100" id="kc-search-results"></div>
+      </div>
+
+      <div class="kc-tools">
+        <div class="dropdown">
+          <button class="kc-icon-btn" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+            <i class="bi bi-bell"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end p-0" style="width:360px">
+            <div class="px-3 py-2 border-bottom fw-semibold small">Notifications</div>
+            
+            
+              <div class="px-3 py-2 ">
+                <div class="d-flex gap-2 align-items-start">
+                  <i class="bi bi-file-earmark-check text-secondary mt-1"></i>
+                  <div>
+                    <div class="fw-medium small">First Aid renewal sent for verification</div>
+                    <div class="small text-secondary">Sarah Chen will check it. You can still be deployed until 5 Oct.</div>
+                    <div class="small" style="color:var(--kc-ink-3)">2 days ago</div>
+                  </div>
+                </div>
+              </div>
+            
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="kc-user" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="kc-avatar">MW</span>
+            <span class="who"><b>Marcus Webb</b><span>Support Worker</span></span>
+            <i class="bi bi-chevron-down small"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end" style="min-width:260px">
+            <li><h6 class="dropdown-header">Switch account</h6></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 " href="../admin/dashboard.html">
+                <span class="kc-avatar" style="width:30px;height:30px">DO</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Douglas Okafor</span><span class="small text-secondary">Organization Administrator</span></span>
+              </a></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 " href="../manager/dashboard.html">
+                <span class="kc-avatar" style="width:30px;height:30px">SC</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Sarah Chen</span><span class="small text-secondary">Compliance Manager</span></span>
+              </a></li>
+            
+              <li><a class="dropdown-item d-flex align-items-center gap-2 py-2 active" href="my-compliance.html">
+                <span class="kc-avatar" style="width:30px;height:30px">MW</span>
+                <span class="lh-sm"><span class="d-block small fw-medium">Marcus Webb</span><span class="small text-secondary">Staff Member</span></span>
+              </a></li>
+            
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item small" href="../index.html"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <nav class="kc-nav" aria-label="Main">
+    <div class="kc-nav-inner">
+      
+        <a href="my-compliance.html" class=""
+           >My compliance</a>
+      
+        <a href="participants.html" class=""
+           >Participants</a>
+      
+        <a href="incidents.html" class="active"
+           aria-current="page">Incidents</a>
+      
+      
+    </div>
+  </nav>
+</header>
+
+
+<script id="kc-search-index" type="application/json">
+[{"label": "J. Tallis (P-1042)", "kind": "Participant", "url": "participants.html"},{"label": "A. Mercado (P-1088)", "kind": "Participant", "url": "participants.html"},{"label": "R. Whitlock (P-1103)", "kind": "Participant", "url": "participants.html"},{"label": "M. Delacroix (P-1130)", "kind": "Participant", "url": "participants.html"},{"label": "INC-2026-0044 Serious injury", "kind": "Incident", "url": "incidents.html"},{"label": "INC-2026-0043 Abuse or neglect", "kind": "Incident", "url": "incidents.html"}]
+</script>
+<main class="kc-page">
+  
+
+  
+  <div class="kc-head">
+    <div><h1>Incidents</h1><p>Report something that happened and follow what you've reported</p></div>
+    <a class="btn btn-kc" href="incidents/new.html"><i class="bi bi-plus-lg me-1"></i>Report an incident</a>
+  </div>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2>My reports</h2><span class="small text-secondary">3 reports</span></div>
+    <div class="table-responsive">
+      <table class="table kc-table">
+        <thead><tr><th>Reference</th><th>Date</th><th>Participant</th><th>What</th><th>Status</th></tr></thead>
+        <tbody>
+        
+          <tr><td class="fw-medium text-nowrap">INC-2026-0044</td><td class="text-nowrap">26 Sep 2026</td>
+            <td>Jordan Tallis</td><td>Serious injury</td><td><span class="kc-pill info">Under review</span></td></tr>
+        
+          <tr><td class="fw-medium text-nowrap">INC-2026-0040</td><td class="text-nowrap">12 Sep 2026</td>
+            <td>Margot Delacroix</td><td>Near miss</td><td><span class="kc-pill warn">Reported</span></td></tr>
+        
+          <tr><td class="fw-medium text-nowrap">INC-2026-0037</td><td class="text-nowrap">19 Jun 2026</td>
+            <td>Rhys Whitlock</td><td>Property damage</td><td><span class="kc-pill neutral">Closed</span></td></tr>
+        
+        </tbody>
+      </table>
+    </div>
+    <div class="px-3 py-2 small text-secondary border-top">Your manager reviews each report. You'll be notified if they need more information.</div>
+  </section>
+
+
+
+</main>
+
+<div class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3">
+  <div id="kc-toast" class="toast align-items-center text-bg-dark border-0" role="status" aria-live="polite" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center gap-2"><i class="bi bi-check-circle"></i><span></span></div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="../static/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+
+<script src="../static/js/kc.js"></script>
+
+
+
+
+</body>
+</html>
