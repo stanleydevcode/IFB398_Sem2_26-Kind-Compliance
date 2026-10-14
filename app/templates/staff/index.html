@@ -9,16 +9,17 @@
     <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#add-modal"><i class="bi bi-person-plus me-1"></i>Add worker</button>
   </div>
 </div>
+{% include "shared/frontend_notice.html" %}
 <nav class="kc-counters four" aria-label="Worker status">
-  <a class="kc-counter" href="#register" data-filter-status=""><b>0</b><span>Active workers</span></a>
-  <a class="kc-counter" href="#register" data-filter-status="ok"><b>0</b><span>Fully compliant</span></a>
-  <a class="kc-counter" href="#register" data-filter-status="soon"><b>0</b><span>Expiring within 30 days</span></a>
-  <a class="kc-counter urgent" href="#register" data-filter-status="blocked"><b>0</b><span>Can't be deployed</span></a>
+  <a class="kc-counter" href="#register" data-filter-status=""><b>{{ counts.active }}</b><span>Active workers</span></a>
+  <a class="kc-counter" href="#register" data-filter-status="ok"><b>{{ counts.ok }}</b><span>Fully compliant</span></a>
+  <a class="kc-counter" href="#register" data-filter-status="soon"><b>{{ counts.soon }}</b><span>Expiring within 30 days</span></a>
+  <a class="kc-counter urgent" href="#register" data-filter-status="blocked"><b>{{ counts.blocked }}</b><span>Can't be deployed</span></a>
 </nav>
 <section>
   <div class="kc-tabs" role="tablist" aria-label="Worker registers">
     <button id="tab-register" role="tab" data-tab="register" aria-controls="pane-register" aria-selected="true" class="active">Register</button>
-    <button id="tab-verify" role="tab" data-tab="verify" aria-controls="pane-verify" aria-selected="false" tabindex="-1">Awaiting verification<span class="count" id="verify-count">0</span></button>
+    <button id="tab-verify" role="tab" data-tab="verify" aria-controls="pane-verify" aria-selected="false" tabindex="-1">Awaiting verification<span class="count" id="verify-count">{{ pending|length }}</span></button>
     {% if ui_is_admin %}<button id="tab-logins" role="tab" data-tab="logins" aria-controls="pane-logins" aria-selected="false" tabindex="-1">Logins &amp; access</button>{% endif %}
   </div>
   <div class="kc-tabpane pt-4" id="pane-register" data-pane="register" role="tabpanel" aria-labelledby="tab-register">
@@ -31,20 +32,26 @@
       </div>
       <div class="table-responsive"><table class="table kc-table">
         <thead><tr><th>Worker</th><th>NDIS Worker Screening</th><th>Police Check</th><th>Blue Card</th><th>First Aid</th><th>Status</th></tr></thead>
-        <tbody id="workers-body"></tbody>
+        <tbody id="workers-body">
+          {% for w in workers %}<tr data-q="{{ (w.name ~ ' ' ~ w.fields.get('email', ''))|lower }}" data-position="{{ w.position }}" data-status="{{ 'blocked' if w.blocked else 'action' if w.status_tone == 'warn' else 'ok' }}" data-soon="{{ 1 if w.credentials|selectattr('tone', 'equalto', 'warn')|list else 0 }}"{% for c in w.credentials %} data-c-{{ c.key }}="{{ 'bad' if c.tone == 'bad' else 'warn' if c.tone == 'warn' else 'ok' }}"{% endfor %} class="{{ 'flag' if w.blocked else '' }}">
+            <td><span class="d-flex align-items-center gap-2"><span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">{{ w.initials }}</span><span><span class="fw-medium d-block">{{ w.name }}</span><span class="small text-secondary">{{ w.position }}</span></span></span></td>
+            {% for c in w.credentials %}<td class="text-nowrap"><span class="kc-cred"><span class="kc-dot {{ c.tone }}"></span>{{ c.expiry if c.expiry and c.expiry != '—' else c.status }}</span>{% if c.note %}<div class="kc-cred-sub {{ 'bad' if c.tone == 'bad' else 'info' }}">{{ c.note }}</div>{% endif %}</td>{% endfor %}
+            <td><span class="kc-pill {{ w.status_tone }}">{{ 'Compliant' if w.status_tone == 'ok' else w.status }}</span></td>
+          </tr>{% endfor %}
+        </tbody>
       </table></div>
-      <div class="kc-empty" id="workers-empty" role="status"><i class="bi bi-people"></i><div class="fw-medium">No workers yet</div><div class="small" id="workers-empty-help">Worker records will appear here once they are added.</div></div>
+      <div class="kc-empty" id="workers-empty" role="status" {% if workers %}hidden{% endif %}><i class="bi bi-people"></i><div class="fw-medium">No workers yet</div><div class="small" id="workers-empty-help">Worker records will appear here once they are added.</div></div>
     </div>
   </div>
   <div class="kc-tabpane pt-4" id="pane-verify" data-pane="verify" role="tabpanel" aria-labelledby="tab-verify" hidden>
     <p class="small text-secondary">Renewals uploaded by workers, waiting for a Compliance Manager to verify them.</p>
-    <section class="kc-panel"><div class="table-responsive"><table class="table kc-table"><thead><tr><th>Worker</th><th>Credential</th><th>Current expiry</th><th>New expiry</th><th>Uploaded</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody></tbody></table></div>
-      <div class="kc-empty"><i class="bi bi-check2-circle"></i><div class="fw-medium">Nothing to verify</div><div class="small">New credential uploads will appear here.</div></div>
+    <section class="kc-panel"><div class="table-responsive"><table class="table kc-table"><thead><tr><th>Worker</th><th>Credential</th><th>Current expiry</th><th>New expiry</th><th>Uploaded</th></tr></thead><tbody>{% for item in pending %}<tr><td>{{ item.worker.name }}</td><td>{{ item.credential.name }}</td><td>{{ item.credential.expiry }}</td><td>{{ item.history[3] if item.history else '—' }}</td><td>{{ item.history[1] if item.history else '—' }}</td></tr>{% endfor %}</tbody></table></div>
+      {% if not pending %}<div class="kc-empty"><i class="bi bi-check2-circle"></i><div class="fw-medium">Nothing to verify</div><div class="small">New credential uploads will appear here.</div></div>{% endif %}
     </section>
   </div>
   {% if ui_is_admin %}
   <div class="kc-tabpane pt-4" id="pane-logins" data-pane="logins" role="tabpanel" aria-labelledby="tab-logins" hidden>
-    <section class="kc-panel"><div class="table-responsive"><table class="table kc-table"><thead><tr><th>Person</th><th>Platform role</th><th>Login</th><th><span class="visually-hidden">Actions</span></th></tr></thead><tbody></tbody></table></div>
+    <section class="kc-panel"><div class="table-responsive"><table class="table kc-table"><thead><tr><th>Person</th><th>Platform role</th><th>Login</th></tr></thead><tbody></tbody></table></div>
       <div class="kc-empty"><i class="bi bi-person-lock"></i><div class="fw-medium">No worker logins to show</div><div class="small">Worker login access will appear here when connected.</div></div>
     </section>
   </div>
@@ -52,7 +59,7 @@
 </section>
 
 <div class="modal fade" id="add-modal" tabindex="-1" aria-labelledby="add-title" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg"><form class="modal-content" id="add-form">
+  <div class="modal-dialog modal-dialog-centered modal-lg"><form class="modal-content" id="add-form" data-preview-form novalidate>
     <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="add-title">Add worker</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
     <div class="modal-body">
       <div class="row g-3">
@@ -66,45 +73,21 @@
       <div class="form-text mt-2">You can add their screening checks and certificates from their worker page.</div>
       <p class="small text-secondary mt-3 mb-0" id="add-note">Form preview only. Saving workers is not available yet.</p>
     </div>
-    <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc" disabled aria-describedby="add-note">Add worker</button></div>
+    <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc" aria-describedby="add-note">Preview worker</button></div>
   </form></div>
 </div>
 
 {% if ui_is_admin %}
 <div class="modal fade" id="import-modal" tabindex="-1" aria-labelledby="im-title" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
-    <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="im-title">Import workers</h5><div class="small text-secondary" id="im-step-label">Step 1 of 2: Upload your file</div></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+    <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="im-title">Import workers</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
     <div class="modal-body">
-      <div data-im-step="1">
-        <label class="kc-drop" id="im-drop" for="im-file">
-          <i class="bi bi-filetype-csv"></i><span class="fw-medium">Choose a CSV or Excel file</span><span class="small">Use the template so the columns match</span>
-          <input id="im-file" type="file" class="form-control form-control-sm mt-2" style="max-width:360px" accept=".csv,.xlsx,.xls" aria-describedby="im-file-note">
-        </label>
-        <div class="text-center mt-3"><button type="button" class="btn btn-sm btn-outline-kc" id="im-sample">Use staff-export-sep-2026.csv</button></div>
-        <p class="small text-secondary text-center mt-3 mb-0" id="im-file-note" role="status">Try the example file to preview the import steps. No records will be saved.</p>
-        <div class="text-center mt-3"><span class="small text-secondary">Import template coming soon</span></div>
-      </div>
-      <div data-im-step="2" hidden>
-        <div class="d-flex gap-3 mb-3">
-          <div class="kc-band"><b>12</b><span>Rows found</span></div>
-          <div class="kc-band"><b style="color:var(--kc-ok)">10</b><span>Ready to import</span></div>
-          <div class="kc-band warn"><b>2</b><span>Need a decision</span></div>
-        </div>
-        <div class="table-responsive kc-panel"><table class="table kc-table">
-          <thead><tr><th>Row</th><th>Name</th><th>Problem</th><th>What to do</th></tr></thead>
-          <tbody>
-            <tr><td>5</td><td>T. Alvarez</td><td class="text-secondary">No email address, so no login can be offered</td><td><select class="form-select form-select-sm" id="im-row-5" aria-label="Row 5"><option value="import">Import without email</option><option value="skip">Skip this row</option></select></td></tr>
-            <tr><td>9</td><td>K. Adeyemi</td><td class="text-secondary">Already on file as a former worker</td><td><select class="form-select form-select-sm" id="im-row-9" aria-label="Row 9"><option value="skip">Skip this row</option><option value="reactivate">Reactivate existing record</option></select></td></tr>
-          </tbody>
-        </table></div>
-        <p class="small text-secondary mt-2 mb-0">Imported workers don't get a login until you invite them.</p>
-        <p class="small mt-2 mb-0" id="im-summary" role="status"></p>
-        <p class="small text-secondary mt-2 mb-0" id="im-preview-note">Example preview only. Importing records is not available yet.</p>
-      </div>
+      <label class="kc-drop" for="im-file"><i class="bi bi-filetype-csv"></i><span class="fw-medium">Choose a CSV or Excel file</span><span class="small">The preview and validation steps will be connected to the migration service.</span><input id="im-file" type="file" class="form-control form-control-sm mt-2" style="max-width:360px" accept=".csv,.xlsx,.xls"></label>
+      <p class="small text-secondary mt-3 mb-0">Selecting a file does not upload or import it yet.</p>
     </div>
-    <div class="modal-footer"><button type="button" class="btn btn-outline-kc" id="im-back" hidden>Back</button><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="button" class="btn btn-kc" id="im-confirm" hidden disabled aria-describedby="im-preview-note">Import rows</button></div>
+    <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-kc" disabled>Review import</button></div>
   </div></div>
 </div>
 {% endif %}
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/workers.js') }}"></script>{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/frontend.js') }}"></script><script src="{{ url_for('static', filename='js/workers.js') }}"></script>{% endblock %}

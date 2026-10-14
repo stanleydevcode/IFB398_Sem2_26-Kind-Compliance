@@ -2,6 +2,17 @@
 
 This version starts with real registration/login instead of a seeded demo account.
 
+## Frontend preview (no database required)
+
+To review the integrated frontend pages while database work
+is pending, run `.\kind\Scripts\python.exe tools\preview_frontend.py` from this
+folder. Open <http://127.0.0.1:5505/preview/> and choose a preview role.
+The review pages have no fictional records or saved data. Unconnected counts
+are marked with a dash rather than a calculated result.
+This static preview is separate from the normal Flask login workflow below.
+See [frontend handoff](docs/frontend-handoff.md) for page ownership, permissions
+and backend integration work.
+
 ## User flow
 
 ```text
@@ -48,8 +59,8 @@ docker compose up -d
 ### 2. Create and activate Python 3.12 virtual environment
 
 ```powershell
-py -3.12 -m venv .venv
-.\.venv\Scripts\Activate.ps1
+py -3.12 -m venv kind
+.\kind\Scripts\Activate.ps1
 ```
 
 ### 3. Install packages

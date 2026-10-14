@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Documents & evidence · Kind Compliance{% endblock %}
+{% block content %}
+<div class="kc-head"><div><h1>Documents &amp; evidence</h1><p>Policies, procedures, forms and registers</p></div><button class="btn btn-kc" disabled title="Document uploads are not connected yet"><i class="bi bi-upload me-1"></i>Upload document</button></div>
+{% include "shared/frontend_notice.html" %}
+<div class="kc-tabs" role="tablist" aria-label="Document sections">
+  <button type="button" class="active" data-tab="library" role="tab" aria-selected="true">Library</button>
+  <button type="button" data-tab="missing" role="tab" aria-selected="false">Missing</button>
+  <button type="button" data-tab="signoff" role="tab" aria-selected="false">Awaiting sign-off</button>
+  <button type="button" data-tab="evidence" role="tab" aria-selected="false">Evidence</button>
+</div>
+<div class="kc-panel mt-4" data-pane="library"><div class="kc-toolbar"><label class="search"><i class="bi bi-search"></i><span class="visually-hidden">Search documents</span><input class="form-control form-control-sm" placeholder="Search by title" disabled></label><select class="form-select form-select-sm" aria-label="Status" disabled><option>All statuses</option></select></div><div class="table-responsive"><table class="table kc-table"><thead><tr><th>Document</th><th>Folder</th><th>Version</th><th>Next review</th><th>Status</th></tr></thead><tbody></tbody></table></div><div class="kc-empty"><i class="bi bi-folder2"></i><div class="fw-medium">No documents yet</div><div class="small">Documents will appear after the backend and upload flow are connected.</div></div></div>
+<div class="kc-panel mt-4" data-pane="missing" hidden><div class="kc-empty"><i class="bi bi-file-earmark-excel"></i><div class="fw-medium">Requirements not assessed yet</div><div class="small">Missing documents depend on the organisation's registration groups and rules.</div></div></div>
+<div class="kc-panel mt-4" data-pane="signoff" hidden><div class="kc-empty"><i class="bi bi-clipboard-check"></i><div class="fw-medium">No sign-off requests</div></div></div>
+<div class="kc-panel mt-4" data-pane="evidence" hidden><div class="kc-empty"><i class="bi bi-folder-check"></i><div class="fw-medium">No linked evidence</div></div></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/empty_tabs.js') }}"></script>{% endblock %}

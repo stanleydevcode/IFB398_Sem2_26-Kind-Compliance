@@ -1,56 +1,65 @@
-# Workers frontend handoff
+# Jesse's frontend handoff
 
-## Where to edit
+## Current scope
 
-| File | Prototype reference | Responsibility |
+The existing Flask login, registration, role decorators, organisation setup and
+shared layout remain in place. This branch adds Jinja presentation for the pages
+below, following Douglas's prototype design. The prototype source is on
+`douglas/prototype-source/prototype`; its fictional records and fixed 2026 dates
+are not copied into the application.
+
+| Page | Template | Current state |
 | --- | --- | --- |
-| `app/templates/base.html` | Header and navigation shared by the prototype pages | Shared layout, real account menu, flash messages and template blocks |
-| `app/templates/staff/index.html` | `admin/workers.html` and `manager/workers.html` | Workers register, verification/access tabs, Add worker form and Import modal |
-| `app/static/js/workers.js` | Workers page interactions | Tabs, filters, file selection and example import decisions |
-| `app/services/ui.py` | Role-specific prototype navigation | Presentation context from the existing signed-in membership |
+| Shared layout | `app/templates/base.html` | Theme, navigation, authenticated account menu and existing POST logout |
+| Workers | `app/templates/staff/index.html` | Register, search/filters, verification and login tabs, empty states and local form previews |
+| Workers import | Modal in `staff/index.html` | File chooser; review/import remains unavailable until Justin's migration service is connected |
+| Participants | `app/templates/participants/index.html` | Register, notes, search/filters, empty states and local form previews |
+| Organisation setup | `app/templates/onboarding/index.html` | Blank profile, insurance, groups and personnel forms; local preview only |
+| Dashboard | `app/templates/dashboard/index.html` | Unassessed scores and empty task/risk sections |
+| Documents | `app/templates/documents/index.html` | Library and evidence tabs with empty states |
+| Incidents | `app/templates/incidents/index.html`, `incidents/new.html` | Role-specific empty register and blank report form; no submission endpoint |
+| My compliance | `app/templates/my_compliance/index.html` | Empty certificates/tasks and signed-in user's account details |
 
-The existing URL remains `/staff/`. Flask renders the Jinja template; do not open
-the template with Live Server. Sign in to the running app and choose **Workers**.
+No fictional worker, participant, incident, document, task, score or migration
+result is shown. A dash means a count has not been connected to real data; it
+does not mean zero. Form previews do not persist, send mail or upload files.
+Detail templates for workers and participants are draft presentation code and
+have no real record routes yet. Do not open Jinja templates with Live Server;
+render them through Flask.
 
-The prototype's theme, IBM Plex Sans fonts, Bootstrap, Bootstrap Icons and images
-are copied into `app/static/`. Keep the theme shared when building other pages.
-Pages can extend `base.html` and use its `title`, `content`, `head` and `scripts`
-blocks. Existing templates still use the same `title` and `content` blocks.
+## Review the pages without a database
 
-## Implemented now
+From this checkout, run:
 
-- Prototype layout with an empty Workers register and zero counters.
-- Register, Awaiting verification, and administrator-only Logins & access tabs.
-- Administrator-only Import modal with CSV/Excel selection and an explicitly
-  labelled example preview matching the prototype's two problem rows.
-- Example decisions update the selected count: both rows skipped means 10;
-  both included means 12. Cancel/reopen resets the example.
-- Add worker form layout; saving, exporting and actual importing stay disabled.
+```powershell
+.\kind\Scripts\python.exe tools\preview_frontend.py
+```
 
-## Integration still needed
+Open <http://127.0.0.1:5505/preview/> and choose a role. This review tool
+renders the Jinja routes with a temporary in-memory test client, serves only
+the rendered HTML and static assets on localhost, rejects POST requests and
+does not create database tables. The role selector is only for design review;
+normal Flask authentication and permissions are unchanged.
 
-- Rick/Justin agree on migration entities, final columns, required fields and
-  duplicate rules before publishing a real import template.
-- Justin connects uploaded-file validation, real previews and confirmed imports.
-  Selecting a local file currently shows its name; it does not parse/upload it.
-- Connect register rows, counters, renewals and login access to real records.
-- Connect Add worker and Export; replace preview notices only when those actions
-  really save/export data. Worker detail pages are a subsequent task.
-- Search currently finds available pages. Record search and notifications need
-  real data, so prototype people/alerts are not presented as actual records.
+## Backend work to agree with the team
 
-## Compatibility
+1. Rick supplies the agreed database schema and upgrade procedure. This
+   frontend branch does not rebuild or migrate the local database.
+2. Justin confirms the import scope, validation, duplicate rules and results,
+   then connects the Workers import UI to the migration service.
+3. Connect the registers, counts, scores, search and detail routes to
+   tenant-scoped data. Show actual numbers only after the relevant queries work.
+4. Add server-side validation and authorised POST routes for setup, worker and
+   participant changes, notes, incidents, documents and uploads. Show success
+   only after a real operation succeeds.
 
-Authentication, POST logout, roles, database models, tenant provisioning and the
-existing migration service are retained. The staff route keeps its existing
-login and manager permission decorators. No database records are changed by this
-frontend work. Original edited files are backed up under the ignored local
-`.tmp-kind/before-frontend/` folder.
-
-Run checks from the project root:
+## Verification
 
 ```powershell
 .\kind\Scripts\python.exe -m pytest -q
+.\kind\Scripts\python.exe tools\preview_frontend.py --check
 ```
 
-Original skeleton tests and frontend permission/form rendering checks pass.
+The frontend integration is developed on `jesse/frontend-workers` for team
+review before it is merged into the shared project branch. The separate local
+`start.ps1` change is not part of this frontend update.

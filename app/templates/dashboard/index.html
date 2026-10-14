@@ -1,41 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Dashboard | Kind Compliance{% endblock %}
+{% block title %}Dashboard · Kind Compliance{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-start mb-4">
-  <div>
-    <h1 class="h3">Executive Compliance Dashboard</h1>
-    <p class="text-secondary mb-0">Skeleton dashboard — connect these cards to real module data next.</p>
-  </div>
-  {% if membership %}
-    <span class="badge text-bg-secondary">{{ membership.role }}</span>
-  {% endif %}
+<div class="kc-head"><div><h1>Dashboard</h1><p>Organisation compliance at a glance</p></div></div>
+{% include "shared/frontend_notice.html" %}
+<section class="kc-panel kc-scores" aria-label="Compliance scores">
+  <div class="kc-score-col"><div class="kc-score-top"><h2>Audit readiness</h2><span class="kc-pill neutral">Not assessed</span></div><div class="kc-score-row"><div class="kc-score-num">—</div><p class="small text-secondary mb-0">A score will appear when evidence and assessment rules are connected.</p></div></div>
+  <div class="kc-score-col"><div class="kc-score-top"><h2>Compliance health</h2><span class="kc-pill neutral">Not assessed</span></div><div class="kc-score-row"><div class="kc-score-num">—</div><p class="small text-secondary mb-0">Worker, document and incident data will contribute here.</p></div></div>
+</section>
+<div class="kc-counters four mt-4" aria-label="Summary">
+  <a class="kc-counter" href="{{ url_for('staff.index') }}"><b>—</b><span>Workers recorded</span></a>
+  <a class="kc-counter" href="{{ url_for('documents.index') }}"><b>—</b><span>Documents recorded</span></a>
+  <a class="kc-counter" href="{{ url_for('participants.index') }}"><b>—</b><span>Participants recorded</span></a>
+  <a class="kc-counter" href="{{ url_for('incidents.index') }}"><b>—</b><span>Incidents recorded</span></a>
 </div>
-
-<div class="row g-3">
-  <div class="col-md-6">
-    <div class="card card-body h-100">
-      <div class="text-secondary">Audit Readiness Score</div>
-      <div class="display-6">Not Yet Assessed</div>
-      <small class="text-secondary">Scoring rules still need client confirmation.</small>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="card card-body h-100">
-      <div class="text-secondary">Compliance Health Score</div>
-      <div class="display-6">Not Yet Assessed</div>
-      <small class="text-secondary">Will combine documents, evidence and worker compliance.</small>
-    </div>
-  </div>
+<div class="row g-4 mt-1">
+  <div class="col-lg-8"><section class="kc-panel"><div class="kc-panel-head"><h2>What to do next</h2></div><div class="kc-empty"><i class="bi bi-check2-circle"></i><div class="fw-medium">No tasks to show</div><div class="small">Tasks will appear when the relevant modules are connected.</div></div></section></div>
+  <div class="col-lg-4"><section class="kc-panel"><div class="kc-panel-head"><h2>Expiring soon</h2></div><div class="kc-empty"><i class="bi bi-calendar-check"></i><div class="fw-medium">No expiry data yet</div></div></section></div>
 </div>
-
-<div class="card card-body mt-4">
-  <h2 class="h5">Next implementation targets</h2>
-  <ul class="mb-0">
-    <li>Staff credential register and expiry rules</li>
-    <li>Document/evidence linking</li>
-    <li>Incident workflow and corrective actions</li>
-    <li>Organisation onboarding / registration groups</li>
-    <li>Spreadsheet migration preview and validation</li>
-  </ul>
-</div>
+<section class="kc-panel mt-4"><div class="kc-panel-head"><h2>Active risks</h2></div><div class="kc-empty"><i class="bi bi-shield-check"></i><div class="fw-medium">No risks to show</div></div></section>
 {% endblock %}

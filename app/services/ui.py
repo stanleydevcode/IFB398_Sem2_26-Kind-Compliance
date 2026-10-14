@@ -4,6 +4,7 @@ from flask_login import current_user
 
 from app import decorators
 from app.constants import Roles
+from app.services.permissions import can
 
 
 def shell_context():
@@ -18,19 +19,21 @@ def shell_context():
             ("Documents", "documents.index"),
             ("Workers", "staff.index"),
         ])
+    if is_manager:
+        navigation.append(("Participants", "participants.index"))
     if membership:
-        navigation.extend([
-            ("Participants", "participants.index"),
-            ("Incidents", "incidents.index"),
-        ])
+        navigation.append(("Incidents", "incidents.index"))
     if is_admin:
         navigation.append(("Setup", "onboarding.index"))
     if current_user.is_authenticated:
         navigation.append(("My compliance", "my_compliance.index"))
     email = current_user.email if current_user.is_authenticated else ""
+    search_index = [dict(label=label, kind="Page", url=url_for(endpoint)) for label, endpoint in navigation]
     return dict(
         ui_is_admin=is_admin,
         ui_is_manager=is_manager,
+        ui_can_edit_care=can(role, "edit_participant_care_requirements"),
+        ui_can_verify_credential=can(role, "approve_credential_renewal"),
         ui_navigation=navigation,
         ui_account_label=email,
         ui_initials=email[:2].upper(),
@@ -39,8 +42,5 @@ def shell_context():
             Roles.COMPLIANCE_MANAGER: "Compliance Manager",
             Roles.STAFF_MEMBER: "Staff Member",
         }.get(role, "Account"),
-        ui_search_index=[
-            dict(label=label, kind="Page", url=url_for(endpoint))
-            for label, endpoint in navigation
-        ],
+        ui_search_index=search_index,
     )
