@@ -1,0 +1,151 @@
+{% extends "base_app.html" %}
+{% block content %}
+{% set me = ROLES[role].user %}
+
+<div class="kc-head">
+  <div>
+    <div class="kc-crumb"><a href="{{ url_for('incidents', role=role) }}">Incidents</a> / New report</div>
+    <h1>Report an incident or complaint</h1>
+    <p>Fill in what you know now; you can add more later.</p>
+  </div>
+</div>
+
+<div class="alert alert-light border small gap-2 align-items-start kc-alert" id="from-note" style="max-width:960px" hidden>
+  <i class="bi bi-journal-check mt-1"></i><span>Details copied from your progress note. Check them and add anything missing.</span>
+</div>
+
+<form id="inc-form" class="kc-form-col" novalidate>
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">1</span>What happened</h2></div>
+    <div class="kc-panel-body row g-3">
+      <div class="col-12">
+        <span class="form-label d-block">This is</span>
+        <div class="kc-seg" role="radiogroup">
+          <input type="radio" class="btn-check" name="ctype" id="ct-inc" value="Incident" checked><label class="btn btn-sm btn-outline-kc rounded-0 border-0" for="ct-inc">An incident</label>
+          <input type="radio" class="btn-check" name="ctype" id="ct-com" value="Complaint"><label class="btn btn-sm btn-outline-kc rounded-0 border-0 border-start" for="ct-com">A complaint</label>
+        </div>
+      </div>
+      <div class="col-md-3"><label class="form-label" for="i-date">Date</label><input id="i-date" type="date" class="form-control" value="{{ TODAY.isoformat() }}" required></div>
+      <div class="col-md-3"><label class="form-label" for="i-time">Time</label><input id="i-time" type="time" class="form-control" value="14:10"></div>
+      <div class="col-md-6"><label class="form-label" for="i-p">Participant</label>
+        <select id="i-p" class="form-select" required><option value="">Choose a participant</option>
+          {% for p in participants %}<option value="{{ p.id }}">{{ p.name }} ({{ p.id }})</option>{% endfor %}<option value="none">No participant involved</option></select>
+        <div class="invalid-feedback">Choose a participant, or "No participant involved".</div></div>
+      <div class="col-md-6"><label class="form-label" for="i-loc">Where</label><input id="i-loc" class="form-control"></div>
+      <div class="col-md-6"><label class="form-label" for="i-cat">Category</label>
+        <select id="i-cat" class="form-select" required><option value="">Choose a category</option>{% for c in categories %}<option>{{ c }}</option>{% endfor %}</select>
+        <div class="invalid-feedback">Choose the closest category.</div></div>
+      <div class="col-12"><label class="form-label" for="i-what">What happened</label>
+        <textarea id="i-what" class="form-control" rows="4" placeholder="Describe what you saw or were told, in order" required></textarea>
+        <div class="invalid-feedback">Describe what happened.</div></div>
+    </div>
+  </section>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">2</span>Immediate response</h2></div>
+    <div class="kc-panel-body row g-3">
+      <div class="col-12"><label class="form-label" for="i-resp">What was done straight away</label><textarea id="i-resp" class="form-control" rows="3"></textarea></div>
+      {% for id, label, first in [('i-ems','Emergency services contacted?','No'), ('i-safe','Is the participant safe now?','Yes'), ('i-inj','Was anyone injured?','No')] %}
+        <div class="col-md-4"><label class="form-label" for="{{ id }}">{{ label }}</label>
+          <select id="{{ id }}" class="form-select"><option value="">Choose</option>{% for o in ['Yes','No','Unsure'] %}<option>{{ o }}</option>{% endfor %}</select></div>
+      {% endfor %}
+      <div class="col-12"><label class="form-label" for="i-wit">Witnesses</label><input id="i-wit" class="form-control" placeholder="Names and roles"></div>
+    </div>
+  </section>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">3</span>Reporter</h2></div>
+    <div class="kc-panel-body row g-3">
+      <div class="col-md-5"><label class="form-label" for="i-by">Reported by</label><input id="i-by" class="form-control" value="{{ me }}, {{ ROLES[role].short }}" readonly></div>
+      <div class="col-md-4"><label class="form-label" for="i-phone">Best contact number</label><input id="i-phone" class="form-control" value="0412 884 019"></div>
+      <div class="col-md-3"><label class="form-label" for="i-reported">Date reported</label><input id="i-reported" type="date" class="form-control" value="{{ TODAY.isoformat() }}"></div>
+    </div>
+  </section>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">4</span>Severity{{ ' and assignment' if role != 'staff' }}</h2></div>
+    <div class="kc-panel-body row g-3">
+      <div class="col-md-4"><label class="form-label" for="i-sev">How serious is it?</label>
+        <select id="i-sev" class="form-select"><option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option></select></div>
+      {% if role != 'staff' %}
+        <div class="col-md-4"><label class="form-label" for="i-own">Investigator</label>
+          <select id="i-own" class="form-select"><option>Sarah Chen</option><option>Douglas Okafor</option><option>Priya Nair</option></select></div>
+        <div class="col-md-4"><label class="form-label" for="i-risk">Linked risk</label>
+          <select id="i-risk" class="form-select"><option>None</option>{% for k in risks %}<option>{{ k.name }} ({{ k.ref }})</option>{% endfor %}</select></div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2><span class="kc-num">5</span>Evidence</h2></div>
+    <div class="kc-panel-body">
+      <label class="kc-drop" for="i-files" id="i-drop"><i class="bi bi-images"></i>
+        <span class="fw-medium" id="i-files-name">Add photos, statements or documents</span><span class="small">Optional</span>
+        <input type="file" id="i-files" class="visually-hidden" multiple></label>
+    </div>
+  </section>
+
+  {% if role != 'staff' %}
+  <section class="kc-panel">
+    <div class="kc-panel-head"><h2>Is this reportable to the NDIS Commission?</h2></div>
+    <div class="kc-panel-body">
+      <label class="kc-choice m-0"><input class="form-check-input mt-1" type="radio" name="rep" value="yes">
+        <span><span class="fw-medium d-block">Yes, reportable</span><span class="small text-secondary">Starts the notification countdown. Most reportable incidents must be notified within 24 hours.</span></span></label>
+      <label class="kc-choice"><input class="form-check-input mt-1" type="radio" name="rep" value="no">
+        <span><span class="fw-medium d-block">No, not reportable</span><span class="small text-secondary">You'll need to record why.</span></span></label>
+      <label class="kc-choice"><input class="form-check-input mt-1" type="radio" name="rep" value="later" checked>
+        <span><span class="fw-medium d-block">Decide after review</span></span></label>
+      <div class="mt-3" id="rep-reason" hidden><label class="form-label" for="i-reason">Why it isn't reportable</label>
+        <textarea id="i-reason" class="form-control" rows="2"></textarea><div class="invalid-feedback">A reason is required.</div></div>
+    </div>
+  </section>
+  {% else %}
+  <p class="small text-secondary mb-0"><i class="bi bi-info-circle me-1"></i>Your manager reviews every report and decides whether it must be reported to the NDIS Commission.</p>
+  {% endif %}
+
+  <div class="d-flex justify-content-end gap-2">
+    <a class="btn btn-outline-kc" href="{{ url_for('incidents', role=role) }}">Cancel</a>
+    <button type="button" class="btn btn-outline-kc" data-toast="Draft saved">Save draft</button>
+    <button type="submit" class="btn btn-kc">Submit report</button>
+  </div>
+</form>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  // fill in details from a progress note
+  try {
+    const raw = sessionStorage.getItem('kc-note-incident');
+    if (raw) {
+      const n = JSON.parse(raw); sessionStorage.removeItem('kc-note-incident');
+      if (n.pid) document.getElementById('i-p').value = n.pid;
+      if (n.text) document.getElementById('i-what').value = n.text;
+      if (n.date) document.getElementById('i-date').value = n.date;
+      document.getElementById('from-note').hidden = false;
+    }
+  } catch (e) {  }
+
+  document.getElementById('i-files').addEventListener('change', (e) => {
+    const n = e.target.files.length; if (!n) return;
+    document.getElementById('i-files-name').textContent = n === 1 ? e.target.files[0].name : n + ' files added';
+    document.getElementById('i-drop').classList.add('has-file');
+  });
+  document.querySelectorAll('input[name=rep]').forEach((r) => r.addEventListener('change', () => {
+    document.getElementById('rep-reason').hidden = r.value !== 'no' || !r.checked;
+  }));
+
+  document.getElementById('inc-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    let bad = false;
+    ['i-p', 'i-cat', 'i-what'].forEach((id) => { const el = document.getElementById(id); const b = !el.value.trim(); el.classList.toggle('is-invalid', b); bad = bad || b; });
+    const rep = document.querySelector('input[name=rep]:checked'), reason = document.getElementById('i-reason');
+    if (rep && rep.value === 'no') { const b = !reason.value.trim(); reason.classList.toggle('is-invalid', b); bad = bad || b; }
+    if (bad) { document.querySelector('.is-invalid').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    const isComplaint = document.getElementById('ct-com').checked;
+    kcToast((isComplaint ? 'CAS' : 'INC') + '-2026-0046 submitted' + (rep && rep.value === 'yes' ? ', 24-hour countdown started' : ''));
+    setTimeout(() => { window.location.href = '{{ url_for("incidents", role=role) }}'; }, 1400);
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "base_app.html" %}
+{% block content %}
+{% set d = doc %}
+
+<div class="kc-head">
+  <div>
+    <div class="kc-crumb"><a href="{{ url_for('documents', role=role) }}">Documents</a> / {{ category_name[d.category] }}</div>
+    <h1>{{ d.title }}</h1>
+    <div class="kc-meta">
+      <span>{{ d.type }}</span>
+      <span>{{ 'Version ' ~ d.version if d.version else 'No approved version yet' }}</span>
+      <span>Owner: {{ d.owner }}</span>
+      {% if d.status == 'signoff' %}<span class="kc-pill info">Awaiting sign-off</span>
+      {% elif d.status == 'overdue' %}<span class="kc-pill bad">Review overdue</span>
+      {% elif d.status == 'due' %}<span class="kc-pill warn">Review due</span>
+      {% else %}<span class="kc-pill ok">Current</span>{% endif %}
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    {% if d.version %}<button class="btn btn-outline-kc" data-toast="Downloading {{ d.title }} v{{ d.version }}"><i class="bi bi-download me-1"></i>Download</button>{% endif %}
+    <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#upload-modal"
+            data-upload-title="{{ d.title }}" data-upload-type="{{ d.type }}" data-upload-category="{{ d.category }}"
+            data-upload-version="{{ '%.1f'|format((d.pending or d.version)|float + 0.1) }}">
+      <i class="bi bi-upload me-1"></i>Upload new version</button>
+  </div>
+</div>
+
+{% if d.pending %}
+<div class="kc-banner" id="signoff-banner">
+  <i class="bi bi-hourglass-split"></i>
+  <div class="txt">
+    <b>Version {{ d.pending }} is waiting for sign-off</b>
+    <div class="small text-secondary">
+      Uploaded by {{ d.uploaded_by }} on {{ fmt_date(d.uploaded_on) }}.
+      {% if d.version %}Version {{ d.version }} stays current until it's approved.{% else %}It becomes current once approved.{% endif %}
+    </div>
+  </div>
+  {% if role == 'manager' %}
+    <button class="btn btn-sm btn-outline-kc" data-toast="Changes requested">Request changes</button>
+    <button class="btn btn-sm btn-kc" id="approve-btn">Approve and make current</button>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-lg-8 d-flex flex-column gap-4">
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Practice Standards it supports</h2>
+        <button class="btn btn-sm btn-outline-kc" data-toast="Link added">Add link</button></div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Standard</th><th>Requirement</th><th>Evidence</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for std, req, ev, st in d.maps_to %}
+            <tr>
+              <td class="text-secondary">{{ std }}</td>
+              <td class="fw-medium">{{ req }}</td>
+              <td>{{ ev or '—' }}</td>
+              <td>{% if st == 'linked' %}<span class="kc-pill ok">Linked</span>{% else %}<span class="kc-pill bad">Missing</span>{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {% if d.drives %}
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Records that put it into practice</h2></div>
+      <div class="kc-panel-body py-2">
+        {% for r in d.drives %}
+        <div class="kc-file">
+          <i class="bi {{ 'bi-table' if r.type == 'Register' else 'bi-ui-checks' }}" style="font-size:1.2rem;color:var(--kc-ink-3)"></i>
+          <div class="flex-grow-1"><div class="fw-medium">{{ r.title }}</div>
+            <div class="small text-secondary">{{ r.type }}, {{ r.entries }} entries{% if r.last %}, last entry {{ fmt_date(r.last) }}{% endif %}</div></div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Version history</h2></div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Version</th><th>Status</th><th>Approved</th><th>By</th><th></th></tr></thead>
+          <tbody>
+          {% if d.pending %}
+            <tr id="pending-row">
+              <td class="fw-medium">v{{ d.pending }}</td>
+              <td><span class="kc-pill info">Awaiting sign-off</span></td>
+              <td class="text-secondary">—</td>
+              <td>{{ d.uploaded_by }}</td>
+              <td class="text-end"><button class="btn btn-sm btn-outline-kc" data-toast="Downloading v{{ d.pending }}">Download</button></td>
+            </tr>
+          {% endif %}
+          {% for v in d.history %}
+            <tr>
+              <td class="fw-medium">v{{ v.version }}</td>
+              <td>{% if v.current %}<span class="kc-pill ok">Current</span>{% else %}<span class="kc-pill neutral">Superseded</span>{% endif %}</td>
+              <td class="text-nowrap">{{ fmt_date(v.approved) }}</td>
+              <td>{{ v.author }}</td>
+              <td class="text-end"><button class="btn btn-sm btn-outline-kc" data-toast="Downloading v{{ v.version }}">Download</button></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-4 d-flex flex-column gap-4">
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Review</h2></div>
+      <div class="kc-panel-body kc-dl">
+        <div>
+          <label for="rv-date" class="form-label">Next review date</label>
+          <input type="date" id="rv-date" class="form-control" value="{{ d.review.isoformat() if d.review else '' }}">
+        </div>
+        <div>
+          <label for="rv-cycle" class="form-label">Review cycle</label>
+          <select id="rv-cycle" class="form-select"><option selected>Annual</option><option>Every 2 years</option><option>Every 3 years</option></select>
+        </div>
+        <div>
+          <label for="rv-owner" class="form-label">Owner</label>
+          <select id="rv-owner" class="form-select">{% for o in ['S. Chen','D. Okafor','P. Nair'] %}<option {{ 'selected' if o == d.owner }}>{{ o }}</option>{% endfor %}</select>
+        </div>
+        <div class="small text-secondary">Reminders go to the owner 90, 30 and 7 days before the review date.</div>
+        <button class="btn btn-outline-kc" data-toast="Review details saved">Save</button>
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Details</h2></div>
+      <div class="kc-panel-body kc-dl small">
+        <div><div class="text-secondary">Folder</div><div class="fw-medium">{{ category_name[d.category] }}</div></div>
+        <div><div class="text-secondary">Standard</div><div class="fw-medium">{{ d.standard }}</div></div>
+        <div><div class="text-secondary">File</div>
+          <div class="fw-medium"><i class="bi bi-file-earmark-pdf me-1" style="color:var(--kc-bad)"></i>{{ d.slug }}-v{{ d.version or d.pending }}.pdf</div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+{% include "partials/upload_modal.html" %}
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+  const approve = document.getElementById('approve-btn');
+  if (approve) approve.addEventListener('click', () => {
+    document.getElementById('signoff-banner').remove();
+    const row = document.getElementById('pending-row');
+    if (row) row.querySelector('.kc-pill').outerHTML = '<span class="kc-pill ok">Current</span>';
+    kcToast('Version {{ doc.pending }} approved and now current');
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends "base_app.html" %}
+{% block content %}
+
+<div class="kc-head">
+  <div class="d-flex gap-3 align-items-center">
+    <span class="kc-avatar" style="width:56px;height:56px;font-size:1.05rem">{{ p.name.split()[0][0] }}{{ p.name.split()[-1][0] }}</span>
+    <div>
+      <div class="kc-crumb"><a href="{{ url_for('participants', role=role) }}">Participants</a> / {{ p.name }}</div>
+      <h1>{{ p.name }}</h1>
+      <div class="kc-meta">
+        <span>{{ p.id }}</span><span>{{ p.support }}</span><span>{{ p.location }}</span><span>Key worker: {{ p.key_worker }}</span>
+        {% if p.restrictive %}<span class="kc-pill warn">Restrictive practice</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-kc" data-bs-toggle="modal" data-bs-target="#handover-modal" data-pid="{{ p.id }}"><i class="bi bi-arrow-left-right me-1"></i>Handover</button>
+    <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#note-modal" data-pid="{{ p.id }}"><i class="bi bi-journal-plus me-1"></i>Add progress note</button>
+  </div>
+</div>
+
+{% if not p.consent %}
+<div class="kc-alert-row" style="background:var(--kc-warn-bg);border-color:#FEDF89;border-left-color:#F79009">
+  <i class="bi bi-shield-exclamation" style="color:var(--kc-warn)"></i>
+  <div class="txt"><b>Consent hasn't been recorded</b>
+    <div class="sub">Record {{ p.first }}'s consent to collect and store their information before adding more detail.</div></div>
+  {% if role != 'staff' %}<button class="btn btn-sm btn-kc" data-bs-toggle="modal" data-bs-target="#consent-modal">Record consent</button>{% endif %}
+</div>
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-lg-8 d-flex flex-column gap-4">
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Care requirements</h2>
+        {% if role == 'manager' %}<button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#care-modal">Edit</button>{% endif %}</div>
+      <div class="kc-panel-body">
+        <ul class="kc-care">{% for c in p.care %}<li>{{ c }}</li>{% endfor %}</ul>
+        {% if p.care_history %}
+          <div class="small text-secondary border-top pt-3 mt-3">
+            <div class="fw-medium text-body mb-1">Change history</div>
+            {% for d, who, why in p.care_history %}<div class="kc-parts"><span>{{ fmt_date(d) }}</span><span>{{ who }}</span><span>{{ why }}</span></div>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Recent notes</h2>
+        <a href="{{ url_for('participants', role=role) }}#notes">All notes</a></div>
+      {% for n in p.notes %}
+        <div class="kc-task">
+          <div class="body">
+            <div class="small text-secondary kc-parts"><span>{{ fmt_date(n.date) }}</span><span>{{ n.by }}</span><span>{{ 'Handover to ' ~ n.to if n.type == 'handover' else 'Progress note' }}</span></div>
+            <div class="mt-1">{{ n.text }}</div>
+            {% if n.follow_up or n.incident %}<div class="d-flex gap-2 mt-1">
+              {% if n.follow_up %}<span class="kc-pill warn">Needs follow-up</span>{% endif %}
+              {% if n.incident %}<span class="kc-pill bad">Raised as incident</span>{% endif %}</div>{% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="kc-empty"><p class="mb-0">No notes yet.</p></div>
+      {% endfor %}
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Support plans</h2></div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Plan</th><th>Status</th><th>Last reviewed</th><th>Next review</th></tr></thead>
+          <tbody>
+          {% for name, st, rev, nxt in p.plans %}
+            <tr><td class="fw-medium">{{ name }}</td>
+              <td>{% if st == 'current' %}<span class="kc-pill ok">Current</span>{% elif st == 'due' %}<span class="kc-pill warn">Review due</span>{% else %}<span class="kc-pill neutral">Not started</span>{% endif %}</td>
+              <td>{{ fmt_date(rev) if rev else '—' }}</td><td class="text-nowrap">{{ fmt_date(nxt) }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    {% if p.risk_rows %}
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Linked risks</h2></div>
+      {% for k in p.risk_rows %}
+        <div class="kc-task">
+          <div class="body"><div class="title">{{ k.name }}</div><div class="meta kc-parts"><span>{{ k.ref }}</span><span>{{ k.rating }}</span><span>{{ k.treatment }}</span></div></div>
+          {% if k.status == 'escalated' %}<span class="kc-pill bad">Escalated</span>{% elif k.status == 'overdue' %}<span class="kc-pill bad">Review overdue</span>{% else %}<span class="kc-pill ok">Controlled</span>{% endif %}
+        </div>
+      {% endfor %}
+    </section>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-4 d-flex flex-column gap-4">
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Consent</h2>
+        {% if role != 'staff' and p.consent %}<button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#consent-modal">Update</button>{% endif %}</div>
+      <div class="kc-panel-body py-2">
+        {% for what, st, d, who in p.consent %}
+          <div class="kc-file">
+            <i class="bi {{ {'given':'bi-check-circle-fill','withdrawn':'bi-x-circle-fill','not_asked':'bi-dash-circle'}[st] }}"
+               style="font-size:1.05rem;color:{{ {'given':'var(--kc-ok)','withdrawn':'var(--kc-bad)','not_asked':'var(--kc-ink-3)'}[st] }}"></i>
+            <div class="small">
+              <div class="fw-medium">{{ what }}</div>
+              <div class="text-secondary">{% if st == 'given' %}Given {{ fmt_date(d) }} by {{ who }}{% elif st == 'withdrawn' %}Withdrawn {{ fmt_date(d) }} by {{ who }}{% else %}Not asked yet{% endif %}</div>
+            </div>
+          </div>
+        {% else %}
+          <p class="small text-secondary my-2">No consent recorded.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Documents</h2></div>
+      <div class="kc-panel-body py-2">
+        <div class="kc-file">
+          <i class="bi bi-file-earmark-text" style="font-size:1.2rem;color:var(--kc-ink-3)"></i>
+          <div class="small flex-grow-1"><div class="fw-medium">Service agreement</div>
+            <div class="text-secondary">{% if p.agreement %}Signed {{ fmt_date(p.agreement) }}{% else %}Not signed yet{% endif %}</div></div>
+          {% if p.agreement %}<span class="kc-pill ok">Signed</span>{% else %}<span class="kc-pill bad">Missing</span>{% endif %}
+        </div>
+        <div class="kc-file">
+          <i class="bi bi-file-earmark-text" style="font-size:1.2rem;color:var(--kc-ink-3)"></i>
+          <div class="small flex-grow-1"><div class="fw-medium">Support plan</div><div class="text-secondary">{{ 'In progress' if p.plan == 'not_started' else 'On file' }}</div></div>
+        </div>
+        {% if p.consent %}<div class="kc-file">
+          <i class="bi bi-file-earmark-text" style="font-size:1.2rem;color:var(--kc-ink-3)"></i>
+          <div class="small flex-grow-1"><div class="fw-medium">Consent form</div><div class="text-secondary">Signed {{ fmt_date(p.consent[0][2]) }}</div></div>
+        </div>{% endif %}
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Support team</h2></div>
+      <div class="kc-panel-body small">
+        {% for t in p.team %}<div class="d-flex justify-content-between py-1"><span>{{ t }}</span><span class="text-secondary">{{ 'Key worker' if t == p.key_worker else 'Support worker' }}</span></div>{% endfor %}
+      </div>
+    </section>
+  </div>
+</div>
+
+{% include "partials/note_modals.html" %}
+
+{% if role == 'manager' %}
+<div class="modal fade" id="care-modal" tabindex="-1" aria-labelledby="cr-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="care-form" novalidate>
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="cr-title">Edit care requirements</h5><div class="small text-secondary">{{ p.name }}</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="cr-text">Care requirements</label>
+        <textarea id="cr-text" class="form-control" rows="6">{{ p.care|join('\n') }}</textarea>
+        <label class="form-label mt-3" for="cr-why">Reason for change</label>
+        <input id="cr-why" class="form-control" required>
+        <div class="invalid-feedback">A reason is required. It's kept in the change history.</div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Save and record change</button></div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if role != 'staff' %}
+<div class="modal fade" id="consent-modal" tabindex="-1" aria-labelledby="cs-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" id="consent-form">
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="cs-title">Record consent</h5><div class="small text-secondary">{{ p.name }}</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="cs-what">Consent for</label>
+        <select id="cs-what" class="form-select mb-3">
+          <option>Collect and store personal information</option><option>Share with family</option><option>Share with GP</option><option>Share with other providers</option>
+        </select>
+        <div class="row g-3">
+          <div class="col-6"><label class="form-label" for="cs-status">Status</label><select id="cs-status" class="form-select"><option>Given</option><option>Withdrawn</option></select></div>
+          <div class="col-6"><label class="form-label" for="cs-date">Date</label><input id="cs-date" type="date" class="form-control" value="{{ TODAY.isoformat() }}"></div>
+          <div class="col-12"><label class="form-label" for="cs-who">Given by</label>
+            <select id="cs-who" class="form-select"><option>{{ p.first }} (participant)</option><option>Nominee</option><option>Guardian</option></select></div>
+        </div>
+        <label class="kc-drop mt-3"><i class="bi bi-paperclip"></i><span class="fw-medium">Attach the signed form</span><input type="file" class="visually-hidden"></label>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" data-bs-dismiss="modal" data-toast="Consent recorded">Save</button></div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+  const cf = document.getElementById('care-form');
+  if (cf) cf.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const why = document.getElementById('cr-why');
+    why.classList.toggle('is-invalid', !why.value.trim()); if (!why.value.trim()) return;
+    bootstrap.Modal.getInstance(document.getElementById('care-modal')).hide();
+    kcToast('Care requirements updated, change recorded');
+  });
+</script>
+{% endblock %}

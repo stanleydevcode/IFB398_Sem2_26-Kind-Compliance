@@ -1,0 +1,208 @@
+{% extends "base_app.html" %}
+{% block content %}
+{% set role_labels = {'admin': 'Organization Administrator', 'manager': 'Compliance Manager', 'staff': 'Staff Member'} %}
+
+<div class="kc-head">
+  <div class="d-flex gap-3 align-items-center">
+    <span class="kc-avatar" style="width:56px;height:56px;font-size:1.05rem">{{ w.initials }}</span>
+    <div>
+      <div class="kc-crumb"><a href="{{ url_for('staff', role=role) }}">Workers</a> / {{ w.name }}</div>
+      <h1>{{ w.name }}</h1>
+      <div class="kc-meta">
+        <span>{{ w.position }}</span><span>{{ w.employment }}</span><span>Started {{ fmt_date(w.started) }}</span>
+        {% if w.status == 'blocked' %}<span class="kc-pill bad">Can't be deployed</span>
+        {% elif w.status == 'action' %}<span class="kc-pill warn">Action needed</span>
+        {% elif w.status == 'former' %}<span class="kc-pill neutral">Former worker</span>
+        {% else %}<span class="kc-pill ok">Can be deployed</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    {% if w.login == 'staff' %}<a class="btn btn-outline-kc" href="{{ url_for('worker_preview', role=role, slug=w.slug) }}"><i class="bi bi-eye me-1"></i>View as {{ w.name.split()[0] }}</a>{% endif %}
+    <button class="btn btn-outline-kc" data-toast="Worker summary downloaded"><i class="bi bi-download me-1"></i>Download summary</button>
+    <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#renew-modal"><i class="bi bi-upload me-1"></i>Upload certificate</button>
+  </div>
+</div>
+
+{% if w.status == 'blocked' %}
+  {% for k, v in w.creds.items() if v and v < TODAY %}{% if loop.first %}
+  <div class="kc-alert-row" id="block-banner">
+    <i class="bi bi-person-x"></i>
+    <div class="txt">
+      <b>Can't be deployed until a valid {{ cred_name[k] }} is verified</b>
+      <div class="sub">Lapsed {{ (TODAY - v).days }} days ago. {{ w.name.split()[0] }}, {{ w.manager }} and rostering have been notified.
+        {% if w.pending and w.pending.key == k %}A renewal was uploaded on {{ fmt_date(w.pending.uploaded) }}.{% endif %}</div>
+    </div>
+    {% if w.pending and w.pending.key == k and role == 'manager' %}
+      <button class="btn btn-sm btn-kc" data-verify-here="{{ cred_name[k] }}">Verify renewal</button>
+    {% elif w.pending and w.pending.key == k %}
+      <span class="small text-secondary">Waiting for a Compliance Manager to verify the renewal</span>
+    {% endif %}
+  </div>
+  {% endif %}{% endfor %}
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-lg-8 d-flex flex-column gap-4">
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Screening and certificates</h2></div>
+      <div class="kc-panel-body">
+        <div class="kc-cred-grid">
+          {% for k, n, issuer in creds %}
+            {% set exp = w.creds[k] %}
+            {% set days = (exp - TODAY).days if exp else None %}
+            <div class="kc-cred-card {{ 'bad' if not exp or days < 0 else ('warn' if days <= 30 else '') }}">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div><div class="fw-semibold">{{ n }}</div><div class="small text-secondary">{{ issuer }}</div></div>
+                {% if not exp %}<span class="kc-pill bad">Missing</span>
+                {% elif days < 0 %}<span class="kc-pill bad">Lapsed</span>
+                {% elif days <= 30 %}<span class="kc-pill warn">{{ days }} days left</span>
+                {% else %}<span class="kc-pill ok">Valid</span>{% endif %}
+              </div>
+              <div class="mt-3 small">
+                {% if exp %}<span class="text-secondary">{{ 'Expired' if days < 0 else 'Expires' }}</span> <span class="fw-medium">{{ fmt_date(exp) }}</span>
+                {% else %}<span class="text-secondary">No certificate on file</span>{% endif %}
+              </div>
+              {% if w.pending and w.pending.key == k %}
+                <div class="kc-cred-sub info mt-2" data-pending-note><i class="bi bi-hourglass-split me-1"></i>Renewal to {{ fmt_date(w.pending.new_expiry) }} awaiting verification</div>
+              {% elif not exp or days <= 30 %}
+                <button class="btn btn-sm btn-outline-kc mt-3" data-bs-toggle="modal" data-bs-target="#renew-modal" data-cred="{{ k }}">Upload {{ 'certificate' if not exp else 'renewal' }}</button>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Upload history</h2></div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Certificate</th><th>Uploaded</th><th>Verified by</th><th>Expiry</th><th></th></tr></thead>
+          <tbody>
+          {% if w.pending %}
+            <tr><td class="fw-medium">{{ cred_name[w.pending.key] }}</td><td>{{ fmt_date(w.pending.uploaded) }}</td>
+              <td><span class="kc-pill info">Awaiting verification</span></td><td>{{ fmt_date(w.pending.new_expiry) }}</td>
+              <td class="text-end"><button class="btn btn-sm btn-outline-kc" data-toast="Certificate opened">View</button></td></tr>
+          {% endif %}
+          {% for h in w.history %}
+            <tr><td class="fw-medium">{{ h.doc }}</td><td>{{ fmt_date(h.on) }}</td><td>{{ h.by }}</td><td class="text-nowrap">{{ fmt_date(h.expiry) }}</td>
+              <td class="text-end"><button class="btn btn-sm btn-outline-kc" data-toast="Certificate opened">View</button></td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Training</h2>
+        <button class="btn btn-sm btn-outline-kc" data-toast="Training reminder sent to {{ w.name.split()[0] }}">Send reminder</button></div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Training</th><th>Completed</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for t, d in w.training %}
+            <tr><td>{{ t }}</td><td>{{ fmt_date(d) if d else '—' }}</td>
+              <td>{% if d %}<span class="kc-pill ok">Complete</span>{% else %}<span class="kc-pill warn">Outstanding</span>{% endif %}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-4 d-flex flex-column gap-4">
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Details</h2></div>
+      <div class="kc-panel-body kc-dl small">
+        <div><div class="text-secondary">Email</div><div class="fw-medium">{{ w.email }}</div></div>
+        <div><div class="text-secondary">Phone</div><div class="fw-medium">{{ w.phone }}</div></div>
+        <div><div class="text-secondary">Manager</div><div class="fw-medium">{{ w.manager }}</div></div>
+        <div><div class="text-secondary">Employment</div><div class="fw-medium">{{ w.employment }}</div></div>
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Login</h2></div>
+      <div class="kc-panel-body small">
+        {% if w.login in ('admin','manager','staff') %}
+          <div class="d-flex justify-content-between align-items-center"><span class="fw-medium">{{ role_labels[w.login] }}</span><span class="kc-pill ok">Active</span></div>
+        {% elif w.login == 'invited' %}
+          <div class="d-flex justify-content-between align-items-center"><span class="fw-medium">Staff Member</span><span class="kc-pill info">Invitation sent</span></div>
+        {% elif w.login == 'deactivated' %}
+          <div class="d-flex justify-content-between align-items-center"><span class="fw-medium">No access</span><span class="kc-pill neutral">Deactivated</span></div>
+          <p class="text-secondary mt-2 mb-0">Records are kept for 7 years.</p>
+        {% else %}
+          <p class="text-secondary mb-2">{{ w.name.split()[0] }} doesn't have a login. Their compliance is tracked here either way.</p>
+          {% if role == 'admin' %}<button class="btn btn-sm btn-outline-kc" data-toast="Invitation sent to {{ w.email }}">Invite to log in</button>{% endif %}
+        {% endif %}
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-body small text-secondary">
+        <i class="bi bi-bell me-1"></i>Renewal reminders go to {{ w.name.split()[0] }} at 90 days, to {{ w.name.split()[0] }} and their manager at 30 days, and to the manager by SMS at 7 days.
+      </div>
+    </section>
+  </div>
+</div>
+
+{# upload certificate / renewal #}
+<div class="modal fade" id="renew-modal" tabindex="-1" aria-labelledby="rn-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" id="renew-form" novalidate>
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="rn-title">Upload certificate</h5><div class="small text-secondary">{{ w.name }}</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="kc-drop mb-3" for="rn-file" id="rn-drop"><i class="bi bi-cloud-arrow-up"></i>
+          <span class="fw-medium" id="rn-file-name">Choose a PDF or photo</span>
+          <input type="file" id="rn-file" class="visually-hidden" accept=".pdf,image/*"></label>
+        <div class="row g-3">
+          <div class="col-7"><label class="form-label" for="rn-cred">Certificate</label>
+            <select id="rn-cred" class="form-select">{% for k, n, _ in creds %}<option value="{{ k }}">{{ n }}</option>{% endfor %}</select></div>
+          <div class="col-5"><label class="form-label" for="rn-exp">Expiry date</label><input id="rn-exp" type="date" class="form-control" required>
+            <div class="invalid-feedback">Enter the expiry date.</div></div>
+        </div>
+        <div class="form-text mt-2">
+          {% if role == 'manager' %}You'll be asked to verify it before the record updates.{% else %}A Compliance Manager verifies it before the record updates.{% endif %}
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Upload</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  const m = document.getElementById('renew-modal');
+  m.addEventListener('show.bs.modal', (e) => {
+    document.getElementById('renew-form').reset();
+    document.getElementById('rn-exp').classList.remove('is-invalid');
+    document.getElementById('rn-file-name').textContent = 'Choose a PDF or photo';
+    document.getElementById('rn-drop').classList.remove('has-file');
+    if (e.relatedTarget && e.relatedTarget.dataset.cred) document.getElementById('rn-cred').value = e.relatedTarget.dataset.cred;
+  });
+  document.getElementById('rn-file').addEventListener('change', (e) => {
+    if (!e.target.files[0]) return;
+    document.getElementById('rn-file-name').textContent = e.target.files[0].name;
+    document.getElementById('rn-drop').classList.add('has-file');
+  });
+  document.getElementById('renew-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const exp = document.getElementById('rn-exp');
+    exp.classList.toggle('is-invalid', !exp.value);
+    if (!exp.value) return;
+    bootstrap.Modal.getInstance(m).hide();
+    kcToast(document.getElementById('rn-cred').selectedOptions[0].text + ' uploaded, awaiting verification');
+  });
+  const v = document.querySelector('[data-verify-here]');
+  if (v) v.addEventListener('click', () => {
+    document.getElementById('block-banner').remove();
+    document.querySelectorAll('[data-pending-note]').forEach((n) => { n.outerHTML = '<div class="kc-cred-sub ok mt-2"><i class="bi bi-check2-circle me-1"></i>Renewal verified</div>'; });
+    kcToast(v.dataset.verifyHere + ' verified. {{ w.name.split()[0] }} can be deployed again');
+  });
+})();
+</script>
+{% endblock %}

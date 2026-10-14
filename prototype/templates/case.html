@@ -1,0 +1,243 @@
+{% extends "base_app.html" %}
+{% block content %}
+
+<div class="kc-head">
+  <div>
+    <div class="kc-crumb"><a href="{{ url_for('incidents', role=role) }}">Incidents</a> / {{ c.ref }}</div>
+    <h1>{{ c.category }}</h1>
+    <div class="kc-meta">
+      <span>{{ c.ref }}</span><span>{{ c.type }}</span><span>{{ c.participant }}</span>
+      <span>{{ fmt_date(c.date) }}, {{ c.time }}</span><span>Owner: {{ c.owner or 'Not assigned' }}</span>
+      <span class="kc-pill {{ {'High':'bad','Critical':'bad','Medium':'warn'}.get(c.severity, 'neutral') }} plain">{{ c.severity }} severity</span>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-kc" data-toast="Case summary downloaded"><i class="bi bi-download me-1"></i>Download</button>
+    {% if not c.closed and c.stage < 4 %}<button class="btn btn-outline-kc" id="advance">Move to {{ stages[c.stage + 1] }}</button>{% endif %}
+  </div>
+</div>
+
+{# stage tracker #}
+<ol class="kc-stages" id="stages" data-stage="{{ c.stage }}">
+  {% for s in stages %}<li class="{{ 'done' if loop.index0 < c.stage else ('now' if loop.index0 == c.stage else '') }}"><span class="dot"></span>{{ s }}</li>{% endfor %}
+</ol>
+
+{% if c.reportable == 'yes' and not c.commission_ref and not c.closed %}
+<div class="kc-alert-row" id="ref-banner">
+  <i class="bi bi-stopwatch"></i>
+  <div class="txt"><b>Notify the NDIS Commission and record the reference</b>
+    <div class="sub">Marked reportable on {{ fmt_date(c.date) }}. The case can't close until the reference is recorded.</div></div>
+  <span class="kc-timer" data-countdown="63718">17:41:58</span>
+</div>
+{% endif %}
+
+<div class="row g-4">
+  <div class="col-lg-8 d-flex flex-column gap-4">
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>What happened</h2></div>
+      <div class="kc-panel-body">
+        <p>{{ c.what }}</p>
+        <div class="kc-dl small" style="grid-template-columns:repeat(2,1fr)">
+          <div><div class="text-secondary">Where</div><div class="fw-medium">{{ c.location }}</div></div>
+          <div><div class="text-secondary">Reported by</div><div class="fw-medium">{{ c.reporter }}</div></div>
+          <div><div class="text-secondary">Emergency services</div><div class="fw-medium">{{ c.emergency }}</div></div>
+          <div><div class="text-secondary">Injury</div><div class="fw-medium">{{ c.injury }}</div></div>
+          <div><div class="text-secondary">Witnesses</div><div class="fw-medium">{{ c.witnesses }}</div></div>
+          <div><div class="text-secondary">Linked risk</div><div class="fw-medium">{{ c.risk or 'None' }}</div></div>
+        </div>
+        <div class="border-top mt-3 pt-3"><div class="small text-secondary">Immediate response</div><p class="mb-0">{{ c.response }}</p></div>
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Corrective actions</h2>
+        {% if not c.closed %}<button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#action-modal">Add action</button>{% endif %}</div>
+      {% for a in c.action_rows %}
+        <div class="kc-task" data-action data-verified="{{ 1 if a.status == 'verified' else 0 }}">
+          <div class="body">
+            <div class="title">{{ a.text }}</div>
+            <div class="meta kc-parts"><span>{{ a.owner }}</span>
+              <span data-due>{% if a.status == 'verified' %}Completed and verified{% elif a.overdue %}<span class="late">Overdue since {{ fmt_date(a.due) }}</span>{% else %}Due {{ fmt_date(a.due) }}{% endif %}</span></div>
+          </div>
+          {% if a.status == 'verified' %}<span class="kc-pill ok">Verified</span>
+          {% elif role == 'manager' and not c.closed %}<button class="btn btn-sm btn-outline-kc" data-verify-action>Verify complete</button>
+          {% else %}<span class="kc-pill {{ 'bad' if a.overdue else 'neutral' }}">{{ 'Overdue' if a.overdue else 'Open' }}</span>{% endif %}
+        </div>
+      {% else %}
+        <div class="kc-empty py-4"><p class="mb-0 small">No corrective actions yet.</p></div>
+      {% endfor %}
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Audit trail</h2></div>
+      <div class="kc-panel-body py-2">
+        <ul class="kc-history" id="history">
+          {% for d, t, who, what in c.history|reverse %}
+            <li><span class="when">{{ fmt_log(d, t) }}</span><span class="who">{{ who }}</span><span>{{ what }}</span></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </section>
+  </div>
+
+  <div class="col-lg-4 d-flex flex-column gap-4">
+    {# reportability #}
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>NDIS Commission</h2></div>
+      <div class="kc-panel-body small">
+        {% if c.reportable == 'pending' %}
+          <p class="fw-medium mb-2">Is this reportable?</p>
+          <label class="kc-choice m-0"><input class="form-check-input mt-1" type="radio" name="rep" value="yes"><span>Yes, reportable</span></label>
+          <label class="kc-choice"><input class="form-check-input mt-1" type="radio" name="rep" value="no"><span>No, not reportable</span></label>
+          <div class="mt-2" id="rep-reason" hidden><label class="form-label" for="r-reason">Reason</label><textarea id="r-reason" class="form-control form-control-sm" rows="2"></textarea>
+            <div class="invalid-feedback">A reason is required.</div></div>
+          <button class="btn btn-sm btn-kc mt-3" id="rep-save">Save decision</button>
+        {% elif c.reportable == 'no' %}
+          <div class="d-flex justify-content-between"><span class="fw-medium">Not reportable</span><span class="kc-pill neutral">Decided</span></div>
+          <p class="text-secondary mt-2 mb-0">{{ c.no_reason }}</p>
+        {% else %}
+          <div class="d-flex justify-content-between align-items-center"><span class="fw-medium">Reportable</span>
+            <span class="kc-pill {{ 'ok' if c.commission_ref else 'bad' }}" id="ref-pill">{{ 'Notified' if c.commission_ref else 'Reference needed' }}</span></div>
+          {% if c.commission_ref %}
+            <div class="kc-dl mt-3">
+              <div><div class="text-secondary">Commission reference</div><div class="fw-medium">{{ c.commission_ref }}</div></div>
+              <div><div class="text-secondary">Notified</div><div class="fw-medium">{{ fmt_date(c.notified) }}</div></div>
+            </div>
+          {% elif role == 'admin' %}
+            <div id="ref-form" class="mt-3">
+              <label class="form-label" for="ref-no">Commission reference</label>
+              <input id="ref-no" class="form-control form-control-sm" placeholder="NDIS-2026-">
+              <div class="invalid-feedback">Enter the reference from the Commission's receipt.</div>
+              <label class="form-label mt-2" for="ref-date">Date notified</label>
+              <input id="ref-date" type="date" class="form-control form-control-sm" value="{{ TODAY.isoformat() }}">
+              <button class="btn btn-sm btn-kc mt-3" id="ref-save">Record reference</button>
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </section>
+
+    {# close #}
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Close case</h2></div>
+      <div class="kc-panel-body small">
+        {% if c.closed %}
+          <div class="d-flex justify-content-between"><span class="fw-medium">Closed</span><span class="kc-pill neutral">Closed</span></div>
+        {% else %}
+          <ul class="kc-checklist" id="close-checks">
+            <li data-check="actions" class="{{ 'ok' if c.open_actions == 0 }}">All corrective actions verified</li>
+            {% if c.reportable == 'yes' %}<li data-check="ref" class="{{ 'ok' if c.commission_ref }}">Commission reference recorded</li>{% endif %}
+            {% if c.reportable == 'pending' %}<li data-check="rep">Reportability decided</li>{% endif %}
+          </ul>
+          {% if role == 'manager' %}
+            <button class="btn btn-sm btn-kc w-100 mt-2" id="close-btn" disabled>Close case</button>
+          {% endif %}
+        {% endif %}
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="modal fade" id="action-modal" tabindex="-1" aria-labelledby="ac-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="ac-title">Add corrective action</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="ac-text">Action</label><input id="ac-text" class="form-control mb-3">
+        <div class="row g-3">
+          <div class="col-6"><label class="form-label" for="ac-own">Owner</label>
+            <select id="ac-own" class="form-select">{% for w in workers if w.status != 'former' %}<option>{{ w.name }}</option>{% endfor %}</select></div>
+          <div class="col-6"><label class="form-label" for="ac-due">Due</label><input id="ac-due" type="date" class="form-control" value="2026-10-11"></div>
+        </div>
+        <div class="form-text mt-2">The owner sees this in their actions list.</div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" data-bs-dismiss="modal" data-toast="Corrective action added">Add action</button></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  const me = '{{ ROLES[role].user }}';
+  const stages = {{ stages|tojson }};
+  const log = (what) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span class="when">{{ TODAY.isoformat() }} ${new Date().toTimeString().slice(0, 5)}</span><span class="who">${me}</span><span>${what}</span>`;
+    document.getElementById('history').prepend(li);
+  };
+  const setStage = (i) => {
+    document.querySelectorAll('#stages li').forEach((li, k) => { li.className = k < i ? 'done' : k === i ? 'now' : ''; });
+    document.getElementById('stages').dataset.stage = i;
+  };
+  // ticks the close checklist and enables "Close case" when everything is done
+  function checks() {
+    let actionsDone = true;
+    document.querySelectorAll('[data-action]').forEach(function (a) {
+      if (a.dataset.verified !== '1') actionsDone = false;
+    });
+    const actionCheck = document.querySelector('[data-check=actions]');
+    if (actionCheck) actionCheck.classList.toggle('ok', actionsDone);
+
+    let allDone = true;
+    document.querySelectorAll('#close-checks li').forEach(function (li) {
+      if (!li.classList.contains('ok')) allDone = false;
+    });
+    const closeButton = document.getElementById('close-btn');
+    if (closeButton) closeButton.disabled = !allDone;
+  }
+  checks();
+
+  const adv = document.getElementById('advance');
+  if (adv) adv.addEventListener('click', () => {
+    const i = +document.getElementById('stages').dataset.stage + 1;
+    setStage(i); log('Moved to ' + stages[i]); kcToast('Moved to ' + stages[i]);
+    if (i >= 4) adv.remove(); else adv.textContent = 'Move to ' + stages[i + 1];
+  });
+
+  document.querySelectorAll('[data-verify-action]').forEach((b) => b.addEventListener('click', () => {
+    const row = b.closest('[data-action]'); row.dataset.verified = '1';
+    row.querySelector('[data-due]').textContent = 'Completed and verified';
+    b.outerHTML = '<span class="kc-pill ok">Verified</span>';
+    log('Verified: ' + row.querySelector('.title').textContent); kcToast('Action verified'); checks();
+  }));
+
+  const refSave = document.getElementById('ref-save');
+  if (refSave) refSave.addEventListener('click', () => {
+    const no = document.getElementById('ref-no');
+    const bad = !no.value.trim() || no.value.trim() === 'NDIS-2026-'; no.classList.toggle('is-invalid', bad); if (bad) return;
+    document.getElementById('ref-form').outerHTML = `<div class="kc-dl mt-3"><div><div class="text-secondary">Commission reference</div><div class="fw-medium">${no.value.trim()}</div></div></div>`;
+    const pill = document.getElementById('ref-pill'); pill.className = 'kc-pill ok'; pill.textContent = 'Notified';
+    const banner = document.getElementById('ref-banner');
+    if (banner) banner.remove();
+    const r = document.querySelector('[data-check=ref]'); if (r) r.classList.add('ok');
+    log('Commission reference ' + no.value.trim() + ' recorded'); kcToast('Commission reference recorded'); checks();
+  });
+
+  document.querySelectorAll('input[name=rep]').forEach((r) => r.addEventListener('change', () => { document.getElementById('rep-reason').hidden = r.value !== 'no'; }));
+  const repSave = document.getElementById('rep-save');
+  if (repSave) repSave.addEventListener('click', () => {
+    const v = document.querySelector('input[name=rep]:checked'); if (!v) return;
+    const reason = document.getElementById('r-reason');
+    if (v.value === 'no' && !reason.value.trim()) { reason.classList.add('is-invalid'); return; }
+    repSave.closest('.kc-panel-body').innerHTML = v.value === 'yes'
+      ? '<div class="d-flex justify-content-between"><span class="fw-medium">Reportable</span><span class="kc-pill bad">Reference needed</span></div><p class="text-secondary mt-2 mb-0">24-hour notification countdown started.</p>'
+      : `<div class="d-flex justify-content-between"><span class="fw-medium">Not reportable</span><span class="kc-pill neutral">Decided</span></div><p class="text-secondary mt-2 mb-0">${reason.value.trim()}</p>`;
+    const rep = document.querySelector('[data-check=rep]'); if (rep) rep.classList.add('ok');
+    if (v.value === 'yes') { const li = document.createElement('li'); li.dataset.check = 'ref'; li.textContent = 'Commission reference recorded'; document.getElementById('close-checks').append(li); }
+    log(v.value === 'yes' ? 'Marked reportable, 24-hour notification started' : 'Marked not reportable');
+    kcToast(v.value === 'yes' ? 'Marked reportable, countdown started' : 'Marked not reportable'); checks();
+  });
+
+  const close = document.getElementById('close-btn');
+  if (close) close.addEventListener('click', () => {
+    setStage(5); log('Closed'); kcToast('{{ c.ref }} closed');
+    close.closest('.kc-panel-body').innerHTML = '<div class="d-flex justify-content-between"><span class="fw-medium">Closed</span><span class="kc-pill neutral">Closed</span></div>';
+    if (adv) adv.remove();
+  });
+})();
+</script>
+{% endblock %}

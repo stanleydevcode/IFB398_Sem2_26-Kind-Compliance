@@ -1,0 +1,173 @@
+{% extends "base_app.html" %}
+{% set title = "Participants" %}
+{% macro plan_pill(status) -%}
+  {%- if status == 'current' %}<span class="kc-pill ok">Current</span>
+  {%- elif status == 'due' %}<span class="kc-pill warn">Review due</span>
+  {%- else %}<span class="kc-pill neutral">Not started</span>{% endif -%}
+{%- endmacro %}
+
+{% block content %}
+<div class="kc-head">
+  <div>
+    <h1>Participants</h1>
+    <p>{% if role == 'staff' %}The people you support, their care needs and your notes{% else %}Participants, their care needs and daily notes{% endif %}</p>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <button class="btn btn-outline-kc" data-bs-toggle="modal" data-bs-target="#handover-modal"><i class="bi bi-arrow-left-right me-1"></i>Shift handover</button>
+    <button class="btn {{ 'btn-kc' if role == 'staff' else 'btn-outline-kc' }}" data-bs-toggle="modal" data-bs-target="#note-modal"><i class="bi bi-journal-plus me-1"></i>Add progress note</button>
+    {% if role != 'staff' %}<button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#add-p-modal"><i class="bi bi-person-plus me-1"></i>Add participant</button>{% endif %}
+  </div>
+</div>
+
+
+<section>
+  <div class="kc-tabs" role="tablist">
+    <button role="tab" data-tab="people">Participants</button>
+    <button role="tab" data-tab="notes">Notes<span class="count">{{ notes|length }}</span></button>
+  </div>
+
+  {# participants #}
+  <div class="kc-tabpane pt-4" data-pane="people">
+    <div class="kc-panel">
+      <div class="kc-toolbar">
+        <label class="search"><i class="bi bi-search"></i><span class="visually-hidden">Search participants</span>
+          <input type="search" class="form-control form-control-sm" id="p-search" placeholder="Search by name or ID"></label>
+      </div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Participant</th><th>Support</th><th>Support plan</th><th>Key worker</th><th>Last note</th></tr></thead>
+          <tbody>
+          {% for p in participants %}
+            {% set last = (notes|selectattr('pid', 'equalto', p.id)|list) %}
+            <tr data-q="{{ (p.name ~ ' ' ~ p.id)|lower }}">
+              <td>
+                <a class="kc-doc-link" href="{{ url_for('participant', role=role, slug=p.slug) }}">{{ p.name }}</a>
+                <div class="small text-secondary kc-parts"><span>{{ p.id }}</span>{% if p.restrictive %}<span style="color:var(--kc-warn)">Restrictive practice</span>{% endif %}</div>
+              </td>
+              <td><div>{{ p.support }}</div><div class="small text-secondary">{{ p.location }}</div></td>
+              <td>{{ plan_pill(p.plan) }}<div class="small text-secondary mt-1">
+                {% if p.plan == 'not_started' %}Due {{ fmt_date(p.plan_next) }}{% elif p.plan == 'due' %}Review {{ fmt_date(p.plan_next) }}{% else %}Reviewed {{ fmt_date(p.plan_reviewed) }}{% endif %}</div></td>
+              <td>{{ p.key_worker }}</td>
+              <td class="text-nowrap">{{ fmt_date(last[0].date) if last else '—' }}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {# notes #}
+  <div class="kc-tabpane pt-4" data-pane="notes" hidden>
+    <div class="kc-panel">
+      <div class="kc-toolbar">
+        <div class="kc-seg" role="group" aria-label="Note filter">
+          <button class="active" data-nf="all">All</button>
+          <button data-nf="progress">Progress</button>
+          <button data-nf="handover">Handover</button>
+          <button data-nf="follow">Needs follow-up</button>
+          <button data-nf="incident">Raised as incident</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Date</th><th>Participant</th><th>Note</th><th>By</th><th></th></tr></thead>
+          <tbody>
+          {% for n in notes %}
+            <tr data-type="{{ n.type }}" data-follow="{{ 1 if n.follow_up else 0 }}" data-incident="{{ 1 if n.incident else 0 }}">
+              <td class="text-nowrap">{{ fmt_date(n.date) }}</td>
+              <td class="text-nowrap"><a class="kc-doc-link" href="{{ url_for('participant', role=role, slug=n.pslug) }}">{{ n.participant }}</a></td>
+              <td style="min-width:320px">
+                <div class="small text-secondary mb-1">{{ 'Shift handover to ' ~ n.to if n.type == 'handover' else 'Progress note' }}{% if n.status == 'draft' %} <span class="kc-pill neutral ms-1">Draft</span>{% endif %}</div>
+                {{ n.text }}
+                <div class="d-flex gap-2 mt-1">
+                  {% if n.follow_up %}<span class="kc-pill warn">Needs follow-up</span>{% endif %}
+                  {% if n.incident %}<span class="kc-pill bad">Raised as incident</span>{% endif %}
+                </div>
+              </td>
+              <td class="text-nowrap">{{ n.by }}</td>
+              <td class="text-end text-nowrap">
+                {% if n.follow_up and role != 'staff' %}<button class="btn btn-sm btn-outline-kc" data-resolve>Mark followed up</button>{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="kc-empty" id="n-empty" hidden><i class="bi bi-journal"></i><p class="fw-medium mt-2 mb-0">No notes found.</p></div>
+    </div>
+  </div>
+</section>
+
+{% include "partials/note_modals.html" %}
+
+{% if role != 'staff' %}
+<div class="modal fade" id="add-p-modal" tabindex="-1" aria-labelledby="ap-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="add-p-form" novalidate>
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="ap-title">Add participant</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="ap-name">Full name</label><input id="ap-name" class="form-control" required><div class="invalid-feedback">Enter their name.</div></div>
+          <div class="col-md-6"><label class="form-label" for="ap-ndis">NDIS number</label><input id="ap-ndis" class="form-control" placeholder="43XXXXXXX"></div>
+          <div class="col-md-6"><label class="form-label" for="ap-support">Primary support</label>
+            <select id="ap-support" class="form-select"><option>Supported independent living</option><option>Community participation</option><option>Therapy supports</option><option>Daily personal activities</option></select></div>
+          <div class="col-md-6"><label class="form-label" for="ap-kw">Key worker</label>
+            <select id="ap-kw" class="form-select">{% for w in workers if w.status != 'former' %}<option>{{ w.name }}</option>{% endfor %}</select></div>
+        </div>
+        <div class="alert alert-light border small mt-3 mb-0"><i class="bi bi-shield-check me-1"></i>
+          Record consent to collect their information from their profile once it's signed. Until then the profile shows consent as outstanding.</div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Add participant</button></div>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  const tabs = document.querySelectorAll('[data-tab]'), panes = document.querySelectorAll('[data-pane]');
+  function show(name) {
+    if (!document.querySelector('[data-pane="' + name + '"]')) name = 'people';
+    tabs.forEach((t) => { const on = t.dataset.tab === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
+    panes.forEach((p) => { p.hidden = p.dataset.pane !== name; });
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => { show(t.dataset.tab); history.replaceState(null, '', '#' + t.dataset.tab); }));
+  show(location.hash.slice(1));
+
+  const q = document.getElementById('p-search');
+  q.addEventListener('input', () => document.querySelectorAll('[data-pane=people] tbody tr').forEach((tr) => { tr.hidden = !tr.dataset.q.includes(q.value.toLowerCase()); }));
+
+  function noteFilter(f) {
+    document.querySelectorAll('[data-nf]').forEach((b) => b.classList.toggle('active', b.dataset.nf === f));
+    let n = 0;
+    document.querySelectorAll('[data-pane=notes] tbody tr').forEach((tr) => {
+      const ok = f === 'all' || (f === 'follow' ? tr.dataset.follow === '1' : f === 'incident' ? tr.dataset.incident === '1' : tr.dataset.type === f);
+      tr.hidden = !ok; if (ok) n++;
+    });
+    document.getElementById('n-empty').hidden = n > 0;
+  }
+  document.querySelectorAll('[data-nf]').forEach((b) => b.addEventListener('click', () => noteFilter(b.dataset.nf)));
+  document.querySelectorAll('[data-tab-link]').forEach((a) => a.addEventListener('click', (e) => {
+    e.preventDefault(); show(a.dataset.tabLink); if (a.dataset.noteFilter) noteFilter(a.dataset.noteFilter);
+  }));
+  document.querySelectorAll('[data-resolve]').forEach((b) => b.addEventListener('click', () => {
+    const row = b.closest('tr');
+    const pill = row.querySelector('.kc-pill.warn');
+    if (pill) pill.remove();
+    row.dataset.follow = '0';
+    b.remove();
+    kcToast('Marked as followed up');
+  }));
+  const ap = document.getElementById('add-p-form');
+  if (ap) ap.addEventListener('submit', (e) => {
+    e.preventDefault(); const n = document.getElementById('ap-name');
+    n.classList.toggle('is-invalid', !n.value.trim()); if (!n.value.trim()) return;
+    bootstrap.Modal.getInstance(document.getElementById('add-p-modal')).hide(); kcToast(n.value.trim() + ' added'); ap.reset();
+  });
+})();
+</script>
+{% endblock %}

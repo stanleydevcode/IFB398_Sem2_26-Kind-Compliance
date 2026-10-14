@@ -1,0 +1,264 @@
+{% extends "base_app.html" %}
+{% block content %}
+{% set w = mc.me %}
+{% set first = w.name.split()[0] %}
+
+{% if preview %}
+<div class="kc-setup">
+  <i class="bi bi-eye" style="color:var(--kc-action)"></i>
+  <span class="flex-grow-1"><b class="fw-semibold">Viewing as {{ w.name }}.</b> This is what {{ first }} sees after signing in. Read only.</span>
+  <a href="{{ url_for('worker', role=role, slug=w.slug) }}" class="fw-medium text-decoration-none">Back to profile</a>
+</div>
+{% endif %}
+
+<div class="kc-contents {{ 'kc-preview' if preview }}">
+<div class="kc-head">
+  <div>
+    {% if preview %}<div class="kc-crumb"><a href="{{ url_for('staff', role=role) }}">Workers</a> / <a href="{{ url_for('worker', role=role, slug=w.slug) }}">{{ w.name }}</a> / Their view</div>{% endif %}
+    <h1>My compliance</h1>
+    <p>Your certificates, what you need to do, and your details</p>
+  </div>
+  <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#renew-modal"><i class="bi bi-upload me-1"></i>Upload a certificate</button>
+</div>
+
+{# status box #}
+{% if w.status == 'blocked' %}
+  <div class="kc-alert-row"><i class="bi bi-person-x"></i>
+    <div class="txt"><b>You can't be deployed right now</b><div class="sub">A required check has lapsed. Upload a current certificate and your manager will verify it.</div></div></div>
+{% elif mc.expiring %}
+  <div class="kc-status warn"><i class="bi bi-exclamation-circle-fill"></i>
+    <div><b>Your {{ cred_name[mc.expiring.key] }} certificate expires in {{ mc.expiring.days }} days.</b> Upload the renewal before {{ fmt_date(mc.expiring.date) }}.</div>
+    <button class="btn btn-sm btn-kc ms-auto" data-bs-toggle="modal" data-bs-target="#renew-modal" data-cred="{{ mc.expiring.key }}">Upload renewal</button></div>
+{% endif %}
+
+{# certificate counters #}
+<div class="kc-counters four">
+  <div class="kc-counter"><b>{{ w.creds|length }}</b><span>My certificates</span></div>
+  <div class="kc-counter"><b>{{ mc.counts.current }}</b><span>Current</span></div>
+  <div class="kc-counter {{ 'warn' if mc.counts.soon }}"><b>{{ mc.counts.soon }}</b><span>Expiring within 30 days</span></div>
+  <div class="kc-counter {{ 'urgent' if mc.counts.bad }}"><b>{{ mc.counts.bad }}</b><span>Lapsed or missing</span></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-8 d-flex flex-column gap-4">
+
+    <section class="kc-panel" id="todo">
+      <div class="kc-panel-head"><h2>To do</h2><span class="small text-secondary" id="todo-count">{{ mc.todos|length }} item{{ 's' if mc.todos|length != 1 }}</span></div>
+      {% for t in mc.todos %}
+        <div class="kc-task" data-todo>
+          <i class="bi {{ {'read':'bi-book','action':'bi-check2-square','note':'bi-journal-text'}[t.kind] }}" style="font-size:1.15rem;color:var(--kc-ink-3)"></i>
+          <div class="body">
+            <div class="title">{{ t.title }}</div>
+            <div class="meta kc-parts">{% if t.overdue %}<span class="late">Overdue since {{ fmt_date(t.due) }}</span>{% else %}<span>Due {{ fmt_date(t.due) }}</span>{% endif %}<span>{{ t.from }}</span></div>
+          </div>
+          {% if t.kind == 'read' %}
+            <button class="btn btn-sm btn-kc" data-bs-toggle="modal" data-bs-target="#ack-modal" data-doc="{{ t.doc }}" data-version="{{ t.version }}">Read</button>
+          {% elif t.kind == 'note' %}
+            <a class="btn btn-sm btn-outline-kc" href="{{ url_for('participants', role=role) }}#notes">Open note</a>
+          {% elif t.case and role != 'staff' %}
+            <a class="btn btn-sm btn-outline-kc" href="{{ url_for('case', role=role, slug=t.case) }}">Open case</a>
+          {% else %}
+            <button class="btn btn-sm btn-outline-kc" data-done>Mark done</button>
+          {% endif %}
+        </div>
+      {% endfor %}
+      <div class="kc-empty" id="todo-empty" {{ 'hidden' if mc.todos }}><i class="bi bi-check2-circle"></i><p class="fw-medium mt-2 mb-0">Nothing to do.</p></div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>My certificates</h2></div>
+      <div class="kc-panel-body">
+        <div class="kc-cred-grid">
+          {% for k, n, issuer in creds %}
+            {% set exp = w.creds[k] %}{% set days = (exp - TODAY).days if exp else None %}
+            <div class="kc-cred-card {{ 'bad' if not exp or days < 0 else ('warn' if days <= 30 and not (w.pending and w.pending.key == k) else '') }}">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div><div class="fw-semibold">{{ n }}</div><div class="small text-secondary">{{ issuer }}</div></div>
+                {% if w.pending and w.pending.key == k %}<span class="kc-pill info">Renewal sent</span>
+                {% elif not exp %}<span class="kc-pill bad">Missing</span>
+                {% elif days < 0 %}<span class="kc-pill bad">Lapsed</span>
+                {% elif days <= 30 %}<span class="kc-pill warn">{{ days }} days left</span>
+                {% else %}<span class="kc-pill ok">Valid</span>{% endif %}
+              </div>
+              <div class="mt-3 small">{% if exp %}<span class="text-secondary">Expires</span> <span class="fw-medium">{{ fmt_date(exp) }}</span>{% else %}<span class="text-secondary">No certificate on file</span>{% endif %}</div>
+              {% if w.pending and w.pending.key == k %}
+                <div class="kc-cred-sub info mt-2"><i class="bi bi-hourglass-split me-1"></i>New certificate to {{ fmt_date(w.pending.new_expiry) }} waiting for verification</div>
+              {% elif not exp or days <= 30 %}
+                <button class="btn btn-sm btn-outline-kc mt-3" data-bs-toggle="modal" data-bs-target="#renew-modal" data-cred="{{ k }}">Upload {{ 'certificate' if not exp else 'renewal' }}</button>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>Policies you've read</h2></div>
+      {% for r in mc.reads %}
+        <div class="kc-task" {% if not r.done %}data-read-row="{{ r.title }}" hidden{% endif %}>
+          <div class="body"><div class="title">{{ r.title }}</div><div class="meta">Version {{ r.version }}</div></div>
+          <span class="kc-pill ok">Acknowledged</span>
+        </div>
+      {% endfor %}
+    </section>
+  </div>
+
+  <div class="col-lg-4 d-flex flex-column gap-4">
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>My details</h2></div>
+      <form class="kc-panel-body kc-dl" id="details-form">
+        <div><div class="small text-secondary">Name</div><div class="fw-medium">{{ w.name }}</div></div>
+        <div><div class="small text-secondary">Position</div><div class="fw-medium">{{ w.position }}</div><div class="small text-secondary">{{ w.employment }}</div></div>
+        <div><div class="small text-secondary">Platform role</div><div class="fw-medium">{{ ROLES[w.login].label if w.login in ROLES else ROLES[role].label }}</div></div>
+        <div><label class="form-label small" for="me-email">Email</label><input id="me-email" type="email" class="form-control form-control-sm" value="{{ w.email }}" {{ 'readonly' if preview }}></div>
+        <div><label class="form-label small" for="me-phone">Phone</label><input id="me-phone" class="form-control form-control-sm" value="{{ w.phone }}" {{ 'readonly' if preview }}></div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-sm btn-kc">Save</button>
+          <button type="button" class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#change-modal">Request a change</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>{{ 'Line manager' if mc.manager else 'Account' }}</h2></div>
+      <div class="kc-panel-body small">
+        {% if mc.manager %}
+          <div class="d-flex gap-2 align-items-center"><span class="kc-avatar">{{ mc.manager.initials }}</span>
+            <div><div class="fw-medium">{{ mc.manager.name }}</div><div class="text-secondary">{{ mc.manager.position }}</div></div></div>
+          <div class="text-secondary mt-2">{{ mc.manager.email }}<br>{{ mc.manager.phone }}</div>
+        {% else %}
+          <p class="mb-0 text-secondary">You're the account owner.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    {% if mc.participants %}
+    <section class="kc-panel">
+      <div class="kc-panel-head"><h2>People you support</h2></div>
+      <div class="kc-panel-body small py-2">
+        {% for p in mc.participants %}
+          <a class="d-flex justify-content-between py-2 text-decoration-none {{ 'border-top' if not loop.first }}" href="{{ url_for('participant', role=role, slug=p.slug) }}">
+            <span class="kc-doc-link">{{ p.name }}</span><span class="text-secondary">{{ 'Key worker' if p.key_worker == w.name else p.id }}</span></a>
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+</div>
+
+{# acknowledge a policy #}
+<div class="modal fade" id="ack-modal" tabindex="-1" aria-labelledby="ak-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="ak-title"></h5><div class="small text-secondary" id="ak-ver"></div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div class="kc-reader">
+          <p><b>Purpose.</b> This policy sets out how everyone at {{ ORG.name }} is expected to behave when supporting participants, working with colleagues and representing the organisation.</p>
+          <p><b>What changed in this version.</b> Updated to reflect the NDIS Code of Conduct, including clearer guidance on respecting participants' privacy, raising concerns, and declaring conflicts of interest.</p>
+          <p><b>Your responsibilities.</b> Act with respect for individual rights, respect privacy, provide supports safely and competently, act with integrity and honesty, raise concerns promptly, prevent violence, exploitation, neglect and abuse, and prevent sexual misconduct.</p>
+          <p class="mb-0"><a href="#" data-toast="Full policy opened">Open the full policy (PDF)</a></p>
+        </div>
+        <label class="kc-choice mt-3"><input class="form-check-input mt-1" type="checkbox" id="ak-check">
+          <span>I've read and understood this policy</span></label>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Later</button>
+        <button type="button" class="btn btn-kc" id="ak-btn" disabled>Acknowledge</button></div>
+    </div>
+  </div>
+</div>
+
+{# request a change #}
+<div class="modal fade" id="change-modal" tabindex="-1" aria-labelledby="ch-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="ch-title">Request a change</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="ch-field">What needs changing?</label>
+        <select id="ch-field" class="form-select mb-3"><option>Name</option><option>Position</option><option>Employment type</option><option>Something else</option></select>
+        <label class="form-label" for="ch-note">Details</label><textarea id="ch-note" class="form-control" rows="3"></textarea>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" data-bs-dismiss="modal" data-toast="Request sent to your administrator">Send request</button></div>
+    </div>
+  </div>
+</div>
+
+{# upload certificate #}
+<div class="modal fade" id="renew-modal" tabindex="-1" aria-labelledby="rn-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" id="renew-form" novalidate>
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="rn-title">Upload a certificate</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="kc-drop mb-3" for="rn-file" id="rn-drop"><i class="bi bi-cloud-arrow-up"></i>
+          <span class="fw-medium" id="rn-file-name">Choose a PDF or take a photo</span>
+          <input type="file" id="rn-file" class="visually-hidden" accept=".pdf,image/*"></label>
+        <div class="row g-3">
+          <div class="col-7"><label class="form-label" for="rn-cred">Certificate</label>
+            <select id="rn-cred" class="form-select">{% for k, n, _ in creds %}<option value="{{ k }}">{{ n }}</option>{% endfor %}</select></div>
+          <div class="col-5"><label class="form-label" for="rn-exp">Expiry date</label><input id="rn-exp" type="date" class="form-control" required>
+            <div class="invalid-feedback">Enter the expiry date.</div></div>
+        </div>
+        <div class="form-text mt-2">{{ mc.manager.name if mc.manager else 'A Compliance Manager' }} checks it before your record updates. You can't approve your own certificate.</div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Send for verification</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  const count = () => {
+    const n = document.querySelectorAll('[data-todo]').length;
+    document.getElementById('todo-count').textContent = n + (n === 1 ? ' item' : ' items');
+    document.getElementById('todo-empty').hidden = n > 0;
+  };
+  document.querySelectorAll('[data-done]').forEach((b) => b.addEventListener('click', () => { b.closest('[data-todo]').remove(); count(); kcToast('Marked as done'); }));
+
+  let current = null;
+  const ack = document.getElementById('ack-modal'), chk = document.getElementById('ak-check'), btn = document.getElementById('ak-btn');
+  ack.addEventListener('show.bs.modal', (e) => {
+    current = e.relatedTarget;
+    document.getElementById('ak-title').textContent = current.dataset.doc;
+    document.getElementById('ak-ver').textContent = 'Version ' + current.dataset.version;
+    chk.checked = false; btn.disabled = true;
+  });
+  chk.addEventListener('change', () => { btn.disabled = !chk.checked; });
+  btn.addEventListener('click', () => {
+    bootstrap.Modal.getInstance(ack).hide();
+    const doc = current.dataset.doc;
+    current.closest('[data-todo]').remove(); count();
+    const row = document.querySelector(`[data-read-row="${doc}"]`); if (row) row.hidden = false;
+    kcToast(doc + ' acknowledged');
+  });
+
+  document.getElementById('details-form').addEventListener('submit', (e) => { e.preventDefault(); kcToast('Your details are saved'); });
+
+  const m = document.getElementById('renew-modal');
+  m.addEventListener('show.bs.modal', (e) => {
+    document.getElementById('renew-form').reset();
+    document.getElementById('rn-exp').classList.remove('is-invalid');
+    document.getElementById('rn-file-name').textContent = 'Choose a PDF or take a photo';
+    document.getElementById('rn-drop').classList.remove('has-file');
+    if (e.relatedTarget && e.relatedTarget.dataset.cred) document.getElementById('rn-cred').value = e.relatedTarget.dataset.cred;
+  });
+  document.getElementById('rn-file').addEventListener('change', (e) => {
+    if (!e.target.files[0]) return;
+    document.getElementById('rn-file-name').textContent = e.target.files[0].name;
+    document.getElementById('rn-drop').classList.add('has-file');
+  });
+  document.getElementById('renew-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const exp = document.getElementById('rn-exp');
+    exp.classList.toggle('is-invalid', !exp.value); if (!exp.value) return;
+    bootstrap.Modal.getInstance(m).hide();
+    kcToast(document.getElementById('rn-cred').selectedOptions[0].text + ' sent for verification');
+  });
+})();
+</script>
+{% endblock %}

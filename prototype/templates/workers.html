@@ -1,0 +1,445 @@
+{% extends "base_app.html" %}
+{% set title = "Workers" %}
+{% macro cred_cell(exp) -%}
+  {%- if not exp %}<span class="kc-cred"><span class="kc-dot bad"></span><span>Missing</span></span><div class="kc-cred-sub bad">No record</div>
+  {%- else %}{% set days = (exp - TODAY).days %}
+    {%- if days < 0 %}<span class="kc-cred"><span class="kc-dot bad"></span>{{ fmt_date(exp) }}</span><div class="kc-cred-sub bad">Lapsed {{ -days }} days ago</div>
+    {%- elif days <= 30 %}<span class="kc-cred"><span class="kc-dot warn"></span>{{ fmt_date(exp) }}</span><div class="kc-cred-sub warn">{{ days }} days left</div>
+    {%- else %}<span class="kc-cred"><span class="kc-dot ok"></span>{{ fmt_date(exp) }}</span>{% endif %}
+  {%- endif %}
+{%- endmacro %}
+
+{% block content %}
+<div class="kc-head">
+  <div>
+    <h1>Workers</h1>
+    <p>Screening, credentials and training for every worker</p>
+  </div>
+  <div class="d-flex gap-2">
+    {% if role == 'admin' %}<button class="btn btn-outline-kc" data-bs-toggle="modal" data-bs-target="#import-modal"><i class="bi bi-file-earmark-arrow-up me-1"></i>Import</button>{% endif %}
+    <button class="btn btn-outline-kc" data-toast="Worker register exported"><i class="bi bi-download me-1"></i>Export</button>
+    <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#add-modal"><i class="bi bi-person-plus me-1"></i>Add worker</button>
+  </div>
+</div>
+
+{% for w in workers if w.status == 'blocked' %}
+  {% for k, v in w.creds.items() if v and v < TODAY %}{% if loop.first %}{% set lapsed = (k, v) %}
+  <div class="kc-alert-row">
+    <i class="bi bi-person-x"></i>
+    <div class="txt">
+      <b>{{ w.name }} can't be deployed</b>
+      <div class="sub">{{ cred_name[lapsed[0]] }} lapsed {{ (TODAY - lapsed[1]).days }} days ago. {{ w.name.split()[0] }}, their manager and rostering have been notified.
+        {% if w.pending %}A renewal is waiting for verification.{% endif %}</div>
+    </div>
+    <button class="btn btn-sm btn-outline-kc bg-white" data-toast="Rostering asked to reassign {{ w.name.split()[0] }}'s shifts">Reassign shifts</button>
+    <a class="btn btn-sm btn-kc-danger" href="{{ url_for('worker', role=role, slug=w.slug) }}">Resolve</a>
+  </div>
+  {% endif %}{% endfor %}
+{% endfor %}
+
+<nav class="kc-counters four" aria-label="Worker status">
+  <a class="kc-counter" href="#register" data-filter-status=""><b>{{ summary.active }}</b><span>Active workers</span></a>
+  <a class="kc-counter" href="#register" data-filter-status="ok"><b>{{ summary.ok }}</b><span>Fully compliant</span></a>
+  <a class="kc-counter" href="#register" data-filter-status="soon"><b>{{ summary.soon }}</b><span>Expiring within 30 days</span></a>
+  <a class="kc-counter {{ 'urgent' if summary.lapsed }}" href="#register" data-filter-status="blocked"><b>{{ summary.lapsed }}</b><span>Can't be deployed</span></a>
+</nav>
+
+<section>
+  <div class="kc-tabs" role="tablist">
+    <button role="tab" data-tab="register">Register</button>
+    <button role="tab" data-tab="verify">Awaiting verification<span class="count" id="verify-count">{{ summary.pending }}</span></button>
+    {% if role == 'admin' %}<button role="tab" data-tab="logins">Logins &amp; access</button>{% endif %}
+  </div>
+
+  {# register #}
+  <div class="kc-tabpane pt-4" data-pane="register">
+    <div class="kc-panel">
+      <div class="kc-toolbar">
+        <label class="search">
+          <i class="bi bi-search"></i><span class="visually-hidden">Search workers</span>
+          <input type="search" class="form-control form-control-sm" id="w-search" placeholder="Search by name or email">
+        </label>
+        <select class="form-select form-select-sm" id="w-cred" aria-label="Credential">
+          <option value="">All credentials</option>
+          {% for k, n, _ in creds %}<option value="{{ k }}">{{ n }}</option>{% endfor %}
+        </select>
+        <select class="form-select form-select-sm" id="w-status" aria-label="Status">
+          <option value="">All statuses</option>
+          <option value="ok">Fully compliant</option>
+          <option value="action">Action needed</option>
+          <option value="soon">Expiring within 30 days</option>
+          <option value="blocked">Can't be deployed</option>
+        </select>
+        <select class="form-select form-select-sm" id="w-position" aria-label="Position">
+          <option value="">All positions</option>
+          {% for p in workers|map(attribute='position')|unique %}<option>{{ p }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Worker</th>{% for k, n, _ in creds %}<th>{{ n }}</th>{% endfor %}<th>Status</th></tr></thead>
+          <tbody>
+          {% for w in workers if w.status != 'former' %}
+            <tr data-status="{{ w.status }}" data-soon="{{ 1 if w.soon else 0 }}" data-position="{{ w.position }}"{% for k, n, _ in creds %} data-c-{{ k }}="{{ w.cred_state[k] }}"{% endfor %} data-q="{{ (w.name ~ ' ' ~ w.email)|lower }}" class="{{ 'flag' if w.status == 'blocked' }}">
+              <td>
+                <a class="d-flex align-items-center gap-2 text-decoration-none" href="{{ url_for('worker', role=role, slug=w.slug) }}">
+                  <span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">{{ w.initials }}</span>
+                  <span><span class="kc-doc-link d-block">{{ w.name }}</span><span class="small text-secondary">{{ w.position }}</span></span>
+                </a>
+              </td>
+              {% for k, n, _ in creds %}
+                <td class="text-nowrap">{{ cred_cell(w.creds[k]) }}
+                  {% if w.pending and w.pending.key == k %}<div class="kc-cred-sub info">Renewal awaiting verification</div>{% endif %}</td>
+              {% endfor %}
+              <td>
+                {% if w.status == 'blocked' %}<span class="kc-pill bad">Can't be deployed</span>
+                {% elif w.status == 'action' %}<span class="kc-pill warn">Action needed</span>
+                {% else %}<span class="kc-pill ok">Compliant</span>{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="kc-empty" id="w-empty" hidden><i class="bi bi-people"></i><p class="fw-medium mt-2 mb-0">No workers found.</p></div>
+    </div>
+  </div>
+
+  {# awaiting verification #}
+  <div class="kc-tabpane pt-4" data-pane="verify" hidden>
+    <p class="text-secondary mb-3">
+      {% if role == 'manager' %}Renewals uploaded by workers. Check the certificate, then verify it to update their record.
+      {% else %}Renewals uploaded by workers, waiting for a Compliance Manager to verify them.{% endif %}
+    </p>
+    <section class="kc-panel">
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Worker</th><th>Credential</th><th>Current expiry</th><th>New expiry</th><th>Uploaded</th><th></th></tr></thead>
+          <tbody id="verify-body">
+          {% for w in workers if w.pending %}
+            <tr>
+              <td><a class="kc-doc-link" href="{{ url_for('worker', role=role, slug=w.slug) }}">{{ w.name }}</a></td>
+              <td>{{ cred_name[w.pending.key] }}</td>
+              <td>{{ cred_cell(w.creds[w.pending.key]) }}</td>
+              <td class="text-nowrap">{{ fmt_date(w.pending.new_expiry) }}</td>
+              <td class="text-nowrap text-secondary">{{ fmt_date(w.pending.uploaded) }}</td>
+              <td class="text-end text-nowrap">
+                <button class="btn btn-sm btn-outline-kc me-1" data-toast="Certificate opened">View file</button>
+                {% if role == 'manager' %}
+                  <button class="btn btn-sm btn-kc" data-verify="{{ w.name }}|{{ cred_name[w.pending.key] }}|{{ w.status }}">Verify</button>
+                {% else %}
+                  <span class="small text-secondary ms-1">With Compliance Manager</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="kc-empty" id="verify-empty" hidden><i class="bi bi-check2-circle"></i><p class="fw-medium mt-2 mb-0">Nothing to verify.</p></div>
+    </section>
+  </div>
+
+  {# logins tab #}
+  {% if role == 'admin' %}
+  <div class="kc-tabpane pt-4" data-pane="logins" hidden>
+    <section class="kc-panel">
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Person</th><th>Platform role</th><th>Login</th><th></th></tr></thead>
+          <tbody>
+          {% set role_labels = {'admin': 'Organization Administrator', 'manager': 'Compliance Manager', 'staff': 'Staff Member'} %}
+          {% for w in workers %}
+            <tr>
+              <td><div class="fw-medium">{{ w.name }}</div><div class="small text-secondary">{{ w.email }}</div></td>
+              <td style="width:260px">
+                {% if w.login in ('admin','manager','staff') %}
+                  <select class="form-select form-select-sm" aria-label="Role for {{ w.name }}" data-role-select>
+                    {% for k, l in role_labels.items() %}<option value="{{ k }}" {{ 'selected' if k == w.login }}>{{ l }}</option>{% endfor %}
+                  </select>
+                {% elif w.login == 'invited' %}<span class="text-secondary">Staff Member</span>
+                {% else %}<span class="text-secondary">—</span>{% endif %}
+              </td>
+              <td>
+                {% if w.login in ('admin','manager','staff') %}<span class="kc-pill ok">Active</span>
+                {% elif w.login == 'invited' %}<span class="kc-pill info">Invitation sent</span>
+                {% elif w.login == 'deactivated' %}<span class="kc-pill neutral">Deactivated</span>
+                {% else %}<span class="kc-pill neutral plain">No login</span>{% endif %}
+              </td>
+              <td class="text-end text-nowrap">
+                {% if w.login in ('manager','staff') %}<button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#deactivate-modal" data-name="{{ w.name }}">Deactivate</button>
+                {% elif w.login == 'invited' %}<button class="btn btn-sm btn-outline-kc" data-toast="Invitation resent to {{ w.email }}">Resend invitation</button>
+                {% elif w.login == 'deactivated' %}<button class="btn btn-sm btn-outline-kc" data-toast="{{ w.name }}'s login reactivated">Reactivate</button>
+                {% elif not w.login %}<button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#invite-modal" data-name="{{ w.name }}" data-email="{{ w.email }}">Invite to log in</button>{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+  {% endif %}
+</section>
+
+{# add worker #}
+<div class="modal fade" id="add-modal" tabindex="-1" aria-labelledby="add-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="add-form" novalidate>
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="add-title">Add worker</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="aw-name">Full name</label><input id="aw-name" class="form-control" required><div class="invalid-feedback">Enter their name.</div></div>
+          <div class="col-md-6"><label class="form-label" for="aw-email">Work email</label><input id="aw-email" type="email" class="form-control"></div>
+          <div class="col-md-4"><label class="form-label" for="aw-pos">Position</label><select id="aw-pos" class="form-select"><option>Support Worker</option><option>Team Leader</option><option>Coordinator</option></select></div>
+          <div class="col-md-4"><label class="form-label" for="aw-emp">Employment</label><select id="aw-emp" class="form-select"><option>Casual</option><option>Permanent part time</option><option>Permanent full time</option><option>Contractor</option></select></div>
+          <div class="col-md-4"><label class="form-label" for="aw-start">Start date</label><input id="aw-start" type="date" class="form-control" value="2026-10-05"></div>
+        </div>
+        {% if role == 'admin' %}
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" id="aw-invite">
+          <label class="form-check-label" for="aw-invite">Also invite them to log in as a Staff Member</label>
+        </div>
+        {% endif %}
+        <div class="form-text mt-2">You can add their screening checks and certificates from their worker page.</div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Add worker</button></div>
+    </form>
+  </div>
+</div>
+
+{% if role == 'admin' %}
+{# invite #}
+<div class="modal fade" id="invite-modal" tabindex="-1" aria-labelledby="inv-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="inv-title">Invite to log in</h5><div class="small text-secondary" id="inv-name"></div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="inv-email">Email</label><input id="inv-email" class="form-control mb-3">
+        <label class="form-label" for="inv-role">Platform role</label>
+        <select id="inv-role" class="form-select"><option>Staff Member</option><option>Compliance Manager</option><option>Organization Administrator</option></select>
+        <div class="form-text">Staff Members see their own certificates and actions, participant care information, and can report incidents.</div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" data-bs-dismiss="modal" data-toast="Invitation sent">Send invitation</button></div>
+    </div>
+  </div>
+</div>
+
+{# deactivate #}
+<div class="modal fade" id="deactivate-modal" tabindex="-1" aria-labelledby="de-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="de-title">Deactivate login</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <p class="mb-2"><b id="de-name"></b> won't be able to sign in.</p>
+        <p class="text-secondary small mb-0">Their worker record, screening history and training stay on file. Screening records are kept for 7 years.</p>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc-danger" data-bs-dismiss="modal" data-toast="Login deactivated">Deactivate login</button></div>
+    </div>
+  </div>
+</div>
+
+{# import #}
+<div class="modal fade" id="import-modal" tabindex="-1" aria-labelledby="im-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="im-title">Import workers</h5>
+        <div class="small text-secondary" id="im-step-label">Step 1 of 2: Upload your file</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div data-im-step="1">
+          <label class="kc-drop" id="im-drop">
+            <i class="bi bi-filetype-csv"></i>
+            <span class="fw-medium">Choose a CSV or Excel file</span>
+            <span class="small">Use the template so the columns match</span>
+            <button type="button" class="btn btn-sm btn-outline-kc mt-2" id="im-sample">Use staff-export-sep-2026.csv</button>
+          </label>
+          <div class="text-center mt-3"><a href="#" data-toast="Template downloaded" class="small">Download the import template</a></div>
+        </div>
+        <div data-im-step="2" hidden>
+          <div class="d-flex gap-3 mb-3">
+            <div class="kc-band"><b>12</b><span>Rows found</span></div>
+            <div class="kc-band"><b style="color:var(--kc-ok)">10</b><span>Ready to import</span></div>
+            <div class="kc-band warn"><b>2</b><span>Need a decision</span></div>
+          </div>
+          <div class="table-responsive kc-panel">
+            <table class="table kc-table">
+              <thead><tr><th>Row</th><th>Name</th><th>Problem</th><th>What to do</th></tr></thead>
+              <tbody>
+                <tr><td>5</td><td>T. Alvarez</td><td class="text-secondary">No email address, so no login can be offered</td>
+                  <td><select class="form-select form-select-sm" aria-label="Row 5"><option>Import without email</option><option>Skip this row</option></select></td></tr>
+                <tr><td>9</td><td>K. Adeyemi</td><td class="text-secondary">Already on file as a former worker</td>
+                  <td><select class="form-select form-select-sm" aria-label="Row 9"><option>Skip this row</option><option>Reactivate existing record</option></select></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small text-secondary mt-2 mb-0">Nothing is imported until you confirm. Imported workers don't get a login until you invite them.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" id="im-confirm" hidden data-bs-dismiss="modal" data-toast="11 workers imported">Import rows</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+// tabs
+const tabs = document.querySelectorAll('[data-tab]');
+const panes = document.querySelectorAll('[data-pane]');
+
+function showTab(name) {
+  let exists = false;
+  panes.forEach(function (pane) {
+    if (pane.dataset.pane === name) exists = true;
+  });
+  if (!exists) name = 'register';
+  tabs.forEach(function (tab) {
+    tab.classList.toggle('active', tab.dataset.tab === name);
+  });
+  panes.forEach(function (pane) {
+    pane.hidden = pane.dataset.pane !== name;
+  });
+}
+
+tabs.forEach(function (tab) {
+  tab.addEventListener('click', function () {
+    showTab(tab.dataset.tab);
+    history.replaceState(null, '', '#' + tab.dataset.tab);
+  });
+});
+showTab(location.hash.slice(1));
+
+// register filters
+const searchBox = document.getElementById('w-search');
+const statusFilter = document.getElementById('w-status');
+const positionFilter = document.getElementById('w-position');
+const credFilter = document.getElementById('w-cred');
+
+function matchesStatus(row) {
+  const status = statusFilter.value;
+  // if a credential is picked, the status filter checks only that credential
+  if (credFilter.value) {
+    const state = row.getAttribute('data-c-' + credFilter.value);
+    if (status === '') return state !== 'ok';
+    if (status === 'ok') return state === 'ok';
+    if (status === 'soon') return state === 'soon';
+    if (status === 'blocked') return state === 'bad';
+    if (status === 'action') return state === 'soon' || state === 'bad';
+  }
+  if (status === '') return true;
+  if (status === 'soon') return row.dataset.soon === '1';
+  return row.dataset.status === status;
+}
+
+function filterWorkers() {
+  let shown = 0;
+  document.querySelectorAll('[data-pane=register] tbody tr').forEach(function (row) {
+    let show = true;
+    if (searchBox.value && !row.dataset.q.includes(searchBox.value.toLowerCase())) show = false;
+    if (positionFilter.value && row.dataset.position !== positionFilter.value) show = false;
+    if (!matchesStatus(row)) show = false;
+    row.hidden = !show;
+    if (show) shown++;
+  });
+  document.getElementById('w-empty').hidden = shown > 0;
+}
+
+searchBox.addEventListener('input', filterWorkers);
+statusFilter.addEventListener('change', filterWorkers);
+positionFilter.addEventListener('change', filterWorkers);
+credFilter.addEventListener('change', filterWorkers);
+
+document.querySelectorAll('[data-filter-status]').forEach(function (link) {
+  link.addEventListener('click', function (e) {
+    e.preventDefault();
+    showTab('register');
+    statusFilter.value = link.dataset.filterStatus;
+    filterWorkers();
+  });
+});
+
+// verify renewals
+document.querySelectorAll('[data-verify]').forEach(function (button) {
+  button.addEventListener('click', function () {
+    const parts = button.dataset.verify.split('|');
+    const name = parts[0], cred = parts[1], status = parts[2];
+    const list = document.getElementById('verify-body');
+    button.closest('tr').remove();
+    document.getElementById('verify-count').textContent = list.children.length;
+    document.getElementById('verify-empty').hidden = list.children.length > 0;
+    if (status === 'blocked') {
+      kcToast(cred + ' verified. ' + name + ' can be deployed again');
+    } else {
+      kcToast(cred + ' verified for ' + name);
+    }
+  });
+});
+
+// add worker
+document.getElementById('add-form').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const nameField = document.getElementById('aw-name');
+  const name = nameField.value.trim();
+  nameField.classList.toggle('is-invalid', name === '');
+  if (name === '') return;
+  bootstrap.Modal.getInstance(document.getElementById('add-modal')).hide();
+  const invite = document.getElementById('aw-invite');
+  if (invite && invite.checked) {
+    kcToast(name + ' added, invitation sent');
+  } else {
+    kcToast(name + ' added');
+  }
+  e.target.reset();
+});
+
+// admin only
+document.querySelectorAll('[data-role-select]').forEach(function (select) {
+  select.addEventListener('change', function () { kcToast('Platform role updated'); });
+});
+
+const inviteModal = document.getElementById('invite-modal');
+if (inviteModal) {
+  inviteModal.addEventListener('show.bs.modal', function (e) {
+    document.getElementById('inv-name').textContent = e.relatedTarget.dataset.name;
+    document.getElementById('inv-email').value = e.relatedTarget.dataset.email;
+  });
+}
+
+const deactivateModal = document.getElementById('deactivate-modal');
+if (deactivateModal) {
+  deactivateModal.addEventListener('show.bs.modal', function (e) {
+    document.getElementById('de-name').textContent = e.relatedTarget.dataset.name;
+  });
+}
+
+const importModal = document.getElementById('import-modal');
+if (importModal) {
+  function importStep(n) {
+    importModal.querySelectorAll('[data-im-step]').forEach(function (step) {
+      step.hidden = step.dataset.imStep !== String(n);
+    });
+    if (n === 1) {
+      document.getElementById('im-step-label').textContent = 'Step 1 of 2: Upload your file';
+    } else {
+      document.getElementById('im-step-label').textContent = 'Step 2 of 2: Check before importing';
+    }
+    document.getElementById('im-confirm').hidden = n === 1;
+  }
+  importModal.addEventListener('show.bs.modal', function () { importStep(1); });
+  document.getElementById('im-sample').addEventListener('click', function (e) {
+    e.preventDefault();
+    importStep(2);
+  });
+}
+</script>
+{% endblock %}

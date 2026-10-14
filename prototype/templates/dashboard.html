@@ -1,0 +1,314 @@
+{% extends "base_app.html" %}
+{% set title = "Dashboard" %}
+{% block content %}
+
+<div class="kc-head">
+  <div>
+    <h1>Dashboard</h1>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    {% if role == 'admin' %}
+    <a class="kc-setup-mini" id="setup-bar" href="{{ url_for('setup', role=role) }}">
+      <span>Setup {{ ORG.setup_step }} of {{ ORG.setup_total }}</span>
+      <span class="bar" role="progressbar" aria-label="Organisation setup" aria-valuenow="{{ ORG.setup_step }}" aria-valuemin="0" aria-valuemax="{{ ORG.setup_total }}"><span style="width:{{ (ORG.setup_step / ORG.setup_total * 100)|int }}%"></span></span>
+      <span class="go">Continue</span>
+    </a>
+    <script>try { if (sessionStorage.getItem('kc-setup-done') === '1') document.getElementById('setup-bar').remove(); } catch (e) {}</script>
+    {% endif %}
+    <button class="btn btn-outline-kc" data-toast="Compliance report exported"><i class="bi bi-download me-1"></i>Export report</button>
+    <button class="btn btn-outline-kc" data-toast="Internal audit started"><i class="bi bi-clipboard2-check me-1"></i>Run internal audit</button>
+  </div>
+</div>
+
+{# alerts #}
+{% set lapsed = expiry.lapsed %}
+{% if reportable or lapsed %}
+<section class="kc-alerts" aria-label="Urgent">
+  {% if reportable %}
+  <div class="kc-alert-row">
+    <i class="bi bi-stopwatch"></i>
+    <div class="txt">
+      <b>Notify the NDIS Commission of a reportable incident</b>
+      <div class="sub">{{ reportable.ref }}, {{ reportable.category|lower }}, reported {{ reportable.reported }}</div>
+    </div>
+    <span class="kc-timer" data-countdown="{{ reportable.seconds_left }}" aria-label="Time remaining">17:41:58</span>
+    <a class="btn btn-sm btn-kc-danger" href="{{ url_for('case', role=role, slug=reportable.ref|lower) }}">Record reference</a>
+  </div>
+  {% endif %}
+  {% for c in lapsed %}
+  <div class="kc-alert-row">
+    <i class="bi bi-person-x"></i>
+    <div class="txt">
+      <b>{{ c.holder }} can't be deployed</b>
+      <div class="sub">{{ c.type }} lapsed {{ -c.days }} days ago. {{ c.holder.split()[0] }}, their manager and rostering have been notified.</div>
+    </div>
+    <a class="btn btn-sm btn-kc-danger" href="{{ url_for('worker', role=role, slug=c.slug) }}">Resolve</a>
+  </div>
+  {% endfor %}
+</section>
+{% endif %}
+
+{% set mine = personal_alert(role) %}
+{% if mine %}
+<div class="kc-setup">
+  <i class="bi bi-person-badge" style="color:var(--kc-warn)"></i>
+  <span class="flex-grow-1"><b class="fw-semibold">{{ mine.title }}.</b> {{ mine.body }}</span>
+  <a href="{{ url_for('my_compliance', role=role) }}" class="fw-medium text-decoration-none">My compliance</a>
+</div>
+{% endif %}
+
+{# scores #}
+{% set r = readiness %}
+<section class="kc-panel kc-scores" aria-label="Scores">
+  <div class="kc-score-col">
+    <div class="kc-score-top">
+      <h2>Audit readiness</h2>
+      {% if r.score >= r.target %}<span class="kc-pill ok">Audit-ready</span>
+      {% elif r.score < r.critical_below %}<span class="kc-pill bad">Critical</span>
+      {% else %}<span class="kc-pill warn">Below target</span>{% endif %}
+    </div>
+    <div class="kc-score-row">
+      <div class="kc-score-num">{{ r.score }}<small>%</small></div>
+      <div class="flex-grow-1">
+        <div class="kc-gauge" aria-hidden="true">
+          <div class="track"><div class="fill" style="width:{{ r.score }}%"></div></div>
+          <div class="tick" style="left:{{ r.target }}%"></div>
+        </div>
+        <div class="kc-score-foot">
+          <span>Target {{ r.target }}%</span>
+          <button type="button" class="kc-linkbtn" data-bs-toggle="modal" data-bs-target="#score-modal">How it's calculated</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="kc-score-col">
+    <div class="kc-score-top">
+      <h2>Compliance health</h2>
+      <span class="kc-pill warn">Needs work</span>
+    </div>
+    <div class="kc-score-row">
+      <div class="kc-score-num">{{ health.score }}<small>%</small></div>
+      <div class="kc-score-parts">
+        {% for label, have, total in health.parts %}
+          <div>
+            <div class="lbl"><span>{{ label }}</span><span>{{ have }}/{{ total }}</span></div>
+            <div class="progress" style="height:5px" role="progressbar" aria-label="{{ label }}"
+                 aria-valuenow="{{ have }}" aria-valuemin="0" aria-valuemax="{{ total }}">
+              <div class="progress-bar" style="width:{{ (have / total * 100)|round|int }}%"></div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{# counters #}
+<nav class="kc-counters" aria-label="Status counters">
+  <a class="kc-counter {{ 'urgent' if counts.priority_gaps }}" href="{{ url_for('documents', role=role) }}#missing"><b>{{ counts.priority_gaps }}</b><span>Priority gaps</span></a>
+  <a class="kc-counter {{ 'urgent' if counts.overdue_actions }}" href="#tasks"><b>{{ counts.overdue_actions }}</b><span>Overdue actions</span></a>
+  <a class="kc-counter" href="{{ url_for('incidents', role=role) }}"><b>{{ counts.open_incidents }}</b><span>Open incidents</span></a>
+  <a class="kc-counter" href="{{ url_for('documents', role=role) }}#missing"><b>{{ missing_docs }}</b><span>Missing documents</span></a>
+  <a class="kc-counter" href="{{ url_for('documents', role=role) }}#evidence"><b>{{ doc_summary.evidence }}</b><span>Missing evidence</span></a>
+  <a class="kc-counter" href="{{ url_for('documents', role=role) }}#signoff"><b>{{ doc_summary.signoff }}</b><span>Awaiting sign-off</span></a>
+  <a class="kc-counter" href="#tasks"><b>{{ counts.open_actions }}</b><span>Open actions</span></a>
+</nav>
+
+{# tasks and expiries #}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <section class="kc-panel h-100" id="tasks">
+      <div class="kc-panel-head">
+        <h2>What to do next</h2>
+        <span class="small text-secondary">{{ tasks|length }} tasks</span>
+      </div>
+      {% for t in tasks %}
+      <div class="kc-task">
+        <span class="kc-sev {{ t.severity }}">{{ t.severity }}</span>
+        <div class="body">
+          <div class="title">{{ t.title }}</div>
+          <div class="meta kc-parts">
+            {% if t.overdue > 0 %}<span class="late">Overdue {{ t.overdue }} day{{ 's' if t.overdue != 1 }}</span>
+            {% elif t.overdue == 0 %}<span class="late">Due today</span>
+            {% else %}<span>Due in {{ -t.overdue }} days</span>{% endif %}
+            <span>{{ t.owner }}</span>
+          </div>
+        </div>
+        <a class="btn btn-sm {{ 'btn-kc' if t.severity == 'Critical' else 'btn-outline-kc' }}" href="{{ url_for(t.target, role=role) }}">{{ t.action }}</a>
+      </div>
+      {% endfor %}
+    </section>
+  </div>
+
+  <div class="col-lg-4">
+    {% set e = expiry %}
+    <section class="kc-panel h-100">
+      <div class="kc-panel-head">
+        <h2>Expiring in 60 days</h2>
+        <a href="{{ url_for('staff', role=role) }}">View workers</a>
+      </div>
+      <ul class="kc-exp2">
+        {% for c in e.rows %}
+        <li>
+          <div class="l1">
+            <span class="fw-medium">{{ c.type }}</span>
+            {% if c.band == 'lapsed' %}<span class="kc-pill bad">Lapsed</span>
+            {% elif c.band == 'soon' %}<span class="kc-pill warn">{{ c.days }} days</span>
+            {% else %}<span class="kc-pill ok">{{ c.days }} days</span>{% endif %}
+          </div>
+          <div class="l2">
+            <span>{{ c.holder }}</span>
+            {% if c.kind == 'worker' %}
+              {% if c.pending %}<a href="{{ url_for('worker', role=role, slug=c.slug) }}">{{ 'Verify renewal' if role == 'manager' else 'View renewal' }}</a>
+              {% elif c.days <= 30 %}<a href="{{ url_for('worker', role=role, slug=c.slug) }}">Upload renewal</a>{% endif %}
+            {% elif role == 'admin' and c.days <= 30 %}<a href="{{ url_for('setup', role=role) }}#step-insurance">Upload renewal</a>{% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+</div>
+
+<section class="kc-panel">
+  <div class="kc-panel-head">
+    <h2>Active risks</h2>
+    <button class="btn btn-sm btn-outline-kc" data-toast="Risk register exported"><i class="bi bi-download me-1"></i>Export register</button>
+  </div>
+  <div class="table-responsive">
+    <table class="table kc-table">
+      <thead><tr><th>Risk</th><th>Rating</th><th>Treatment</th><th>Owner</th><th>Next review</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      {% for k in risks %}
+        <tr class="{{ 'flag' if k.status in ('overdue','escalated') }}" data-ref="{{ k.ref }}">
+          <td><div class="fw-medium">{{ k.name }}</div><div class="small text-secondary">{{ k.ref }}</div></td>
+          <td>{{ k.rating }}</td>
+          <td class="text-secondary" style="max-width:280px">{{ k.treatment }}</td>
+          <td class="risk-owner">{{ k.owner }}</td>
+          <td class="risk-date text-nowrap" data-date="{{ k.review.isoformat() }}">{{ fmt_date(k.review) }}</td>
+          <td>
+            {% if k.status == 'escalated' %}<span class="kc-pill bad">Escalated</span>
+            {% elif k.status == 'overdue' %}<span class="kc-pill bad">Review overdue</span>
+            {% elif k.status == 'monitoring' %}<span class="kc-pill warn">Monitoring</span>
+            {% else %}<span class="kc-pill ok">Controlled</span>{% endif %}
+          </td>
+          <td class="text-end text-nowrap">
+            {% if k.status in ('overdue','escalated') %}
+              <button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#review-modal" data-risk="{{ k.name }}">Review</button>
+            {% endif %}
+            <button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#edit-risk-modal">Edit</button>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="modal fade" id="edit-risk-modal" tabindex="-1" aria-labelledby="er-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" id="edit-risk-form">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title fs-6 fw-semibold" id="er-title">Edit risk</h5>
+          <div class="small text-secondary" id="er-name"></div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row g-3">
+        <div class="col-6">
+          <label class="form-label" for="er-owner">Owner</label>
+          <select id="er-owner" class="form-select">{% for o in owners %}<option>{{ o }}</option>{% endfor %}</select>
+        </div>
+        <div class="col-6">
+          <label class="form-label" for="er-date">Next review</label>
+          <input id="er-date" type="date" class="form-control" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-kc">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{# score breakdown #}
+<div class="modal fade" id="score-modal" tabindex="-1" aria-labelledby="sc-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="sc-title">How audit readiness is calculated</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body p-0">
+        <table class="table kc-table mb-0">
+          <thead><tr><th>Component</th><th class="text-end">Weight</th><th class="text-end">Result</th></tr></thead>
+          <tbody>
+          {% for name, w, v in readiness.components %}
+            <tr><td>{{ name }}</td><td class="text-end">{{ w }}%</td><td class="text-end fw-medium">{{ v }}%</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer small text-secondary justify-content-between">
+        <span>Critical below {{ readiness.critical_below }}%</span><span>Audit-ready at {{ readiness.target }}%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# review modal #}
+<div class="modal fade" id="review-modal" tabindex="-1" aria-labelledby="rv-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>
+          <h5 class="modal-title fs-6 fw-semibold" id="rv-title">Review risk</h5>
+          <div class="small text-secondary" id="rv-name"></div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body pt-2">
+        <label class="kc-choice"><input class="form-check-input mt-1" type="radio" name="rv" checked>
+          <span><span class="fw-medium d-block">Treatment is working</span><span class="small text-secondary">Confirm and set the next review for 90 days.</span></span></label>
+        <label class="kc-choice"><input class="form-check-input mt-1" type="radio" name="rv">
+          <span><span class="fw-medium d-block">Extend the review date</span><span class="small text-secondary">Add a reason. The Compliance Manager is notified.</span></span></label>
+        <label class="kc-choice"><input class="form-check-input mt-1" type="radio" name="rv">
+          <span><span class="fw-medium d-block">Treatment needs changing</span><span class="small text-secondary">Creates a corrective action for the owner.</span></span></label>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" data-bs-dismiss="modal" data-toast="Risk review saved">Save review</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+  document.getElementById('review-modal').addEventListener('show.bs.modal', (e) => {
+    document.getElementById('rv-name').textContent = e.relatedTarget.dataset.risk;
+  });
+
+  let riskRow = null;
+  document.getElementById('edit-risk-modal').addEventListener('show.bs.modal', (e) => {
+    riskRow = e.relatedTarget.closest('tr');
+    document.getElementById('er-name').textContent = riskRow.querySelector('.fw-medium').textContent;
+    document.getElementById('er-owner').value = riskRow.querySelector('.risk-owner').textContent;
+    document.getElementById('er-date').value = riskRow.querySelector('.risk-date').dataset.date;
+  });
+
+  document.getElementById('edit-risk-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const value = document.getElementById('er-date').value;
+    if (!value) return;
+    const d = new Date(value + 'T00:00:00');
+    riskRow.querySelector('.risk-owner').textContent = document.getElementById('er-owner').value;
+    riskRow.querySelector('.risk-date').textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+    riskRow.querySelector('.risk-date').dataset.date = value;
+    bootstrap.Modal.getInstance(document.getElementById('edit-risk-modal')).hide();
+    kcToast('Risk updated');
+  });
+</script>
+{% endblock %}

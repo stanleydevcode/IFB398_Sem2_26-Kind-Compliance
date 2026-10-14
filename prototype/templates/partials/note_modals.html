@@ -1,0 +1,102 @@
+{# progress note and handover modals #}
+{% set me = ROLES[role].user %}
+<div class="modal fade" id="note-modal" tabindex="-1" aria-labelledby="nt-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="note-form" novalidate>
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="nt-title">Add progress note</h5>
+        <div class="small text-secondary">Signed as {{ me }}</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="nt-p">Participant</label>
+            <select id="nt-p" class="form-select" required><option value="">Choose a participant</option>
+              {% for x in participants %}<option value="{{ x.id }}">{{ x.name }} ({{ x.id }})</option>{% endfor %}</select>
+            <div class="invalid-feedback">Choose who this note is about.</div></div>
+          <div class="col-md-3"><label class="form-label" for="nt-date">Date</label><input id="nt-date" type="date" class="form-control" value="{{ TODAY.isoformat() }}"></div>
+          <div class="col-md-3"><label class="form-label" for="nt-hours">Hours</label><input id="nt-hours" type="number" step="0.5" min="0" class="form-control" value="3"></div>
+          <div class="col-12"><label class="form-label" for="nt-text">Support provided</label>
+            <textarea id="nt-text" class="form-control" rows="4" placeholder="What you did and how it went" required></textarea>
+            <div class="invalid-feedback">Describe the support provided.</div></div>
+          <div class="col-md-6"><label class="form-label" for="nt-mood">Mood</label>
+            <select id="nt-mood" class="form-select"><option>Settled</option><option>Happy</option><option>Anxious</option><option>Distressed</option><option>Unwell</option></select></div>
+          <div class="col-md-6"><label class="form-label" for="nt-part">Participation</label>
+            <select id="nt-part" class="form-select"><option>Fully engaged</option><option>Partly engaged</option><option>Declined</option></select></div>
+        </div>
+        <div class="mt-3 d-grid gap-2">
+          <label class="kc-choice m-0"><input class="form-check-input mt-1" type="checkbox" id="nt-follow">
+            <span><span class="fw-medium d-block">Needs follow-up</span><span class="small text-secondary">Flags the note for the key worker and Compliance Manager.</span></span></label>
+          <label class="kc-choice m-0"><input class="form-check-input mt-1" type="checkbox" id="nt-incident">
+            <span><span class="fw-medium d-block">Report this as an incident</span><span class="small text-secondary">Starts an incident report with these details filled in.</span></span></label>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal" data-toast="Draft saved">Save draft</button>
+        <button type="submit" class="btn btn-kc">Submit note</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="handover-modal" tabindex="-1" aria-labelledby="ho-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="handover-form" novalidate>
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="ho-title">Shift handover</h5>
+        <div class="small text-secondary">Signed as {{ me }}</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-md-6"><label class="form-label" for="ho-p">Participant</label>
+            <select id="ho-p" class="form-select" required><option value="">Choose a participant</option>
+              {% for x in participants %}<option value="{{ x.id }}">{{ x.name }} ({{ x.id }})</option>{% endfor %}</select>
+            <div class="invalid-feedback">Choose a participant.</div></div>
+          <div class="col-md-6"><label class="form-label" for="ho-shift">Shift</label>
+            <select id="ho-shift" class="form-select"><option>Morning, 6 am to 2 pm</option><option>Afternoon, 2 pm to 10 pm</option><option>Night, 10 pm to 6 am</option></select></div>
+          <div class="col-md-6"><label class="form-label" for="ho-to">Hand over to</label>
+            <select id="ho-to" class="form-select">{% for w in workers if w.status != 'former' and w.name != me %}<option>{{ w.name }}</option>{% endfor %}</select></div>
+          <div class="col-12"><label class="form-label" for="ho-text">What the next worker needs to know</label>
+            <textarea id="ho-text" class="form-control" rows="4" placeholder="Changes, unfinished tasks, things to watch" required></textarea>
+            <div class="invalid-feedback">Add the handover details.</div></div>
+          <div class="col-12"><span class="form-label d-block">Flags</span>
+            <div class="d-flex flex-wrap gap-2">
+              {% for f in ['Medication change', 'Behaviour', 'Health concern', 'Family contact', 'Equipment'] %}
+                <input type="checkbox" class="btn-check" id="ho-f{{ loop.index }}"><label class="btn btn-sm btn-outline-kc" for="ho-f{{ loop.index }}">{{ f }}</label>
+              {% endfor %}
+            </div></div>
+        </div>
+        <div class="form-check mt-3"><input class="form-check-input" type="checkbox" id="ho-follow"><label class="form-check-label" for="ho-follow">Needs follow-up</label></div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-kc">Complete handover</button></div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  const pre = (modalId, selectId) => document.getElementById(modalId).addEventListener('show.bs.modal', (e) => {
+    const form = e.target.querySelector('form'); form.reset();
+    form.querySelectorAll('.is-invalid').forEach((x) => x.classList.remove('is-invalid'));
+    if (e.relatedTarget && e.relatedTarget.dataset.pid) document.getElementById(selectId).value = e.relatedTarget.dataset.pid;
+  });
+  pre('note-modal', 'nt-p'); pre('handover-modal', 'ho-p');
+  const check = (ids) => ids.map((id) => { const el = document.getElementById(id); const bad = !el.value.trim(); el.classList.toggle('is-invalid', bad); return bad; }).some(Boolean);
+
+  document.getElementById('note-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (check(['nt-p', 'nt-text'])) return;
+    const inc = document.getElementById('nt-incident').checked, fu = document.getElementById('nt-follow').checked;
+    if (inc) {
+      try { sessionStorage.setItem('kc-note-incident', JSON.stringify({ pid: document.getElementById('nt-p').value,
+        text: document.getElementById('nt-text').value, date: document.getElementById('nt-date').value })); } catch (err) {  }
+      window.location.href = '{{ url_for("report_incident", role=role) }}';
+      return;
+    }
+    bootstrap.Modal.getInstance(document.getElementById('note-modal')).hide();
+    kcToast('Progress note submitted' + (inc ? ', incident report started' : fu ? ', flagged for follow-up' : ''));
+  });
+  document.getElementById('handover-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (check(['ho-p', 'ho-text'])) return;
+    bootstrap.Modal.getInstance(document.getElementById('handover-modal')).hide();
+    kcToast('Handover sent to ' + document.getElementById('ho-to').value);
+  });
+})();
+</script>

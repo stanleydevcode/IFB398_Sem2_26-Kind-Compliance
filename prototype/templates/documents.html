@@ -1,0 +1,332 @@
+{% extends "base_app.html" %}
+{% set title = "Documents & evidence" %}
+{% macro doc_pill(status) -%}
+  {%- if status == 'signoff' %}<span class="kc-pill info">Awaiting sign-off</span>
+  {%- elif status == 'overdue' %}<span class="kc-pill bad">Review overdue</span>
+  {%- elif status == 'due' %}<span class="kc-pill warn">Review due</span>
+  {%- else %}<span class="kc-pill ok">Current</span>{% endif -%}
+{%- endmacro %}
+
+{% block content %}
+<div class="kc-head">
+  <div>
+    <h1>Documents &amp; evidence</h1>
+    <p>Policies, procedures, forms and registers</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-kc" data-toast="Document list exported"><i class="bi bi-download me-1"></i>Export</button>
+    <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#upload-modal"><i class="bi bi-upload me-1"></i>Upload document</button>
+  </div>
+</div>
+
+
+<section>
+  <div class="kc-tabs" role="tablist">
+    <button role="tab" data-tab="library">Library</button>
+    <button role="tab" data-tab="missing">Missing<span class="count">{{ summary.missing }}</span></button>
+    <button role="tab" data-tab="signoff">Awaiting sign-off<span class="count" id="signoff-count">{{ summary.signoff }}</span></button>
+    <button role="tab" data-tab="evidence">Evidence<span class="count">{{ summary.evidence }}</span></button>
+  </div>
+
+  {# library #}
+  <div class="kc-tabpane pt-4" data-pane="library">
+    <div class="row g-4">
+      <div class="col-lg-3">
+        <nav class="kc-panel" aria-label="Folders">
+          <ul class="kc-folders">
+            <li><button class="active" data-folder=""><i class="bi bi-folder2-open"></i>All documents<span class="n">{{ policies|length + records|length }}</span></button></li>
+            <li><hr></li>
+            {% for key, name, icon in categories %}
+            <li><button data-folder="{{ key }}"><i class="bi {{ icon }}"></i>{{ name }}<span class="n">{{ category_counts[key] }}</span></button></li>
+            {% endfor %}
+          </ul>
+        </nav>
+      </div>
+
+      <div class="col-lg-9">
+        <div class="kc-panel">
+          <div class="kc-toolbar">
+            <div class="kc-seg" role="group" aria-label="Document kind">
+              <button class="active" data-kind="policies">Policies &amp; procedures</button>
+              <button data-kind="records">Forms &amp; registers</button>
+            </div>
+            <label class="search">
+              <i class="bi bi-search"></i><span class="visually-hidden">Search documents</span>
+              <input type="search" class="form-control form-control-sm" id="lib-search" placeholder="Search by title">
+            </label>
+            <select class="form-select form-select-sm" id="lib-status" aria-label="Status">
+              <option value="">All statuses</option>
+              <option value="current">Current</option>
+              <option value="due">Review due</option>
+              <option value="signoff">Awaiting sign-off</option>
+            </select>
+          </div>
+
+          <div class="table-responsive" data-kind-pane="policies">
+            <table class="table kc-table">
+              <thead><tr><th>Document</th><th>Folder</th><th>Version</th><th>Next review</th><th>Status</th></tr></thead>
+              <tbody>
+              {% for d in policies %}
+                <tr data-folder="{{ d.category }}" data-status="{{ 'due' if d.status in ('due','overdue') else d.status }}" data-title="{{ d.title|lower }}">
+                  <td><a class="kc-doc-link" href="{{ url_for('document', role=role, slug=d.slug) }}">{{ d.title }}</a>
+                    <div class="small text-secondary">{{ d.type }}</div></td>
+                  <td class="text-secondary">{{ category_name[d.category] }}</td>
+                  <td>{{ 'v' ~ d.version if d.version else '—' }}</td>
+                  <td class="text-nowrap">{{ fmt_date(d.review) if d.review else '—' }}</td>
+                  <td>{{ doc_pill(d.status) }}</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-responsive" data-kind-pane="records" hidden>
+            <table class="table kc-table">
+              <thead><tr><th>Record</th><th>Folder</th><th class="text-end">Entries</th><th>Last entry</th><th>Fed by</th></tr></thead>
+              <tbody>
+              {% for r in records %}
+                <tr data-folder="{{ r.category }}" data-status="current" data-title="{{ r.title|lower }}">
+                  <td><span class="fw-medium">{{ r.title }}</span><div class="small text-secondary">{{ r.type }}</div></td>
+                  <td class="text-secondary">{{ category_name[r.category] }}</td>
+                  <td class="text-end">{{ r.entries }}</td>
+                  <td class="text-nowrap">{{ fmt_date(r.last) if r.last else 'No entries yet' }}</td>
+                  <td class="text-secondary">{{ r.source or '—' }}</td>
+                </tr>
+              {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="kc-empty" id="lib-empty" hidden>
+            <i class="bi bi-folder2"></i>
+            <p class="fw-medium mt-2 mb-3">Nothing in this folder yet.</p>
+            <button class="btn btn-outline-kc btn-sm" data-bs-toggle="modal" data-bs-target="#upload-modal">Upload document</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# missing #}
+  <div class="kc-tabpane pt-4" data-pane="missing" hidden>
+    <p class="text-secondary mb-3">Required by the Core module and your registration groups, most critical first.</p>
+    <div class="d-grid gap-4">
+      {% for g in missing %}
+      <section class="kc-panel overflow-hidden">
+        <div class="kc-group-head">
+          <h3>{{ g.label }}</h3>
+          <span class="n">{{ g.rows|length }} document{{ 's' if g.rows|length != 1 }}</span>
+          <span class="ms-auto kc-pill {{ {'Critical':'bad','High':'warn'}.get(g.priority, 'neutral') }}">{{ g.priority }}</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table kc-table">
+            <thead class="visually-hidden"><tr><th>Document</th><th>Type</th><th>Folder</th><th></th></tr></thead>
+            <tbody>
+            {% for r in g.rows %}
+              <tr>
+                <td class="fw-medium">{{ r.title }}</td>
+                <td class="text-secondary" style="width:120px">{{ r.type }}</td>
+                <td class="text-secondary" style="width:220px">{{ category_name[r.category] }}</td>
+                <td class="text-end" style="width:110px">
+                  <button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#upload-modal"
+                          data-upload-title="{{ r.title }}" data-upload-type="{{ r.type }}" data-upload-category="{{ r.category }}">Upload</button>
+                </td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+      {% endfor %}
+    </div>
+  </div>
+
+  {# sign-off #}
+  <div class="kc-tabpane pt-4" data-pane="signoff" hidden>
+    <p class="text-secondary mb-3">
+      {% if role == 'manager' %}New versions stay in draft until you approve them. The current version stays in use until then.
+      {% else %}New versions stay in draft until a Compliance Manager approves them. The current version stays in use until then.{% endif %}
+    </p>
+    <section class="kc-panel">
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Document</th><th>Folder</th><th>New version</th><th>Replaces</th><th>Uploaded</th><th></th></tr></thead>
+          <tbody>
+          {% for d in policies if d.status == 'signoff' %}
+            <tr>
+              <td><a class="kc-doc-link" href="{{ url_for('document', role=role, slug=d.slug) }}">{{ d.title }}</a></td>
+              <td class="text-secondary">{{ category_name[d.category] }}</td>
+              <td>v{{ d.pending }}</td>
+              <td class="text-secondary">{{ 'v' ~ d.version if d.version else 'First version' }}</td>
+              <td class="text-nowrap text-secondary">S. Chen, 24 Sep 2026</td>
+              <td class="text-end text-nowrap">
+                {% if role == 'manager' %}
+                  <button class="btn btn-sm btn-outline-kc me-1" data-bs-toggle="modal" data-bs-target="#changes-modal" data-doc="{{ d.title }}">Request changes</button>
+                  <button class="btn btn-sm btn-kc" data-approve="{{ d.title }} v{{ d.pending }}">Approve</button>
+                {% else %}
+                  <span class="small text-secondary">With Compliance Manager</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="kc-empty" id="signoff-empty" hidden>
+        <i class="bi bi-check2-circle"></i>
+        <p class="fw-medium mt-2 mb-0">Nothing to sign off.</p>
+      </div>
+    </section>
+  </div>
+
+  {# evidence #}
+  <div class="kc-tabpane pt-4" data-pane="evidence" hidden>
+    <p class="text-secondary mb-3">Practice Standards requirements that don't have accepted evidence yet.</p>
+    <section class="kc-panel">
+      <div class="table-responsive">
+        <table class="table kc-table">
+          <thead><tr><th>Requirement</th><th>Evidence needed</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+          {% for e in evidence %}
+            <tr>
+              <td><div class="fw-medium">{{ e.requirement }}</div><div class="small text-secondary">{{ e.standard }}</div></td>
+              <td>{{ e.evidence }}</td>
+              <td>
+                {% if e.status == 'missing' %}<span class="kc-pill bad">Missing</span>
+                {% elif e.status == 'expired' %}<span class="kc-pill warn">Expired</span>
+                {% else %}<span class="kc-pill neutral">Partly supplied</span>{% endif %}
+              </td>
+              <td class="text-end"><button class="btn btn-sm btn-outline-kc text-nowrap" data-bs-toggle="modal" data-bs-target="#link-modal" data-req="{{ e.requirement }}">Link evidence</button></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</section>
+
+{% include "partials/upload_modal.html" %}
+
+{# request changes #}
+<div class="modal fade" id="changes-modal" tabindex="-1" aria-labelledby="ch-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div><h5 class="modal-title fs-6 fw-semibold" id="ch-title">Request changes</h5><div class="small text-secondary" id="ch-doc"></div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="ch-note" class="form-label">What needs to change?</label>
+        <textarea id="ch-note" class="form-control" rows="4"></textarea>
+        <div class="form-text">The person who uploaded it is notified. The current version stays in use.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" data-bs-dismiss="modal" data-toast="Changes requested">Send request</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# link evidence #}
+<div class="modal fade" id="link-modal" tabindex="-1" aria-labelledby="ln-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div><h5 class="modal-title fs-6 fw-semibold" id="ln-title">Link evidence</h5><div class="small text-secondary" id="ln-req"></div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="ln-doc" class="form-label">Choose an existing document or record</label>
+        <select id="ln-doc" class="form-select">
+          {% for d in policies if d.version %}<option>{{ d.title }}</option>{% endfor %}
+          {% for r in records %}<option>{{ r.title }}</option>{% endfor %}
+        </select>
+        <div class="text-center small text-secondary my-3">or</div>
+        <button type="button" class="btn btn-outline-kc w-100" id="ln-upload">Upload new evidence</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-kc" data-bs-dismiss="modal" data-toast="Evidence linked">Link</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+(function () {
+  // tabs
+  const tabs = document.querySelectorAll('[data-tab]');
+  const panes = document.querySelectorAll('[data-pane]');
+  function show(name) {
+    if (!document.querySelector('[data-pane="' + name + '"]')) name = 'library';
+    tabs.forEach((t) => { const on = t.dataset.tab === name; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
+    panes.forEach((p) => { p.hidden = p.dataset.pane !== name; });
+  }
+  tabs.forEach((t) => t.addEventListener('click', () => { show(t.dataset.tab); history.replaceState(null, '', '#' + t.dataset.tab); }));
+  show(location.hash.slice(1) || '{{ "missing" if summary.missing else "library" }}');
+
+  // library filters
+  let folder = '', kind = 'policies';
+  const search = document.getElementById('lib-search');
+  const status = document.getElementById('lib-status');
+  const empty = document.getElementById('lib-empty');
+  function filter() {
+    const q = search.value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll('[data-kind-pane]').forEach((pane) => {
+      const active = pane.dataset.kindPane === kind;
+      let n = 0;
+      pane.querySelectorAll('tbody tr').forEach((tr) => {
+        const ok = (!folder || tr.dataset.folder === folder) && (!q || tr.dataset.title.includes(q))
+          && (!status.value || tr.dataset.status === status.value);
+        tr.hidden = !ok; if (ok) n++;
+      });
+      pane.hidden = !active || n === 0;
+      if (active) shown = n;
+    });
+    empty.hidden = shown > 0;
+  }
+  document.querySelectorAll('[data-folder]').forEach((b) => {
+    if (b.tagName !== 'BUTTON') return;
+    b.addEventListener('click', () => {
+      folder = b.dataset.folder; window.kcCurrentFolder = folder;
+      document.querySelectorAll('.kc-folders button').forEach((x) => x.classList.toggle('active', x === b));
+      filter();
+    });
+  });
+  document.querySelectorAll('[data-kind]').forEach((b) => b.addEventListener('click', () => {
+    kind = b.dataset.kind;
+    document.querySelectorAll('[data-kind]').forEach((x) => x.classList.toggle('active', x === b));
+    status.disabled = kind === 'records'; if (status.disabled) status.value = '';
+    filter();
+  }));
+  search.addEventListener('input', filter);
+  status.addEventListener('change', filter);
+
+  // sign-off
+  const count = document.getElementById('signoff-count');
+  document.querySelectorAll('[data-approve]').forEach((b) => b.addEventListener('click', () => {
+    const row = b.closest('tr'); const tbody = row.parentElement;
+    row.remove();
+    count.textContent = tbody.children.length;
+    document.getElementById('signoff-empty').hidden = tbody.children.length > 0;
+    kcToast(`${b.dataset.approve} approved and now current`);
+  }));
+  document.getElementById('changes-modal').addEventListener('show.bs.modal', (e) => {
+    document.getElementById('ch-doc').textContent = e.relatedTarget ? e.relatedTarget.dataset.doc : '';
+  });
+  document.getElementById('ln-upload').addEventListener('click', () => {
+    const link = document.getElementById('link-modal');
+    link.addEventListener('hidden.bs.modal', () => bootstrap.Modal.getOrCreateInstance(document.getElementById('upload-modal')).show(), { once: true });
+    bootstrap.Modal.getInstance(link).hide();
+  });
+  document.getElementById('link-modal').addEventListener('show.bs.modal', (e) => {
+    if (e.relatedTarget && e.relatedTarget.dataset.req) document.getElementById('ln-req').textContent = e.relatedTarget.dataset.req;
+  });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{# Upload a document. Every document must be filed in a Kind Compliance folder.
+   Open with data-bs-toggle="modal" data-bs-target="#upload-modal" and optional
+   data-upload-title / data-upload-type / data-upload-category / data-upload-version. #}
+<div class="modal fade" id="upload-modal" tabindex="-1" aria-labelledby="up-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="upload-form" novalidate>
+      <div class="modal-header">
+        <h5 class="modal-title fs-6 fw-semibold" id="up-title">Upload document</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label class="kc-drop mb-3" for="up-file" id="up-drop">
+          <i class="bi bi-cloud-arrow-up"></i>
+          <span class="fw-medium" id="up-file-name">Choose a file or drag it here</span>
+          <span class="small">PDF or Word, up to 20 MB</span>
+          <input type="file" id="up-file" class="visually-hidden" accept=".pdf,.doc,.docx">
+        </label>
+
+        <div class="row g-3">
+          <div class="col-md-8">
+            <label for="up-doc-title" class="form-label">Document title</label>
+            <input type="text" class="form-control" id="up-doc-title" required>
+            <div class="invalid-feedback">Enter a title.</div>
+          </div>
+          <div class="col-md-4">
+            <label for="up-type" class="form-label">Type</label>
+            <select class="form-select" id="up-type">
+              <option>Policy</option><option>Procedure</option><option>Form</option><option>Register</option>
+            </select>
+          </div>
+          <div class="col-md-8">
+            <label for="up-category" class="form-label">Folder</label>
+            <select class="form-select" id="up-category" required>
+              <option value="">Choose a folder</option>
+              {% for key, name, icon in categories %}<option value="{{ key }}">{{ name }}</option>{% endfor %}
+            </select>
+            <div class="invalid-feedback">Choose the folder this document belongs in.</div>
+          </div>
+          <div class="col-md-4">
+            <label for="up-version" class="form-label">Version</label>
+            <input type="text" class="form-control" id="up-version" value="1.0">
+          </div>
+          <div class="col-md-6 up-reviewed">
+            <label for="up-review" class="form-label">Next review date</label>
+            <input type="date" class="form-control" id="up-review" value="2027-09-27">
+          </div>
+          <div class="col-md-6 up-reviewed">
+            <label for="up-cadence" class="form-label">Review cycle</label>
+            <select class="form-select" id="up-cadence"><option>Annual</option><option>Every 2 years</option><option>Every 3 years</option></select>
+          </div>
+        </div>
+
+        <div class="alert alert-light border small mt-3 mb-0 up-reviewed" id="up-signoff-note">
+          <i class="bi bi-info-circle me-1"></i>
+          {% if role == 'manager' %}Policies and procedures stay in draft until you approve them.
+          {% else %}Policies and procedures stay in draft until a Compliance Manager approves them.{% endif %}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-kc">Upload</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function () {
+  const modal = document.getElementById('upload-modal');
+  const form = document.getElementById('upload-form');
+  const $ = (id) => document.getElementById(id);
+  const names = { {% for key, name, icon in categories %}"{{ key }}": "{{ name }}",{% endfor %} };
+  const syncType = () => {
+    const reviewed = ['Policy', 'Procedure'].includes($('up-type').value);
+    modal.querySelectorAll('.up-reviewed').forEach((el) => { el.hidden = !reviewed; });
+  };
+
+  modal.addEventListener('show.bs.modal', (e) => {
+    const t = e.relatedTarget ? e.relatedTarget.dataset : {};
+    form.reset();
+    form.querySelectorAll('.is-invalid').forEach((el) => el.classList.remove('is-invalid'));
+    $('up-drop').classList.remove('has-file');
+    $('up-file-name').textContent = 'Choose a file or drag it here';
+    $('up-doc-title').value = t.uploadTitle || '';
+    $('up-type').value = t.uploadType || 'Policy';
+    $('up-category').value = t.uploadCategory || (window.kcCurrentFolder || '');
+    $('up-version').value = t.uploadVersion || '1.0';
+    $('up-title').textContent = t.uploadVersion ? 'Upload new version' : 'Upload document';
+    syncType();
+  });
+  $('up-type').addEventListener('change', syncType);
+  $('up-file').addEventListener('change', (e) => {
+    const f = e.target.files[0];
+    if (!f) return;
+    $('up-file-name').textContent = f.name;
+    $('up-drop').classList.add('has-file');
+    if (!$('up-doc-title').value) $('up-doc-title').value = f.name.replace(/\.[^.]+$/, '');
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = $('up-doc-title'), cat = $('up-category');
+    title.classList.toggle('is-invalid', !title.value.trim());
+    cat.classList.toggle('is-invalid', !cat.value);
+    if (!title.value.trim() || !cat.value) return;
+    const reviewed = ['Policy', 'Procedure'].includes($('up-type').value);
+    bootstrap.Modal.getInstance(modal).hide();
+    kcToast(`Uploaded to ${names[cat.value]}` + (reviewed ? ', awaiting sign-off' : ''));
+  });
+})();
+</script>
