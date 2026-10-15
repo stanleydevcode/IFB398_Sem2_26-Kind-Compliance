@@ -1,0 +1,3 @@
+{% extends "migration/layout.html" %}
+{% block migration_title %}Migration needs attention{% endblock %}
+{% block migration_content %}<div class="alert alert-warning"><p>{{ message }}</p><p class="mb-0">Return to the previous page to correct the input, or <a href="{{ url_for('migration.index') }}">open migration history</a>.</p></div>{% endblock %}

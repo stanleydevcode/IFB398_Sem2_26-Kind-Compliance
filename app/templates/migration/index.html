@@ -1,0 +1,9 @@
+{% extends "migration/layout.html" %}
+{% block title %}Data migration · Kind Compliance{% endblock %}
+{% block migration_content %}
+<div class="migration-intro kc-panel p-4"><h2>Review first. Bring approved records live.</h2><p>Upload CSV or Excel, map its columns, resolve errors and duplicates, then sign off selected rows. Valid rows can proceed while others stay in the review queue.</p><p>For PDF, Word and scans, retain the original and enter its key dates manually. Uploads do not automatically verify credentials or satisfy compliance requirements.</p><a class="btn btn-kc" href="{{ url_for('migration.upload') }}">Start an import</a> <a class="btn btn-outline-secondary" href="{{ url_for('migration.documents') }}">Upload original evidence</a></div>
+<div class="kc-panel p-3 mt-4"><h2>Import history <small class="text-secondary fs-6">Latest 100 jobs</small></h2>
+<div class="table-responsive"><table class="table"><thead><tr><th>Source</th><th>Type</th><th>State</th><th>Reconciliation</th><th>Uploaded</th></tr></thead><tbody>
+{% for job in jobs %}<tr><td><a href="{{ url_for('migration.preview', job_id=job.id) }}">{{ job.filename }}</a><small class="d-block">{{ job.source_system }}</small></td><td>{{ migration_labels[job.record_type] }}</td><td>{{ job.status }}</td><td>{% for state,n in counts(job).items() %}<span class="migration-pill">{{ n }} {{ state }}</span> {% endfor %}</td><td>{{ job.created_at.strftime('%Y-%m-%d %H:%M') }} UTC</td></tr>{% else %}<tr><td colspan="5">No imports yet. Templates and fictional examples are included in the project.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

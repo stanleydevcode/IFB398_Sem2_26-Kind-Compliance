@@ -134,7 +134,17 @@ def test_public_roles_are_seeded_once_and_registration_reuses_them(monkeypatch):
     app = create_app(Config)
     provisioned = []
     # SQLite cannot create PostgreSQL schemas; the ORM uses translated tables.
-    monkeypatch.setattr(routes, 'provision_tenant_schema', provisioned.append)
+    def provision_for_role_test(organisation_id):
+        provisioned.append(organisation_id)
+        with app.app_context():
+            db.metadata.create_all(db.engine)
+    monkeypatch.setattr(routes, 'provision_tenant_schema', provision_for_role_test)
+    from contextlib import contextmanager
+    from app.services import record_pages
+    @contextmanager
+    def translated_test_session(organisation_id=None):
+        yield db.session
+    monkeypatch.setattr(record_pages, 'tenant_session', translated_test_session)
     runner = app.test_cli_runner()
     assert runner.invoke(args=['init-db']).exit_code == 0
     assert runner.invoke(args=['init-db']).exit_code == 0

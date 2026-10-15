@@ -14,3 +14,4 @@ from app.models.documents import Document, DocumentVersion, EvidenceLink, Docume
 from app.models.forms import FormTemplate, FormSubmission
 from app.models.operations import Case, IncidentCase, Risk, RiskControl, CorrectiveAction, Notification, AuditLog
 from app.models.organisation import OrganisationRegistrationGroup, OrganisationRequirement
+from app.models.migration import MigrationJob, MigrationRow, SourceIdentity, MigrationAttachment, MigrationChange

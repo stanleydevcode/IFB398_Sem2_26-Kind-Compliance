@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/migration.css') }}">{% endblock %}
+{% block content %}
+<div class="kc-head"><div><h1>{% block migration_title %}Data migration{% endblock %}</h1><p>Bring historical records and original evidence into your organisation.</p></div></div>
+<nav class="migration-nav" aria-label="Migration workspace">
+<a href="{{ url_for('migration.index') }}">Import history</a><a href="{{ url_for('migration.upload') }}">Import spreadsheet</a><a href="{{ url_for('migration.documents') }}">Documents &amp; versions</a>
+{% for kind, label in migration_labels.items() %}<a href="{{ url_for('migration.records', kind=kind) }}">{{ label }}</a>{% endfor %}
+</nav>
+{% block migration_content %}{% endblock %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/migration.js') }}"></script>{% endblock %}

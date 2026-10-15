@@ -21,10 +21,14 @@ def shell_context():
         ])
     if is_manager:
         navigation.append(("Participants", "participants.index"))
+    if membership and not is_manager:
+        navigation.append(("My participants", "participants.assigned"))
     if membership:
         navigation.append(("Incidents", "incidents.index"))
     if is_admin:
         navigation.append(("Setup", "onboarding.index"))
+    if can(role, "run_migration"):
+        navigation.append(("Migration", "migration.index"))
     if current_user.is_authenticated:
         navigation.append(("My compliance", "my_compliance.index"))
     email = current_user.email if current_user.is_authenticated else ""

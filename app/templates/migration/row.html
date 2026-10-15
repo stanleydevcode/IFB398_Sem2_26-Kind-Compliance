@@ -1,0 +1,19 @@
+{% extends "migration/layout.html" %}
+{% block migration_title %}Review source row {{ row.row_number }}{% endblock %}
+{% block migration_content %}
+<div class="kc-panel p-4"><p><a href="{{ url_for('migration.preview', job_id=job.id) }}">Back to review queue</a> · {{ row.status }}</p>
+<p>Decision: {{ row.decision }} · Reason: {{ row.decision_reason or '—' }}</p>
+{% for error in row.errors %}<p class="text-danger">{{ error }}</p>{% endfor %}
+<details class="mb-3"><summary>Original source values (retained)</summary><pre>{{ row.raw_data|tojson(indent=2) }}</pre></details>
+{% for candidate in candidates %}<details class="mb-3"><summary>Existing candidate: {{ candidate.label }} · {{ candidate.id }}</summary><pre>{{ candidate['values']|tojson(indent=2) }}</pre></details>{% endfor %}
+{% if row.status not in ['imported','skipped'] and job.status != 'cancelled' %}
+<form method="post" class="migration-form"><input type="hidden" name="csrf_token" value="{{ migration_csrf() }}"><input type="hidden" name="revision" value="{{ revision }}">
+<p class="form-text">Corrections use YYYY-MM-DD for dates. Timestamps require an offset. Updating changes only non-empty mapped fields, preserves the internal ID and records before/after values. To clear a live field, use its normal module workflow.</p>
+{% for key,field in fields.items() %}<label class="form-label mt-2" for="field_{{ key }}">{{ field.label }}{% if field.required %} *{% endif %}</label>{% if field.choices %}<select class="form-select" name="field_{{ key }}" id="field_{{ key }}"><option value="">Not supplied</option>{% for value in field.choices %}<option value="{{ value }}" {% if row.data.get(key)==value %}selected{% endif %}>{{ value }}</option>{% endfor %}</select>{% else %}<textarea class="form-control" name="field_{{ key }}" id="field_{{ key }}" rows="{{ 3 if field.limit>1000 else 1 }}" maxlength="{{ field.limit }}">{{ row.data.get(key,'') }}</textarea>{% endif %}{% endfor %}
+<label class="form-label mt-3" for="decision">Decision</label><select class="form-select" id="decision" name="decision">{% for value,label in [('create','Create if no duplicate'),('update','Update an existing candidate'),('create_new','Create a separate record despite a possible match'),('skip','Skip this row')] %}<option value="{{ value }}" {% if row.decision==value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+<label class="form-label mt-3" for="target_id">Update target (only existing candidates)</label><select class="form-select" name="target_id" id="target_id"><option value="">Choose for update</option>{% for c in candidates %}<option value="{{ c.id }}" {% if row.target_id==c.id %}selected{% endif %}>{{ c.label }} · {{ c.id }}</option>{% endfor %}</select>
+<label class="form-label mt-3" for="reason">Reason for update / separate record / skip</label><textarea class="form-control" id="reason" name="reason" maxlength="2000">{{ row.decision_reason or '' }}</textarea><button class="btn btn-kc mt-3">Save decision &amp; revalidate</button></form>
+{% else %}<pre>{{ row.data|tojson(indent=2) }}</pre><p>Destination ID: {{ row.destination_id or 'None' }} · Reviewer: {{ row.approved_by or '—' }} · Approved: {{ row.approved_at or '—' }}</p>{% endif %}
+{% for change in changes %}<details><summary>Reviewed update history</summary><h3>Before</h3><pre>{{ change.before|tojson(indent=2) }}</pre><h3>After</h3><pre>{{ change.after|tojson(indent=2) }}</pre></details>{% endfor %}
+</div>
+{% endblock %}

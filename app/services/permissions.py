@@ -19,6 +19,7 @@ ROLE_CAPABILITIES = {
     },
 
     Roles.COMPLIANCE_MANAGER: {
+        "run_migration",
         "manage_staff",
         "manage_documents",
         "review_evidence",
@@ -45,4 +46,3 @@ ROLE_CAPABILITIES = {
 
 
 def can(role: str, capability: str) -> bool:
-    return capability in ROLE_CAPABILITIES.get(role, set())

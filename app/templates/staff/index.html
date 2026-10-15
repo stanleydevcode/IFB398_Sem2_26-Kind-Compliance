@@ -1,93 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Workers · Kind Compliance{% endblock %}
 {% block content %}
-<div class="kc-head">
-  <div><h1>Workers</h1><p>Screening, credentials and training for every worker</p></div>
-  <div class="d-flex gap-2">
-    {% if ui_is_admin %}<button class="btn btn-outline-kc" data-bs-toggle="modal" data-bs-target="#import-modal"><i class="bi bi-file-earmark-arrow-up me-1"></i>Import</button>{% endif %}
-    <button class="btn btn-outline-kc" disabled title="There are no workers to export"><i class="bi bi-download me-1"></i>Export</button>
-    <button class="btn btn-kc" data-bs-toggle="modal" data-bs-target="#add-modal"><i class="bi bi-person-plus me-1"></i>Add worker</button>
-  </div>
-</div>
-{% include "shared/frontend_notice.html" %}
-<nav class="kc-counters four" aria-label="Worker status">
-  <a class="kc-counter" href="#register" data-filter-status=""><b>{{ counts.active }}</b><span>Active workers</span></a>
-  <a class="kc-counter" href="#register" data-filter-status="ok"><b>{{ counts.ok }}</b><span>Fully compliant</span></a>
-  <a class="kc-counter" href="#register" data-filter-status="soon"><b>{{ counts.soon }}</b><span>Expiring within 30 days</span></a>
-  <a class="kc-counter urgent" href="#register" data-filter-status="blocked"><b>{{ counts.blocked }}</b><span>Can't be deployed</span></a>
-</nav>
-<section>
-  <div class="kc-tabs" role="tablist" aria-label="Worker registers">
-    <button id="tab-register" role="tab" data-tab="register" aria-controls="pane-register" aria-selected="true" class="active">Register</button>
-    <button id="tab-verify" role="tab" data-tab="verify" aria-controls="pane-verify" aria-selected="false" tabindex="-1">Awaiting verification<span class="count" id="verify-count">{{ pending|length }}</span></button>
-    {% if ui_is_admin %}<button id="tab-logins" role="tab" data-tab="logins" aria-controls="pane-logins" aria-selected="false" tabindex="-1">Logins &amp; access</button>{% endif %}
-  </div>
-  <div class="kc-tabpane pt-4" id="pane-register" data-pane="register" role="tabpanel" aria-labelledby="tab-register">
-    <div class="kc-panel">
-      <div class="kc-toolbar">
-        <label class="search"><i class="bi bi-search"></i><span class="visually-hidden">Search workers</span><input type="search" class="form-control form-control-sm" id="w-search" placeholder="Search by name or email"></label>
-        <select class="form-select form-select-sm" id="w-cred" aria-label="Credential"><option value="">All credentials</option><option value="screening">NDIS Worker Screening</option><option value="police">Police Check</option><option value="bluecard">Blue Card</option><option value="firstaid">First Aid</option></select>
-        <select class="form-select form-select-sm" id="w-status" aria-label="Status"><option value="">All statuses</option><option value="ok">Fully compliant</option><option value="action">Action needed</option><option value="soon">Expiring within 30 days</option><option value="blocked">Can't be deployed</option></select>
-        <select class="form-select form-select-sm" id="w-position" aria-label="Position"><option value="">All positions</option><option>Support Worker</option><option>Compliance Manager</option><option>Team Leader</option><option>Director</option></select>
-      </div>
-      <div class="table-responsive"><table class="table kc-table">
-        <thead><tr><th>Worker</th><th>NDIS Worker Screening</th><th>Police Check</th><th>Blue Card</th><th>First Aid</th><th>Status</th></tr></thead>
-        <tbody id="workers-body">
-          {% for w in workers %}<tr data-q="{{ (w.name ~ ' ' ~ w.fields.get('email', ''))|lower }}" data-position="{{ w.position }}" data-status="{{ 'blocked' if w.blocked else 'action' if w.status_tone == 'warn' else 'ok' }}" data-soon="{{ 1 if w.credentials|selectattr('tone', 'equalto', 'warn')|list else 0 }}"{% for c in w.credentials %} data-c-{{ c.key }}="{{ 'bad' if c.tone == 'bad' else 'warn' if c.tone == 'warn' else 'ok' }}"{% endfor %} class="{{ 'flag' if w.blocked else '' }}">
-            <td><span class="d-flex align-items-center gap-2"><span class="kc-avatar" style="width:32px;height:32px;font-size:.72rem">{{ w.initials }}</span><span><span class="fw-medium d-block">{{ w.name }}</span><span class="small text-secondary">{{ w.position }}</span></span></span></td>
-            {% for c in w.credentials %}<td class="text-nowrap"><span class="kc-cred"><span class="kc-dot {{ c.tone }}"></span>{{ c.expiry if c.expiry and c.expiry != '—' else c.status }}</span>{% if c.note %}<div class="kc-cred-sub {{ 'bad' if c.tone == 'bad' else 'info' }}">{{ c.note }}</div>{% endif %}</td>{% endfor %}
-            <td><span class="kc-pill {{ w.status_tone }}">{{ 'Compliant' if w.status_tone == 'ok' else w.status }}</span></td>
-          </tr>{% endfor %}
-        </tbody>
-      </table></div>
-      <div class="kc-empty" id="workers-empty" role="status" {% if workers %}hidden{% endif %}><i class="bi bi-people"></i><div class="fw-medium">No workers yet</div><div class="small" id="workers-empty-help">Worker records will appear here once they are added.</div></div>
-    </div>
-  </div>
-  <div class="kc-tabpane pt-4" id="pane-verify" data-pane="verify" role="tabpanel" aria-labelledby="tab-verify" hidden>
-    <p class="small text-secondary">Renewals uploaded by workers, waiting for a Compliance Manager to verify them.</p>
-    <section class="kc-panel"><div class="table-responsive"><table class="table kc-table"><thead><tr><th>Worker</th><th>Credential</th><th>Current expiry</th><th>New expiry</th><th>Uploaded</th></tr></thead><tbody>{% for item in pending %}<tr><td>{{ item.worker.name }}</td><td>{{ item.credential.name }}</td><td>{{ item.credential.expiry }}</td><td>{{ item.history[3] if item.history else '—' }}</td><td>{{ item.history[1] if item.history else '—' }}</td></tr>{% endfor %}</tbody></table></div>
-      {% if not pending %}<div class="kc-empty"><i class="bi bi-check2-circle"></i><div class="fw-medium">Nothing to verify</div><div class="small">New credential uploads will appear here.</div></div>{% endif %}
-    </section>
-  </div>
-  {% if ui_is_admin %}
-  <div class="kc-tabpane pt-4" id="pane-logins" data-pane="logins" role="tabpanel" aria-labelledby="tab-logins" hidden>
-    <section class="kc-panel"><div class="table-responsive"><table class="table kc-table"><thead><tr><th>Person</th><th>Platform role</th><th>Login</th></tr></thead><tbody></tbody></table></div>
-      <div class="kc-empty"><i class="bi bi-person-lock"></i><div class="fw-medium">No worker logins to show</div><div class="small">Worker login access will appear here when connected.</div></div>
-    </section>
-  </div>
-  {% endif %}
-</section>
-
-<div class="modal fade" id="add-modal" tabindex="-1" aria-labelledby="add-title" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg"><form class="modal-content" id="add-form" data-preview-form novalidate>
-    <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="add-title">Add worker</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-    <div class="modal-body">
-      <div class="row g-3">
-        <div class="col-md-6"><label class="form-label" for="aw-name">Full name</label><input id="aw-name" class="form-control" required></div>
-        <div class="col-md-6"><label class="form-label" for="aw-email">Work email</label><input id="aw-email" type="email" class="form-control"></div>
-        <div class="col-md-4"><label class="form-label" for="aw-pos">Position</label><select id="aw-pos" class="form-select"><option>Support Worker</option><option>Team Leader</option><option>Coordinator</option></select></div>
-        <div class="col-md-4"><label class="form-label" for="aw-emp">Employment</label><select id="aw-emp" class="form-select"><option>Casual</option><option>Permanent part time</option><option>Permanent full time</option><option>Contractor</option></select></div>
-        <div class="col-md-4"><label class="form-label" for="aw-start">Start date</label><input id="aw-start" type="date" class="form-control"></div>
-      </div>
-      {% if ui_is_admin %}<div class="form-check mt-3"><input class="form-check-input" type="checkbox" id="aw-invite"><label class="form-check-label" for="aw-invite">Also invite them to log in as a Staff Member</label></div>{% endif %}
-      <div class="form-text mt-2">You can add their screening checks and certificates from their worker page.</div>
-      <p class="small text-secondary mt-3 mb-0" id="add-note">Form preview only. Saving workers is not available yet.</p>
-    </div>
-    <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc" aria-describedby="add-note">Preview worker</button></div>
-  </form></div>
-</div>
-
-{% if ui_is_admin %}
-<div class="modal fade" id="import-modal" tabindex="-1" aria-labelledby="im-title" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content">
-    <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="im-title">Import workers</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
-    <div class="modal-body">
-      <label class="kc-drop" for="im-file"><i class="bi bi-filetype-csv"></i><span class="fw-medium">Choose a CSV or Excel file</span><span class="small">The preview and validation steps will be connected to the migration service.</span><input id="im-file" type="file" class="form-control form-control-sm mt-2" style="max-width:360px" accept=".csv,.xlsx,.xls"></label>
-      <p class="small text-secondary mt-3 mb-0">Selecting a file does not upload or import it yet.</p>
-    </div>
-    <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Close</button><button type="button" class="btn btn-kc" disabled>Review import</button></div>
-  </div></div>
-</div>
-{% endif %}
+<div class="kc-head"><div><h1>Workers</h1><p>Live worker profiles, credential review and expiry tracking</p></div><a class="btn btn-kc" href="{{ url_for('migration.upload',record_type='staff') }}">Import workers</a></div>
+<div class="kc-counters four"><div class="kc-counter"><b>{{ counts.active }}</b><span>Active workers</span></div><div class="kc-counter"><b>{{ counts.pending }}</b><span>Credentials awaiting verification</span></div><div class="kc-counter urgent"><b>{{ counts.expired }}</b><span>Credentials with expired dates</span></div><div class="kc-counter"><b>{{ counts.soon }}</b><span>Credentials due within 30 days</span></div></div>
+<p class="small text-secondary my-3">Review and expiry are shown separately. These counts do not assess deployment eligibility or complete worker compliance.</p>
+<section class="kc-panel"><form class="kc-toolbar" method="get"><label class="search"><span class="visually-hidden">Search workers</span><input name="q" value="{{ search }}" class="form-control" type="search" maxlength="100" placeholder="Search name or email"></label><select name="active" class="form-select" aria-label="Worker activity"><option value="">All workers</option><option value="yes" {% if active=='yes' %}selected{% endif %}>Active</option><option value="no" {% if active=='no' %}selected{% endif %}>Inactive</option></select><button class="btn btn-outline-kc">Search</button></form>
+<div class="table-responsive"><table class="table kc-table"><thead><tr><th>Worker</th><th>Role / employment</th><th>Activity</th><th>Credentials</th><th>Profile</th></tr></thead><tbody>
+{% for worker in workers %}<tr><td><a class="fw-semibold" href="{{ url_for('staff.detail',staff_id=worker.id) }}">{{ worker.first_name }} {{ worker.last_name }}</a><div class="small text-secondary">{{ worker.email or 'No email recorded' }}</div></td><td>{{ worker.job_title or '—' }}<div class="small text-secondary">{{ worker.employment_type or '—' }}</div></td><td>{{ 'Active' if worker.is_active else 'Inactive' }}</td><td>{% for credential in worker.credentials %}<div class="small mb-1">{{ credential.credential_type.name }} · <strong>{{ credential.status }}</strong> · {{ credential_dates(credential) }}</div>{% else %}<span class="text-secondary">No credential records</span>{% endfor %}</td><td><a href="{{ url_for('staff.detail',staff_id=worker.id) }}">Open profile</a></td></tr>{% else %}<tr><td colspan="5"><div class="kc-empty"><strong>{{ 'No matching workers' if search or active else 'No workers yet' }}</strong><p>Approved staff imports appear here automatically.</p></div></td></tr>{% endfor %}
+</tbody></table></div>{% include "shared/register_pagination.html" %}</section>
 {% endblock %}
-{% block scripts %}<script src="{{ url_for('static', filename='js/frontend.js') }}"></script><script src="{{ url_for('static', filename='js/workers.js') }}"></script>{% endblock %}
