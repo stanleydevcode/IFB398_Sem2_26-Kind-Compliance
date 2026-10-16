@@ -1,9 +1,5 @@
 # Install the data migration integration
 
-This ZIP is an overlay for the project version uploaded on 15 October 2026.
-Extract its contents into your repository root, beside `run.py`, after committing or backing up your current work. It contains new files and seven updated existing files; review the exact list in `docs/data-migration/CHANGELOG.md` if your team has edited them since the uploaded snapshot.
-
-Your working `.env`, `docker-compose.yml`, `requirements.txt`, original root README and Git metadata are not included and will not be replaced. Keep your successful local PostgreSQL port configuration.
 
 In your existing `(kind)` PowerShell terminal:
 
