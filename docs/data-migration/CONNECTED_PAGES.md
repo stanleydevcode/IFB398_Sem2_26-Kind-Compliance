@@ -5,7 +5,7 @@ This update connects approved imports to the normal application pages. It builds
 ## Install
 
 1. Stop Flask. Commit/back up the current checkout.
-2. Extract Kind_Compliance_Connected_Pages.zip into the repository root beside run.py. This is an overlay with only changed/new files. Review the manifest if teammates have edited those files since the last upload.
+2. Extract Kind_Compliance_Design_Restored.zip into the repository root beside run.py. This is an overlay with only changed/new files. Review the manifest if teammates have edited those files since the last upload.
 3. Keep your working .env and Docker mapping on port 5433. Neither is included in the ZIP.
 4. From the existing (kind) terminal, run:
 
@@ -44,7 +44,7 @@ Dashboard incident/risk links open the existing migration live-record views. Bui
 - A pending replacement leaves the current accepted version in the library and preserves its existing tracking dates.
 - Accepting a replacement changes the current version. Historical originals remain downloadable by authorised managers.
 - An expired historical original can be accepted for recordkeeping; its expiry condition remains expired.
-- Evidence links do not automatically satisfy a configured requirement. The Requirements & evidence tab displays existing organisation requirements and recorded statuses.
+- Evidence links do not automatically satisfy a configured requirement. The Evidence tab displays existing organisation requirements and recorded statuses.
 
 The normal upload form accepts the same controlled file types/limits as migration. Originals uploaded through either path appear in the same document and profile views.
 
@@ -122,7 +122,9 @@ Profile edits keep UUIDs/source mappings intact. General edit audits contain act
 
 ## Verification and limits
 
-The full updated suite passes **77 tests**, including eight new connected-page integration tests. Existing frontend tests now use real empty tenant tables rather than role-only mocks, and the obsolete disabled worker-import modal assertion now checks the working import link.
+The design-restoration update supersedes the initial visual layouts described here. See [current verification](DESIGN_RESTORATION.md).
+
+The full updated suite passes **79 tests**, including eight connected-page integration tests and two register-tab access tests. Existing frontend tests now use real empty tenant tables rather than role-only mocks, and the obsolete disabled worker-import modal assertion now checks the working import link.
 
 New tests cover staged-versus-live visibility, profile/provenance identity, stale forms, existing role restrictions, document acceptance/replacements, normal private downloads, dashboard counts, account linking, assigned access/revocation, cross-tenant URLs/forged relationships, credential renewal reverification, per-version confidentiality, search filters, HTML escaping and private response headers. They use separate attached SQLite schemas with the real tenant-session routing. The same migration test fixture supports the optional dedicated PostgreSQL test database described in README.md.
 

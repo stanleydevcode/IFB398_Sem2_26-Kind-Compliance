@@ -1,6 +1,6 @@
 from flask import Blueprint, abort, flash, g, redirect, render_template, request, url_for
 from flask_login import current_user
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from app.models import Participant, Staff, ParticipantNote
@@ -25,8 +25,27 @@ def register(assigned=False):
     if search:
         query = query.where(((Participant.first_name + " " + Participant.last_name).icontains(search,autoescape=True)) |
                             Participant.ndis_number.icontains(search,autoescape=True))
-    people, number, more = pages.paginate(tenant,query.order_by(Participant.last_name,Participant.first_name,Participant.id))
-    return render_template("participants/index.html", participants=people, page=number, more=more, search=search, assigned=assigned)
+    tab = request.args.get("tab", "people")
+    if tab not in {"people", "notes"}:
+        abort(400)
+    # Reuse the authorised participant query so assigned staff cannot see others' notes.
+    people = []
+    notes = []
+    last_notes = {}
+    if tab == "notes":
+        note_query = select(ParticipantNote).options(selectinload(ParticipantNote.participant),
+            selectinload(ParticipantNote.staff)).where(ParticipantNote.participant_id.in_(
+            query.with_only_columns(Participant.id))).order_by(ParticipantNote.created_at.desc(), ParticipantNote.id)
+        notes, number, more = pages.paginate(tenant, note_query)
+    else:
+        people, number, more = pages.paginate(tenant, query.order_by(
+            Participant.last_name, Participant.first_name, Participant.id))
+        if people:
+            last_notes = dict(tenant.execute(select(ParticipantNote.participant_id,
+                func.max(ParticipantNote.created_at)).where(ParticipantNote.participant_id.in_(
+                [person.id for person in people])).group_by(ParticipantNote.participant_id)).all())
+    return render_template("participants/index.html", participants=people, notes=notes, tab=tab,
+                           last_notes=last_notes, page=number, more=more, search=search, assigned=assigned)
 
 
 @bp.get("/")

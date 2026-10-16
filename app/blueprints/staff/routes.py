@@ -28,9 +28,22 @@ def index():
     if search:
         query = query.where((Staff.first_name + " " + Staff.last_name + " " + func.coalesce(Staff.email, "")).icontains(search, autoescape=True))
     active = request.args.get("active", "")
+    tab = request.args.get("tab", "register")
+    if tab not in {"register", "verify", "logins"}:
+        abort(400)
+    if tab == "logins" and not can(g.records_member.role, "manage_users"):
+        abort(403)
     if active in {"yes", "no"}:
         query = query.where(Staff.is_active.is_(active == "yes"))
-    workers, number, more = pages.paginate(tenant, query.order_by(Staff.last_name, Staff.first_name, Staff.id))
+    workers = []
+    pending = []
+    if tab == "verify":
+        pending, number, more = pages.paginate(tenant, select(StaffCredential).options(
+            selectinload(StaffCredential.staff), selectinload(StaffCredential.credential_type)).where(
+            StaffCredential.status == "pending").order_by(StaffCredential.created_at, StaffCredential.id))
+    else:
+        query = query.options(selectinload(Staff.user))
+        workers, number, more = pages.paginate(tenant, query.order_by(Staff.last_name, Staff.first_name, Staff.id))
     today = date.today()
     counts = dict(
         active=tenant.scalar(select(func.count()).select_from(Staff).where(Staff.is_active.is_(True))),
@@ -38,7 +51,8 @@ def index():
         expired=tenant.scalar(select(func.count()).select_from(StaffCredential).where(StaffCredential.expiry_date < today)),
         soon=tenant.scalar(select(func.count()).select_from(StaffCredential).where(StaffCredential.expiry_date.between(today, today+timedelta(days=30)))),
     )
-    return render_template("staff/index.html", workers=workers, counts=counts, page=number, more=more, search=search, active=active)
+    return render_template("staff/index.html", workers=workers, pending=pending, tab=tab,
+                           counts=counts, page=number, more=more, search=search, active=active)
 
 
 @bp.get("/<staff_id>")

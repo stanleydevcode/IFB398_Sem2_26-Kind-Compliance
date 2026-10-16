@@ -1,6 +1,6 @@
 # Verification record
 
-This is the original migration verification record. The later connected-page update and current 77-test result are documented in CONNECTED_PAGES.md.
+This is the original migration verification record. The later connected-page update and current 79-test result are documented in CONNECTED_PAGES.md.
 
 Verified 15 October 2026 against the uploaded project snapshot, using Python 3.12 and its pinned requirements.
 

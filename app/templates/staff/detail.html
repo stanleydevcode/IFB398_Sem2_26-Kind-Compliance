@@ -1,15 +1,35 @@
-{% extends "base.html" %}{% block title %}{{ worker.first_name }} {{ worker.last_name }} · Workers{% endblock %}
+{% extends "base.html" %}
+{% from "shared/record_macros.html" import avatar, empty %}
+{% block title %}{{ worker.first_name }} {{ worker.last_name }} · Workers · Kind Compliance{% endblock %}
 {% block content %}
-<div class="kc-head"><div><div class="kc-crumb"><a href="{{ url_for('staff.index') }}">Workers</a> / Profile</div><h1>{{ worker.first_name }} {{ worker.last_name }}</h1><p>{{ worker.job_title or 'Role not recorded' }} · {{ 'Active' if worker.is_active else 'Inactive' }}</p></div><a class="btn btn-kc" href="{{ url_for('staff.edit',staff_id=worker.id) }}">Edit details</a></div>
-<section class="kc-panel"><div class="kc-panel-head"><h2>Worker details</h2></div><div class="kc-panel-body"><dl class="row mb-0">{% for label,value in [('Email',worker.email),('Phone',worker.phone),('Employment',worker.employment_type),('Start date',worker.start_date),('Linked login',worker.user.email if worker.user else none),('Permanent ID',worker.id)] %}<dt class="col-sm-3">{{ label }}</dt><dd class="col-sm-9">{{ value or '—' }}</dd>{% endfor %}</dl><p class="form-text">A linked login identifies this worker for assigned-participant access. Importing a worker does not create a login.</p></div></section>
-<section class="kc-panel mt-4"><div class="kc-panel-head"><h2>Credentials &amp; training records</h2><a href="{{ url_for('migration.upload',record_type='credential') }}">Import credentials</a></div>
-{% for credential in worker.credentials %}<div class="kc-panel-body border-top"><div class="d-flex flex-wrap gap-2 justify-content-between"><h3 class="fs-6">{{ credential.credential_type.name }}</h3><span>{{ credential.status }} · {{ credential_dates(credential) }}</span></div><p class="small">Issued {{ credential.issue_date or '—' }} · Expires {{ credential.expiry_date or '—' }}<br>Verified {{ credential.verified_at or 'Not yet' }}{% if credential.verifier %} by {{ credential.verifier.email }}{% endif %}</p>
-{% if credential.document %}<p><a href="{{ url_for('documents.detail',document_id=credential.document_id) }}">Open accepted evidence and version history</a></p>{% endif %}
-<a class="btn btn-sm btn-outline-kc" href="{{ url_for('documents.upload',link='credential:' ~ credential.id,document_id=credential.document_id or '',title=credential.credential_type.name) }}">{{ 'Upload replacement evidence' if credential.document_id else 'Upload supporting evidence' }}</a>
-{% set accepted=credential.document.current_version if credential.document else none %}
-{% if ui_can_verify_credential and accepted and accepted.approval_status=='approved' and credential.status!='verified' %}
-<form class="mt-3" method="post" action="{{ url_for('staff.verify',staff_id=worker.id,credential_id=credential.id) }}"><input type="hidden" name="csrf_token" value="{{ records_csrf() }}"><input type="hidden" name="revision" value="{{ fingerprint(credential) }}"><input type="hidden" name="version_id" value="{{ accepted.id }}"><p class="small">Verification will use the accepted original's dates: issued {{ accepted.issue_date or '—' }}, expiry {{ accepted.expiry_date or '—' }}. Expired dates stay expired.</p><label for="verify_{{ credential.id }}" class="form-label">Verification notes</label><textarea class="form-control" id="verify_{{ credential.id }}" name="reason" required maxlength="1000"></textarea><label class="d-block my-2"><input type="checkbox" name="signoff" value="yes" required> I checked the original, worker identity, credential type and dates.</label><button class="btn btn-sm btn-kc">Record verification</button></form>
-{% elif credential.status!='verified' %}<p class="form-text">Accepted evidence and a Compliance Manager's verification are required before this credential is marked verified.</p>{% endif %}
-</div>{% else %}<div class="kc-empty">No credential records yet.</div>{% endfor %}</section>
-{% set evidence_kind='staff' %}{% set evidence_record_id=worker.id %}{% include "shared/profile_evidence.html" %}{% include "shared/record_sources.html" %}
+<div class="kc-head">
+  <div class="d-flex gap-3 align-items-center">{{ avatar(worker) }}<div><div class="kc-crumb"><a href="{{ url_for('staff.index') }}">Workers</a> / {{ worker.first_name }} {{ worker.last_name }}</div><h1>{{ worker.first_name }} {{ worker.last_name }}</h1><div class="kc-meta"><span>{{ worker.job_title or 'Role not recorded' }}</span><span>{{ worker.employment_type or 'Employment not recorded' }}</span><span>Started {{ worker.start_date or '—' }}</span><span class="kc-pill neutral">{{ 'Active' if worker.is_active else 'Inactive' }}</span></div></div></div>
+  <div class="d-flex gap-2"><a class="btn btn-outline-kc" href="{{ url_for('staff.edit',staff_id=worker.id) }}"><i class="bi bi-pencil me-1" aria-hidden="true"></i>Edit details</a><a class="btn btn-kc" href="{{ url_for('documents.upload',link='staff:' ~ worker.id) }}"><i class="bi bi-upload me-1" aria-hidden="true"></i>Upload evidence</a></div>
+</div>
+<div class="row g-4">
+  <div class="col-lg-8 d-flex flex-column gap-4">
+    <section class="kc-panel"><div class="kc-panel-head"><h2>Screening and certificates</h2><a href="{{ url_for('migration.upload',record_type='credential') }}">Import credentials</a></div><div class="kc-panel-body">
+      <div class="kc-cred-grid">{% for credential in worker.credentials %}{% set tone=credential_tone(credential) %}
+        <div class="kc-cred-card {{ tone }}">
+          <div class="d-flex justify-content-between align-items-start gap-2"><div class="fw-semibold">{{ credential.credential_type.name }}</div><span class="kc-pill {{ tone }}">{{ credential.status }}</span></div>
+          <div class="mt-3 small"><span class="text-secondary">Issued</span> {{ credential.issue_date or '—' }}<br><span class="text-secondary">Expires</span> {{ credential.expiry_date or '—' }}</div>
+          <div class="kc-cred-sub {{ tone }} mt-2">{{ credential_dates(credential) }}</div>
+          <p class="small text-secondary mt-2">Verified {{ credential.verified_at or 'Not yet' }}{% if credential.verifier %} by {{ credential.verifier.email }}{% endif %}</p>
+          {% if credential.document %}<p class="small"><a href="{{ url_for('documents.detail',document_id=credential.document_id) }}">Open accepted evidence and version history</a></p>{% endif %}
+          <a class="btn btn-sm btn-outline-kc" href="{{ url_for('documents.upload',link='credential:' ~ credential.id,document_id=credential.document_id or '',title=credential.credential_type.name) }}"><i class="bi bi-upload me-1" aria-hidden="true"></i>{{ 'Upload replacement evidence' if credential.document_id else 'Upload supporting evidence' }}</a>
+          {% include "staff/_verification.html" %}
+        </div>
+      {% endfor %}</div>
+      {% if not worker.credentials %}{{ empty('bi-person-vcard', 'No credential records yet', 'Import credential records to link certificates and training to this worker.') }}{% endif %}
+    </div></section>
+    {% set evidence_kind='staff' %}{% set evidence_record_id=worker.id %}{% include "shared/profile_evidence.html" %}
+  </div>
+  <div class="col-lg-4 d-flex flex-column gap-4">
+    <section class="kc-panel"><div class="kc-panel-head"><h2>Worker details</h2></div><div class="kc-panel-body kc-dl">
+      {% for label,value in [('Email',worker.email),('Phone',worker.phone),('Employment',worker.employment_type),('Start date',worker.start_date),('Linked login',worker.user.email if worker.user else none)] %}<div><div class="small text-secondary">{{ label }}</div><div class="fw-medium kc-wrap">{{ value or '—' }}</div></div>{% endfor %}
+      <p class="form-text mb-0">Importing a worker does not create a login. An Administrator can link an existing organisation login from Edit details.</p>
+    </div></section>
+    {% include "shared/record_sources.html" %}
+  </div>
+</div>
 {% endblock %}

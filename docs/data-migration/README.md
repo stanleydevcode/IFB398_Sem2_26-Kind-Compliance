@@ -1,5 +1,7 @@
 # Kind Compliance data migration
 
+**Current update:** use `Kind_Compliance_Design_Restored.zip` and [DESIGN_RESTORATION.md](DESIGN_RESTORATION.md) for the latest cumulative overlay.
+
 **Connected-page update:** approved records now appear on Workers, Participants and Documents. See [CONNECTED_PAGES.md](CONNECTED_PAGES.md) for the normal page workflows, access rules, renewal verification and current verification results.
 
 This integration adds a working migration workspace to the supplied Flask application. It uses the existing PostgreSQL schema per organisation, existing login/membership roles and the team's actual Staff, StaffCredential, Participant, Case, Risk, Document and DocumentVersion models. It replaces the migration placeholder; it does not replace the team's authentication or domain architecture.

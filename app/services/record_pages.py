@@ -12,7 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app import decorators
 from app.constants import Roles
 from app.models import (Staff, StaffCredential, Participant, Document, DocumentVersion,
-                        ServiceAgreement, AuditLog)
+                        ServiceAgreement)
 from app.models.migration import MigrationAttachment, SourceIdentity
 from app.services.migration.documents import date_condition
 from app.services.migration.engine import audit, fingerprint, lock_imports, normalise
@@ -46,7 +46,7 @@ def install_guards(bp):
     @bp.context_processor
     def context():
         return dict(records_csrf=csrf_token, date_condition=date_condition, credential_dates=credential_dates,
-                    fingerprint=fingerprint)
+                    fingerprint=fingerprint, credential_tone=credential_tone)
 
     @bp.after_request
     def protect(response):
@@ -115,6 +115,16 @@ def credential_dates(credential, today=None):
     if (credential.expiry_date - today).days <= 30:
         return "Due within 30 days"
     return "Current dates"
+
+
+def credential_tone(credential):
+    """Date/review presentation only; this is not a compliance decision."""
+    condition = credential_dates(credential)
+    if condition == "Expired":
+        return "bad"
+    if condition in {"Expiry missing", "Due within 30 days"} or credential.status != "verified":
+        return "warn"
+    return "neutral"
 
 
 def page_number():

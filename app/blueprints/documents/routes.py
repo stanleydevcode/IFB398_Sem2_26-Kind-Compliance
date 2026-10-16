@@ -2,8 +2,7 @@ from flask import Blueprint, abort, flash, g, redirect, render_template, request
 from flask_login import current_user
 from sqlalchemy import select, func
 
-from app.models import (Document, DocumentVersion, OrganisationRequirement, EvidenceLink,
-                        StaffCredential, Staff, Participant)
+from app.models import Document, DocumentVersion, OrganisationRequirement
 from app.models.migration import MigrationAttachment
 from app.services import record_pages as pages
 from app.services.migration.documents import upload_document, review_document
@@ -21,7 +20,7 @@ def index():
     pages.manager()
     tenant = g.records_db
     tab = request.args.get("tab","library")
-    if tab not in {"library","pending","requirements"}:
+    if tab not in {"library","pending","requirements","missing"}:
         abort(400)
     search = request.args.get("q","").strip()[:100]
     current = select(Document).join(DocumentVersion,Document.current_version_id == DocumentVersion.id).where(
@@ -31,7 +30,7 @@ def index():
     documents, number, more = pages.paginate(tenant,current.order_by(Document.title,Document.id))
     pending = tenant.scalars(select(DocumentVersion).where(DocumentVersion.approval_status == "pending")
                              .order_by(DocumentVersion.uploaded_at.desc()).limit(200)).all() if tab == "pending" else []
-    requirements = tenant.scalars(select(OrganisationRequirement)).all() if tab == "requirements" else []
+    requirements = tenant.scalars(select(OrganisationRequirement)).all() if tab in {"requirements", "missing"} else []
     counts = dict(accepted=tenant.scalar(select(func.count()).select_from(Document).join(DocumentVersion,
         Document.current_version_id == DocumentVersion.id).where(DocumentVersion.approval_status == "approved")),
         pending=tenant.scalar(select(func.count()).select_from(DocumentVersion).where(DocumentVersion.approval_status == "pending")))
