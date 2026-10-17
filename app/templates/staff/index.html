@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "shared/record_macros.html" import avatar, empty, credential_summary %}
+{% block title %}Workers · Kind Compliance{% endblock %}
+{% block content %}
+<div class="kc-head">
+  <div><h1>Workers</h1><p>Screening, credentials and training for every worker</p></div>
+  <div class="d-flex gap-2"><a class="btn btn-outline-kc" href="{{ url_for('migration.upload', record_type='staff') }}"><i class="bi bi-file-earmark-arrow-up me-1" aria-hidden="true"></i>Import workers</a></div>
+</div>
+<nav class="kc-counters four" aria-label="Worker status">
+  <a class="kc-counter" href="{{ url_for('staff.index', active='yes') }}"><b>{{ counts.active }}</b><span>Active workers</span></a>
+  <a class="kc-counter" href="{{ url_for('staff.index', tab='verify') }}"><b>{{ counts.pending }}</b><span>Credentials awaiting verification</span></a>
+  <div class="kc-counter warn"><b>{{ counts.soon }}</b><span>Credentials due within 30 days</span></div>
+  <div class="kc-counter urgent"><b>{{ counts.expired }}</b><span>Credentials with expired dates</span></div>
+</nav>
+<section>
+  <nav class="kc-tabs" aria-label="Worker registers">
+    <a class="{{ 'active' if tab=='register' }}" href="{{ url_for('staff.index') }}" {% if tab=='register' %}aria-current="page"{% endif %}>Register</a>
+    <a class="{{ 'active' if tab=='verify' }}" href="{{ url_for('staff.index', tab='verify') }}" {% if tab=='verify' %}aria-current="page"{% endif %}>Awaiting verification<span class="count">{{ counts.pending }}</span></a>
+    {% if ui_is_admin %}<a class="{{ 'active' if tab=='logins' }}" href="{{ url_for('staff.index', tab='logins') }}" {% if tab=='logins' %}aria-current="page"{% endif %}>Logins &amp; access</a>{% endif %}
+  </nav>
+  <div class="kc-tabpane pt-4">
+    {% if tab=='verify' %}
+    <p class="small text-secondary">Check the accepted original from the worker profile. A Compliance Manager records credential verification separately from document sign-off.</p>
+    <section class="kc-panel"><div class="table-responsive"><table class="table kc-table">
+      <thead><tr><th>Worker</th><th>Credential</th><th>Current expiry</th><th>Review state</th><th>Profile</th></tr></thead>
+      <tbody>{% for credential in pending %}<tr><td>{{ credential.staff.first_name }} {{ credential.staff.last_name }}</td><td>{{ credential.credential_type.name }}</td><td>{{ credential.expiry_date or '—' }}</td><td><span class="kc-pill warn">Pending verification</span></td><td><a class="kc-doc-link" href="{{ url_for('staff.detail', staff_id=credential.staff_id) }}">Open profile</a></td></tr>{% endfor %}</tbody>
+    </table></div>{% if not pending %}{{ empty('bi-check2-circle', 'Nothing to verify', 'New credential records awaiting review will appear here.') }}{% endif %}{% include "shared/register_pagination.html" %}</section>
+    {% else %}
+    <section class="kc-panel">
+      <form class="kc-toolbar" method="get">
+        <input type="hidden" name="tab" value="{{ tab }}">
+        <label class="search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Search workers</span><input name="q" value="{{ search }}" class="form-control form-control-sm" type="search" maxlength="100" placeholder="Search by name or email"></label>
+        <select name="active" class="form-select form-select-sm" aria-label="Worker activity"><option value="">All workers</option><option value="yes" {% if active=='yes' %}selected{% endif %}>Active</option><option value="no" {% if active=='no' %}selected{% endif %}>Inactive</option></select>
+        <button class="btn btn-sm btn-outline-kc">Search</button>
+      </form>
+      <div class="table-responsive"><table class="table kc-table">
+      {% if tab=='logins' %}
+        <thead><tr><th>Person</th><th>Linked login</th><th>Activity</th><th>Access</th></tr></thead>
+        <tbody>{% for worker in workers %}<tr><td><a class="kc-doc-link" href="{{ url_for('staff.detail', staff_id=worker.id) }}">{{ worker.first_name }} {{ worker.last_name }}</a></td><td>{{ worker.user.email if worker.user else 'No login linked' }}</td><td>{{ 'Active' if worker.is_active else 'Inactive' }}</td><td><a href="{{ url_for('staff.edit', staff_id=worker.id) }}">Manage login link</a></td></tr>{% endfor %}</tbody>
+      {% else %}
+        <thead><tr><th>Worker</th><th>NDIS Worker Screening</th><th>Police Check</th><th>Blue Card</th><th>First Aid</th><th>Other credentials</th><th>Activity</th></tr></thead>
+        <tbody>{% for worker in workers %}<tr>
+          <td><span class="d-flex align-items-center gap-2">{{ avatar(worker, true) }}<span><a class="kc-doc-link d-block" href="{{ url_for('staff.detail', staff_id=worker.id) }}">{{ worker.first_name }} {{ worker.last_name }}</a><span class="small text-secondary d-block">{{ worker.job_title or 'Role not recorded' }}</span><span class="small text-secondary">{{ worker.email or 'No email recorded' }}</span></span></span></td>
+          {% for names in [('ndis worker screening', 'worker screening'), ('police check',), ('blue card',), ('first aid',)] %}
+          <td class="text-nowrap">{% set matched=namespace(found=false) %}{% for credential in worker.credentials if credential.credential_type.name|lower in names %}{% set matched.found=true %}{{ credential_summary(credential, credential_tone(credential), credential_dates(credential)) }}{% endfor %}{% if not matched.found %}<span class="small text-secondary">Not recorded</span>{% endif %}</td>
+          {% endfor %}
+          <td>{% for credential in worker.credentials if credential.credential_type.name|lower not in ['ndis worker screening', 'worker screening', 'police check', 'blue card', 'first aid'] %}<div class="small fw-medium">{{ credential.credential_type.name }}</div>{{ credential_summary(credential, credential_tone(credential), credential_dates(credential)) }}{% else %}<span class="text-secondary">—</span>{% endfor %}</td>
+          <td><span class="kc-pill neutral">{{ 'Active' if worker.is_active else 'Inactive' }}</span></td>
+        </tr>{% endfor %}</tbody>
+      {% endif %}
+      </table></div>
+      {% if not workers %}{{ empty('bi-people', 'No matching workers' if search or active else 'No workers yet', 'Approved staff imports appear here automatically.') }}{% endif %}
+      {% include "shared/register_pagination.html" %}
+    </section>
+    {% endif %}
+  </div>
+  <p class="form-text mt-3 mb-0">Review state and expiry dates are tracked separately. These counts do not assess complete compliance or deployment eligibility.</p>
+</section>
+{% endblock %}

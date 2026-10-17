@@ -1,0 +1,3 @@
+{% extends "migration/layout.html" %}
+{% block migration_title %}{{ migration_labels[kind] }} · live records{% endblock %}
+{% block migration_content %}<div class="kc-panel p-4"><p>Latest 200 live records in your organisation. This view confirms imported records while the team's normal module screens are being connected. Draft import rows are excluded.</p>{% for record in records %}<details class="migration-record"><summary>{{ record.label }} <small class="text-secondary">{{ record.id }}</small></summary><dl>{% for key,value in record['values'].items() %}<dt>{{ key }}</dt><dd>{{ value if value is not none else '—' }}</dd>{% endfor %}</dl></details>{% else %}<p>No live records yet.</p>{% endfor %}</div>{% endblock %}

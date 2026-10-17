@@ -1,0 +1,13 @@
+{% extends "migration/layout.html" %}
+{% block migration_title %}Import a spreadsheet{% endblock %}
+{% block migration_content %}
+<form method="post" enctype="multipart/form-data" class="kc-panel p-4 migration-form">
+<input type="hidden" name="csrf_token" value="{{ migration_csrf() }}">
+<label class="form-label" for="record_type">Record type</label><select class="form-select mb-3" id="record_type" name="record_type" required>{% for kind,label in migration_labels.items() %}<option value="{{ kind }}" {% if request.args.get('record_type')==kind %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+<label class="form-label" for="source_system">Source system / provider export name</label><input class="form-control" name="source_system" id="source_system" required maxlength="100" placeholder="e.g. Legacy demo"><p class="form-text">Use the same name for related files. Import staff first, then participants and credentials, then cases/risks.</p>
+<label class="form-label" for="file">CSV or Excel file</label><input class="form-control mb-2" id="file" name="file" type="file" accept=".csv,.xlsx" required>
+<p class="form-text">UTF-8 CSV or one-sheet XLSX. Up to 10 MiB, 2,000 rows and 80 columns. Heading row required. Convert formulas to values. No records become live at upload.</p>
+<button class="btn btn-kc mt-2">Continue to column mapping</button>
+</form>
+<div class="kc-panel p-4 mt-4"><h2>Blank templates</h2><div class="migration-nav">{% for kind,label in migration_labels.items() %}<a href="{{ url_for('migration.template', kind=kind) }}">{{ label }} CSV</a>{% endfor %}</div><p class="mb-0">An Excel export can use different column names; map them on the next screen. NDIS numbers, phone numbers and legacy references should be stored as text to preserve leading zeroes.</p></div>
+{% endblock %}

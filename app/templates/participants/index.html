@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "shared/record_macros.html" import empty %}
+{% block title %}{{ 'My participants' if assigned else 'Participants' }} · Kind Compliance{% endblock %}
+{% block content %}
+<div class="kc-head"><div><h1>{{ 'My participants' if assigned else 'Participants' }}</h1><p>{{ 'Participants assigned to your active worker profile' if assigned else 'Participants, their care needs and daily notes' }}</p></div>{% if ui_is_manager %}<div class="d-flex gap-2"><a class="btn btn-outline-kc" href="{{ url_for('migration.upload',record_type='participant') }}"><i class="bi bi-file-earmark-arrow-up me-1" aria-hidden="true"></i>Import participants</a></div>{% endif %}</div>
+<section>
+  <nav class="kc-tabs" aria-label="Participant registers">{% for key,label in [('people','Participants'),('notes','Notes')] %}<a class="{{ 'active' if tab==key }}" href="{{ url_for(request.endpoint,tab=key) }}" {% if tab==key %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}</nav>
+  <div class="kc-tabpane pt-4"><section class="kc-panel">
+    <form class="kc-toolbar" method="get"><input type="hidden" name="tab" value="{{ tab }}"><label class="search"><i class="bi bi-search" aria-hidden="true"></i><span class="visually-hidden">Search participants</span><input class="form-control form-control-sm" name="q" value="{{ search }}" maxlength="100" placeholder="Search by name or ID" type="search"></label><button class="btn btn-sm btn-outline-kc">Search</button></form>
+    <div class="table-responsive"><table class="table kc-table">
+    {% if tab=='notes' %}
+      <thead><tr><th>Date</th><th>Participant</th><th>Note</th><th>By</th></tr></thead><tbody>{% for note in notes %}<tr><td class="text-nowrap">{{ note.created_at }}</td><td><a class="kc-doc-link" href="{{ url_for('participants.detail',participant_id=note.participant_id) }}">{{ note.participant.first_name }} {{ note.participant.last_name }}</a></td><td class="kc-note"><div class="small text-secondary mb-1">{{ note.note_type }}</div><div class="kc-prewrap">{{ note.content }}</div></td><td>{{ note.staff.first_name }} {{ note.staff.last_name }}</td></tr>{% endfor %}</tbody>
+    {% else %}
+      <thead><tr><th>Participant</th><th>Support</th><th>Support plan</th><th>Key worker</th><th>Last note</th></tr></thead><tbody>{% for person in participants %}<tr>
+        <td><a class="kc-doc-link" href="{{ url_for('participants.detail',participant_id=person.id) }}">{{ person.first_name }} {{ person.last_name }}</a><div class="small text-secondary kc-parts">{{ person.ndis_number or 'No NDIS identifier recorded' }}</div></td>
+        <td>{{ person.support_type or '—' }}</td><td><span class="kc-pill neutral">{{ person.plan_status or 'Not supplied' }}</span><div class="small text-secondary mt-1">{{ person.plan_start_date or '—' }} → {{ person.plan_end_date or '—' }}</div></td>
+        <td>{{ person.key_worker.first_name ~ ' ' ~ person.key_worker.last_name if person.key_worker else 'Unassigned' }}</td><td class="text-nowrap">{{ last_notes.get(person.id) or '—' }}</td>
+      </tr>{% endfor %}</tbody>
+    {% endif %}
+    </table></div>
+    {% if tab=='notes' and not notes %}{{ empty('bi-journal-text','No notes to show','Existing notes for participants you can access appear here.') }}{% elif tab=='people' and not participants %}{{ empty('bi-people','No assigned participants' if assigned else 'No matching participants' if search else 'No participants yet','An administrator must link your login to an active worker and assign that worker to a participant.' if assigned else 'Approved participant imports appear here automatically.') }}{% endif %}
+    {% include "shared/register_pagination.html" %}
+  </section></div>
+</section>
+{% endblock %}

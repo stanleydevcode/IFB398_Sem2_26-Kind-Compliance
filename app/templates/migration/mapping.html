@@ -1,0 +1,12 @@
+{% extends "migration/layout.html" %}
+{% block migration_title %}Map source columns{% endblock %}
+{% block migration_content %}
+<div class="kc-panel p-4"><h2>{{ job.filename }}</h2><p>{{ migration_labels[job.record_type] }} · {{ job.rows|length }} source rows · {{ job.source_system }}</p>
+<details class="mb-3"><summary>First source row</summary><pre>{{ job.rows[0].raw_data|tojson(indent=2) }}</pre></details>
+<form method="post"><input type="hidden" name="csrf_token" value="{{ migration_csrf() }}">
+<label for="date_format" class="form-label">Text date format (never guessed)</label><select class="form-select mb-3 migration-select" id="date_format" name="date_format"><option value="iso">YYYY-MM-DD</option><option value="dmy">DD/MM/YYYY</option><option value="mdy">MM/DD/YYYY</option></select>
+<p class="form-text">Event timestamps must include a timezone, for example 2025-08-15T09:30:00+10:00. Native Excel dates and ISO dates are accepted. Unmapped columns are retained in the original source and raw row; they do not populate live fields.</p>
+<div class="table-responsive"><table class="table kc-table"><thead><tr><th>Kind Compliance field</th><th>Source column</th><th>Accepted values</th></tr></thead><tbody>
+{% for key,field in fields.items() %}<tr><td><label for="map_{{ key }}">{{ field.label }}{% if field.required %} <strong class="text-danger">*</strong>{% endif %}</label><small class="d-block text-secondary">{{ key }}</small></td><td><select class="form-select" name="map_{{ key }}" id="map_{{ key }}" {% if field.required %}required{% endif %}><option value="">Do not import this field</option>{% for header in job.headers %}<option value="{{ header }}" {% if suggestions[key] == header %}selected{% endif %}>{{ header }}</option>{% endfor %}</select></td><td>{{ field.choices|join(', ') if field.choices else field.kind }}</td></tr>{% endfor %}
+</tbody></table></div><button class="btn btn-kc">Validate and stage rows</button></form></div>
+{% endblock %}
