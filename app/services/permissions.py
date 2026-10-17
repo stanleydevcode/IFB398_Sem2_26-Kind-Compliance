@@ -19,6 +19,7 @@ ROLE_CAPABILITIES = {
     },
 
     Roles.COMPLIANCE_MANAGER: {
+        "run_migration",
         "manage_staff",
         "manage_documents",
         "review_evidence",

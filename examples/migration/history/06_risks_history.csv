@@ -1,0 +1,3 @@
+﻿source_reference,title,description,category,likelihood,consequence,rating,residual_rating,status,existing_controls,treatment,review_date,owner_reference
+RSK-001,Fictional credential renewal delay,FICTIONAL TEST: a required screening renewal may be missed.,workforce,3,4,high,medium,monitoring,Monthly manual review of the historical spreadsheet.,Confirm review responsibilities and renewal dates.,2025-12-01,S-002
+RSK-002,Fictional outdated policy copy,FICTIONAL TEST: an old policy version may remain in a shared folder.,documents,2,3,medium,,treating,Version number in the file name.,Move originals into a versioned register.,2027-03-01,S-001

@@ -1,0 +1,4 @@
+﻿source_reference,first_name,last_name,email,phone,job_title,start_date,employment_type,is_active
+S-001,Alex,Example,alex@example.test,TEST-PHONE-01,Support worker,2023-02-06,part_time,yes
+S-002,Jamie,Sample,jamie@example.test,TEST-PHONE-02,Team leader,2022-07-11,full_time,yes
+S-003,Taylor,Fictional,taylor@example.test,,Former support worker,2021-03-01,casual,no

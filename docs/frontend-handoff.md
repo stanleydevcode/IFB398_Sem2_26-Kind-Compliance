@@ -1,65 +1,23 @@
-# Jesse's frontend handoff
+# Frontend handoff
 
-## Current scope
+The current application keeps the original Kind Compliance visual system from the uploaded project: shared header/navigation, logo, IBM Plex Sans, teal actions, compact tables, tabs, counter strips, credential cards and two-column profiles. Original `theme.css` and `app.css` are unchanged. `records.css` extends that theme for working links/forms; migration styles are scoped to `.kc-migration`.
 
-The existing Flask login, registration, role decorators, organisation setup and
-shared layout remain in place. This branch adds Jinja presentation for the pages
-below, following Douglas's prototype design. The prototype source is on
-`douglas/prototype-source/prototype`; its fictional records and fixed 2026 dates
-are not copied into the application.
+| Page | Current state |
+| --- | --- |
+| Workers | Live credential register, pending verification and Administrator login-link tabs. Working import links replace the old preview import modal. |
+| Worker profile | Credential cards, originals/history, contact sidebar, editing and Compliance Manager verification. |
+| Participants | Live register and authorised existing-note list. Assigned staff see only assigned participants/notes. |
+| Participant profile | Care, notes, plan details, consent/sidebar, support team and authorised original files. |
+| Documents | Original Library/Missing/Awaiting sign-off/Evidence tab design. Accepted library, sign-off queue, upload/replacement/download work. Missing assessment remains unassessed. |
+| Dashboard | Original score/counter layout and 8/4 task/expiry columns, populated with live records. Scores remain unassessed. |
+| My compliance | Original counter strip and main/sidebar layout, linked credentials, own originals and assigned participants. |
+| Migration | Working import/review flows styled with the shared theme. |
+| Organisation setup, incidents and risks | Existing prototype/workflow scope remains; see module implementation before presenting saves as available. |
 
-| Page | Template | Current state |
-| --- | --- | --- |
-| Shared layout | `app/templates/base.html` | Theme, navigation, authenticated account menu and existing POST logout |
-| Workers | `app/templates/staff/index.html` | Register, search/filters, verification and login tabs, empty states and local form previews |
-| Workers import | Modal in `staff/index.html` | File chooser; review/import remains unavailable until Justin's migration service is connected |
-| Participants | `app/templates/participants/index.html` | Register, notes, search/filters, empty states and local form previews |
-| Organisation setup | `app/templates/onboarding/index.html` | Blank profile, insurance, groups and personnel forms; local preview only |
-| Dashboard | `app/templates/dashboard/index.html` | Unassessed scores and empty task/risk sections |
-| Documents | `app/templates/documents/index.html` | Library and evidence tabs with empty states |
-| Incidents | `app/templates/incidents/index.html`, `incidents/new.html` | Role-specific empty register and blank report form; no submission endpoint |
-| My compliance | `app/templates/my_compliance/index.html` | Empty certificates/tasks and signed-in user's account details |
+No fictional business records are injected into the running application. Import approval, document sign-off and credential verification remain separate operations. Previously approved records need no re-import after a visual update.
 
-No fictional worker, participant, incident, document, task, score or migration
-result is shown. A dash means a count has not been connected to real data; it
-does not mean zero. Form previews do not persist, send mail or upload files.
-Detail templates for workers and participants are draft presentation code and
-have no real record routes yet. Do not open Jinja templates with Live Server;
-render them through Flask.
+## Review
 
-## Review the pages without a database
+Run `python tools/preview_frontend.py --check` to render static empty-state pages using disposable SQLite preview tables. `python tools/preview_frontend.py` serves them on http://127.0.0.1:5505/preview/. The server rejects POST requests; its preview-role selector is not production authentication. To test imports, edits, files and access controls, use the real Flask application and [connected-page walkthrough](data-migration/CONNECTED_PAGES.md).
 
-From this checkout, run:
-
-```powershell
-.\kind\Scripts\python.exe tools\preview_frontend.py
-```
-
-Open <http://127.0.0.1:5505/preview/> and choose a role. This review tool
-renders the Jinja routes with a temporary in-memory test client, serves only
-the rendered HTML and static assets on localhost, rejects POST requests and
-does not create database tables. The role selector is only for design review;
-normal Flask authentication and permissions are unchanged.
-
-## Backend work to agree with the team
-
-1. Rick supplies the agreed database schema and upgrade procedure. This
-   frontend branch does not rebuild or migrate the local database.
-2. Justin confirms the import scope, validation, duplicate rules and results,
-   then connects the Workers import UI to the migration service.
-3. Connect the registers, counts, scores, search and detail routes to
-   tenant-scoped data. Show actual numbers only after the relevant queries work.
-4. Add server-side validation and authorised POST routes for setup, worker and
-   participant changes, notes, incidents, documents and uploads. Show success
-   only after a real operation succeeds.
-
-## Verification
-
-```powershell
-.\kind\Scripts\python.exe -m pytest -q
-.\kind\Scripts\python.exe tools\preview_frontend.py --check
-```
-
-The frontend integration is developed on `jesse/frontend-workers` for team
-review before it is merged into the shared project branch. The separate local
-`start.ps1` change is not part of this frontend update.
+Run `python -m pytest -q` for the regression suite. Check desktop/mobile layouts in your browser before merging. New controls should use existing `kc-*` components and authorised tenant-scoped endpoints. Do not reconnect obsolete preview JavaScript to the working record forms.

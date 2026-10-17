@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block head %}<link rel="stylesheet" href="{{ url_for('static', filename='css/migration.css') }}">{% endblock %}
+{% block content %}
+<div class="kc-migration">
+<div class="kc-head"><div><h1>{% block migration_title %}Data migration{% endblock %}</h1><p>Bring historical records and original evidence into your organisation.</p></div></div>
+<nav class="kc-tabs migration-workspace" aria-label="Migration workspace">
+<a class="{{ 'active' if request.endpoint=='migration.index' }}" href="{{ url_for('migration.index') }}">Import history</a><a class="{{ 'active' if request.endpoint in ['migration.upload','migration.mapping','migration.preview','migration.row_review'] }}" href="{{ url_for('migration.upload') }}">Import spreadsheet</a><a class="{{ 'active' if request.endpoint in ['migration.documents','migration.document_detail'] }}" href="{{ url_for('migration.documents') }}">Documents &amp; versions</a>
+{% for kind, label in migration_labels.items() %}<a class="{{ 'active' if request.endpoint=='migration.records' and request.view_args.get('kind')==kind }}" href="{{ url_for('migration.records', kind=kind) }}">{{ label }}</a>{% endfor %}
+</nav>
+{% block migration_content %}{% endblock %}
+</div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/migration.js') }}"></script>{% endblock %}

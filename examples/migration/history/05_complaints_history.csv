@@ -1,0 +1,2 @@
+﻿source_reference,category,description,occurred_at,reported_at,severity,status,reportability,location,immediate_response,investigation_notes,outcome,closed_at,reporter_reference,participant_reference
+CMP-2025-001,communication,FICTIONAL TEST: participant requested earlier notice of roster changes.,2025-05-05T10:00:00+10:00,2025-05-05T11:00:00+10:00,low,closed,requires_review,Fictional office,Acknowledged the concern.,Reviewed the example roster notification log.,Agreed a preferred notice period for demonstration.,2025-05-12T15:00:00+10:00,S-002,P-001

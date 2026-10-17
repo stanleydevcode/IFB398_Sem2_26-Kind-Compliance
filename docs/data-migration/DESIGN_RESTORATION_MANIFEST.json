@@ -1,0 +1,332 @@
+{
+  "description": "Cumulative frontend restoration overlay relative to the latest uploaded merged ZIP. Includes earlier connected-page/startup changes; migration integration must already be present.",
+  "baseline": "IFB398_Sem2_26-Kind-Compliance(1).zip",
+  "tests_passed": 79,
+  "preview_pages": 45,
+  "files": [
+    {
+      "path": "CONNECTED_PAGES_START_HERE.md",
+      "status": "added",
+      "sha256": "c94f35e19b8210d215ea9dd67fa46090c89abda9c9bc91f104717dffd0a91743",
+      "baseline_sha256": null
+    },
+    {
+      "path": "DESIGN_RESTORATION_START_HERE.md",
+      "status": "added",
+      "sha256": "4a75e8815535378e3963c07639e80acec54a2d22c31e8e07cb0c5ab5ae1c60b6",
+      "baseline_sha256": null
+    },
+    {
+      "path": "README.md",
+      "status": "changed",
+      "sha256": "b324f2f891cdc1baad553d71456a8783f1b2946b364f6193f15d58d7490ee302",
+      "baseline_sha256": "ab2fc28b6922192d283bda7a6c301eb08fddadf5f8fc6d76547c221e43db250c"
+    },
+    {
+      "path": "app/__init__.py",
+      "status": "changed",
+      "sha256": "791d7657e29cfc12d016537a70dc2cf7a3f44e6c772f5afd8a4e1386a3f18912",
+      "baseline_sha256": "40b9e0ea65e53eebc79d080f931009c2c12440212941621afdc16237f8ddd0f7"
+    },
+    {
+      "path": "app/blueprints/dashboard/routes.py",
+      "status": "changed",
+      "sha256": "f56f8f7fa8fcbbf4c1adf2c4a9cfedc7df1d0f7fa42611ab0cd22a12a7077ee6",
+      "baseline_sha256": "7d6ab3097c2ace261373adeb097eebca5a850fb7cabd8f276a8a485fbcc963fe"
+    },
+    {
+      "path": "app/blueprints/documents/routes.py",
+      "status": "changed",
+      "sha256": "709992a3b8c9a8f91f904ea08e8370d659433f3ca035c632c1a471786d344ee5",
+      "baseline_sha256": "e1fbcdf5bec054749e20d3d7683fab75aaf410b367cfe06ac96430e074386e56"
+    },
+    {
+      "path": "app/blueprints/my_compliance/routes.py",
+      "status": "changed",
+      "sha256": "6aa998749e5b4ca261ef3c63f311c83a43891083051ab14893cba4e3d929d244",
+      "baseline_sha256": "20c345adcf8b4e55b855574cdb5d2dbee71ec105d85bc55f63f4b2949928be93"
+    },
+    {
+      "path": "app/blueprints/participants/routes.py",
+      "status": "changed",
+      "sha256": "c409aad2d1d4ec8a2912afca3ae295a3c224c5f51bc7de4ca02ab076105f0fd6",
+      "baseline_sha256": "4519056a0c167b9d3a287831fe52f0458787d09cf83597cac885e490b22b2a52"
+    },
+    {
+      "path": "app/blueprints/staff/routes.py",
+      "status": "changed",
+      "sha256": "37682188d117aeb871ad66e1d466b9e49d14999f2f7efeb3ab9c6db43226afdd",
+      "baseline_sha256": "5b524dc519caf919f1a89b0805e7f8b64a5b43fe1db0804e202ea1e2dc5b4da1"
+    },
+    {
+      "path": "app/cli.py",
+      "status": "changed",
+      "sha256": "93db4deb84275b65da8d601be8f5f26039cbf85c3c59d43953fb1e69113081e8",
+      "baseline_sha256": "a3fcbdbb7f63442b5168e7a4fb3762acc9ba8819fadb1c117e63a9718d224ab3"
+    },
+    {
+      "path": "app/config.py",
+      "status": "changed",
+      "sha256": "3ff0ca5e315a083b5f27c385edeeab140ab412f6826cb427c9ef93cf79b5accb",
+      "baseline_sha256": "9f372fa657182e3e63f54997f3dc4e8e3eb234e60668edcbd51e4100fe51cf76"
+    },
+    {
+      "path": "app/services/migration/documents.py",
+      "status": "changed",
+      "sha256": "b5a9022ca31d4792783a6a37e7c87882d85b6678b80b943cf2dd3047843690e6",
+      "baseline_sha256": "ed3e67f53845950d308fa19133fcf853445fa2ecb35ea399e4cb42811d2d157f"
+    },
+    {
+      "path": "app/services/record_pages.py",
+      "status": "added",
+      "sha256": "060c4e29c6cf42a9748ec6839fc43e1d48f6a9c383025ec6499e20ae6f289deb",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/services/ui.py",
+      "status": "changed",
+      "sha256": "e2758553476b1bb7c0e4e5e536a7141ec2188ebf09054e76d2c6733666aa952a",
+      "baseline_sha256": "833e8e3b28424fa5f334dfae9bde9763c81737b8ef121e8df2e593c488c064f0"
+    },
+    {
+      "path": "app/static/css/migration.css",
+      "status": "changed",
+      "sha256": "fc2664f3486a24c8bf158cb5b71789a7a52c3ee4ad478f936c36ac84cd276159",
+      "baseline_sha256": "0f1078553fea2f6d5466c7dd07fbd98cf1e4d23c8b4dd5f12dc134805001a053"
+    },
+    {
+      "path": "app/static/css/records.css",
+      "status": "added",
+      "sha256": "601273e3e4533c9f596359c705ca41cf58d290a5a802bb556d45406629801f45",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/base.html",
+      "status": "changed",
+      "sha256": "6d2cf26322807f3be83bd2fad9be83f35f3ba8a1175e2eb2aa2bfb8c72a7e92b",
+      "baseline_sha256": "26102abcf74d91e5e8be4475bfc199fb14fcbc084a141de53b2b6e9102680acc"
+    },
+    {
+      "path": "app/templates/dashboard/index.html",
+      "status": "changed",
+      "sha256": "d420f15e24488eadc91ae31cc36dfdc90389eb5e3cd9d8d344b396ff6ebdbef5",
+      "baseline_sha256": "b8dbec5d35a9b66b7188495154e8281e5db90970c284023ffe3f1e1fbcb84c32"
+    },
+    {
+      "path": "app/templates/documents/detail.html",
+      "status": "added",
+      "sha256": "2a4a7a7d5cf3f637cae8b2ae0a18f2498805533e597e64006ca92240d3fd9f12",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/documents/index.html",
+      "status": "changed",
+      "sha256": "e997740e9bb8d310026e6b38b77b9f3e5bb8bf82e8c992f5cf0f7e8e62e94269",
+      "baseline_sha256": "54f6004503d8c6245e70e6910d927f6e6e7aea73ee1f10536844fac40b360bd8"
+    },
+    {
+      "path": "app/templates/documents/upload.html",
+      "status": "added",
+      "sha256": "5e34a6334ae24a1ca5357686940ff78e40cfc1a6eea8af05875b998b1be070c0",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/migration/documents.html",
+      "status": "changed",
+      "sha256": "caed993bcef525e12af4c87b61d18d93d10bb5a43448049256e50b329364ea7c",
+      "baseline_sha256": "18c03ea3855d096871fd8c118bfee7019fdc41089b04089bbfbacb642ae9ebe0"
+    },
+    {
+      "path": "app/templates/migration/index.html",
+      "status": "changed",
+      "sha256": "1a7f385db50219fd40eea4719de56de1270c926adfa17d1316539b20c94b0809",
+      "baseline_sha256": "d2889aa977334eedd85ac9814324dffde2f024ef90fcf3e8fe1d783d67429309"
+    },
+    {
+      "path": "app/templates/migration/layout.html",
+      "status": "changed",
+      "sha256": "c15b74a3fb59c7755717d0af1385fa52c0c39dbc52aa52a571e62d3753751a06",
+      "baseline_sha256": "eb9334ced460531eb9c78fc62805cc29e8a9084a9f807ea9839c3d350aaefe4b"
+    },
+    {
+      "path": "app/templates/migration/mapping.html",
+      "status": "changed",
+      "sha256": "58cac7e1e3f8b8c05abe9d4942dca63545d0037f9f322665297e99b9c53baad7",
+      "baseline_sha256": "ae051b47efd802f5d2dac78e50a19d5ab78abd1b5e61c7cf0c156841008bd62f"
+    },
+    {
+      "path": "app/templates/migration/preview.html",
+      "status": "changed",
+      "sha256": "4c4500eedff8306e724c97f7dc238f7cff9c662febb8e91db758a68af5ff2c1f",
+      "baseline_sha256": "467ab8e69a9b4e0653562d0840d3bd5296b34fdbf2070b9fcff64e99231c30e0"
+    },
+    {
+      "path": "app/templates/migration/upload.html",
+      "status": "changed",
+      "sha256": "1d83ef13ef8752e466b2f3c420d8931e57aa0925bb57be11cef6078b55713d73",
+      "baseline_sha256": "9e922088a185c2bbf349f23120061f3f5f3187bb08be0c315ac1efc5612d5d1a"
+    },
+    {
+      "path": "app/templates/my_compliance/index.html",
+      "status": "changed",
+      "sha256": "29aba6d289b523ec3d8d9aba8dce05166d125d3e8dd48a58f3b218f7d76bf2ca",
+      "baseline_sha256": "8d0147949b41e905bb975e546084dda2a6c7f6f19b0e7d5c9ddb944220a79ffb"
+    },
+    {
+      "path": "app/templates/participants/detail.html",
+      "status": "changed",
+      "sha256": "5bb29d4ba72d23cbd8b5f5da32769b7740e5630a7c5f218c7760976b2281b19d",
+      "baseline_sha256": "17d95018ba828e60d59665827d8a9cc3e5627a022e5c0751be23f9662ad8f423"
+    },
+    {
+      "path": "app/templates/participants/edit.html",
+      "status": "added",
+      "sha256": "63785e414493641355c1f14277a800b339789ccc81f4aee0dbf7198540d0432f",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/participants/index.html",
+      "status": "changed",
+      "sha256": "6aa450f48f4aac5d5bd282eabd6a2897767765e4b8f5f8b43331b18500c799cf",
+      "baseline_sha256": "be171f66b7c7e5e956546783986dba675571bc19e9d241174da9d980b8a903bc"
+    },
+    {
+      "path": "app/templates/shared/profile_evidence.html",
+      "status": "added",
+      "sha256": "405236a144ba6c4eda0542a74e21f4bd755a9d98c5ebf4622d72d353f1d9b199",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/shared/record_error.html",
+      "status": "added",
+      "sha256": "7e5ca6637da2553c4957f5b85351b1efcc0fc0d1488c78e40b012280fa66102a",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/shared/record_macros.html",
+      "status": "added",
+      "sha256": "856b7500e762f0b5782e4251d8df597511eddea1754e19f59dbd9bc9dcace7ee",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/shared/record_sources.html",
+      "status": "added",
+      "sha256": "c3ae476e026e5d5be24aa93082352b1917f72b85f4b04431ab1a61477f2bb9b5",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/shared/register_pagination.html",
+      "status": "added",
+      "sha256": "d98bf84cead475a4dd74ce86ab58d8466b549d62e1f1f97744d8e9339806ea2a",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/staff/_verification.html",
+      "status": "added",
+      "sha256": "9d85cf07e52e9d9d8a342aa84ad56d9a7509d112901c07a0dd995d694201618b",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/staff/detail.html",
+      "status": "changed",
+      "sha256": "a4c48bca1a7c8d9a958f6345425e04a3966926872095a31d2def954f17f13c14",
+      "baseline_sha256": "727207caf050e506847f915ed1bd086be5b811963640cc335e6216e29edf7507"
+    },
+    {
+      "path": "app/templates/staff/edit.html",
+      "status": "added",
+      "sha256": "7b6317e396b33fcb78b5c9d8f57ca14f63d70bb0abb4a884630f5ff907cdfa47",
+      "baseline_sha256": null
+    },
+    {
+      "path": "app/templates/staff/index.html",
+      "status": "changed",
+      "sha256": "38837411d0cbae39f9ca23f310f3929dbe382e7bfb722550631df41f208ac0a7",
+      "baseline_sha256": "9357596ff841bd116ea0d0540a265b7ced81d56785cf6d8d5745b5c25196bb83"
+    },
+    {
+      "path": "docs/data-migration/CONNECTED_PAGES.md",
+      "status": "added",
+      "sha256": "6bc2f06c581adae9bf701523b14a9a6f1d4b34430efca74c47c849a6b16f2289",
+      "baseline_sha256": null
+    },
+    {
+      "path": "docs/data-migration/CONNECTED_PAGES_MANIFEST.json",
+      "status": "added",
+      "sha256": "fef28061c82e389585fc2553f463cea988a3b086d3fd61277e5f389ccb210c35",
+      "baseline_sha256": null
+    },
+    {
+      "path": "docs/data-migration/DESIGN_RESTORATION.md",
+      "status": "added",
+      "sha256": "bad9a900bef91b1d1e515ff4d878943b520afb50ffe29b5fd1fb0447e84b764a",
+      "baseline_sha256": null
+    },
+    {
+      "path": "docs/data-migration/README.md",
+      "status": "changed",
+      "sha256": "286dadc20f82467cdfc0e81a90dff3d477e85d9e7c2bc3c0303e7d60744cd7d9",
+      "baseline_sha256": "eb4ecb4ab1bbcdd686241dff4fadb8e9ddb354d2dde1b2d23ce19cd029308569"
+    },
+    {
+      "path": "docs/data-migration/STARTUP_FIX.md",
+      "status": "added",
+      "sha256": "e47cfb1ebf7b8f9191f21482221f3067c7b7238d0ac2c7983b1d3f249255efb8",
+      "baseline_sha256": null
+    },
+    {
+      "path": "docs/data-migration/VERIFICATION.md",
+      "status": "changed",
+      "sha256": "7376f795f00973695409cf5200ef857434e8c0084c691796834c881e19ffe79b",
+      "baseline_sha256": "bcbbf9f602e5c41a2019de52d4156115848296c8cd580ea4bc60931b63ad8ab7"
+    },
+    {
+      "path": "docs/frontend-handoff.md",
+      "status": "changed",
+      "sha256": "6adfa98cc24dde6a8560095775b6106da80b36d33226dfa4f54ae0631a8a631f",
+      "baseline_sha256": "06b5f2126c704d2b125705126cc969421e92da7ee0a37dfac47aa80839d3e129"
+    },
+    {
+      "path": "examples/migration/README.md",
+      "status": "changed",
+      "sha256": "7dfa70dacc01e91cf0ee031868747f35687ddbea013cc0c9b380577be3b3cdd9",
+      "baseline_sha256": "58803f99933f418cf29cbc5955dcee642a94dbe3007ba2d0ef82fb6d1499e309"
+    },
+    {
+      "path": "tests/migration/test_connected_pages.py",
+      "status": "added",
+      "sha256": "75de5d1d728e81524ea2e5e4415f353f48b658a8a10199d42fe46bd6d09f6dd2",
+      "baseline_sha256": null
+    },
+    {
+      "path": "tests/migration/test_register_tabs.py",
+      "status": "added",
+      "sha256": "4eb08d0ad8560e85fedcd60176dc53ff2686d31459230be0ebbc314182c31fa7",
+      "baseline_sha256": null
+    },
+    {
+      "path": "tests/test_frontend.py",
+      "status": "changed",
+      "sha256": "566c7ef6aa5d1cdb41626cbd02cb25f9176e57abf7659ed63b272282abb53215",
+      "baseline_sha256": "c50abc693c86f649445877a86b96fb84f122a091497ebd9a72145c66e087d4c6"
+    },
+    {
+      "path": "tests/test_models.py",
+      "status": "changed",
+      "sha256": "26c480a0368477314cc192aad491b203b02329c3810c102f7e575d2d7bb1d113",
+      "baseline_sha256": "2da47de1e2c521ff2e916b645d0270ad9a8cf28e096e6daca8631a61e2c34760"
+    },
+    {
+      "path": "tests/test_startup_configuration.py",
+      "status": "added",
+      "sha256": "604ccec62280b93c6f1690a70fbbe36d9dee6acbb7507218ee37f773c764a9dc",
+      "baseline_sha256": null
+    },
+    {
+      "path": "tools/preview_frontend.py",
+      "status": "changed",
+      "sha256": "fa63446ac8112670ee588032395b5d2feeb44ff4f5e39dbf843dd5f65e5906e5",
+      "baseline_sha256": "bc9cb8e0469e7639efdb88f0b62736a7addd01bcbc110c056a3794d6a048018f"
+    }
+  ]
+}

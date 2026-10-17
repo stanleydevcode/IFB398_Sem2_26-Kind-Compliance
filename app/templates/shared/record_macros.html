@@ -1,0 +1,11 @@
+{% macro avatar(person, small=false) -%}
+<span class="kc-avatar {{ 'kc-avatar-small' if small else 'kc-avatar-profile' }}" aria-hidden="true">{{ person.first_name[:1] }}{{ person.last_name[:1] }}</span>
+{%- endmacro %}
+
+{% macro empty(icon, title, help='') -%}
+<div class="kc-empty" role="status"><i class="bi {{ icon }}" aria-hidden="true"></i><div class="fw-medium">{{ title }}</div>{% if help %}<div class="small">{{ help }}</div>{% endif %}</div>
+{%- endmacro %}
+
+{% macro credential_summary(credential, tone, condition) -%}
+<div class="mb-2"><span class="kc-cred"><span class="kc-dot {{ tone }}" aria-hidden="true"></span>{{ credential.expiry_date or 'No expiry recorded' }}</span><div class="kc-cred-sub {{ tone }}">{{ credential.status }} · {{ condition }}</div></div>
+{%- endmacro %}

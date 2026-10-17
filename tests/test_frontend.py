@@ -1,5 +1,8 @@
-"""The integrated frontend stays empty until backend records are available."""
-from types import SimpleNamespace
+"""Connected pages render real empty tenant data and preserve role boundaries."""
+from sqlalchemy import event
+from app.extensions import db
+from app.models import User, Organisation, Role, Membership
+from app.services.tenant import schema_name_for_organisation
 
 import pytest
 from flask_login import UserMixin
@@ -20,18 +23,41 @@ class PreviewUser(UserMixin):
     email = "preview@example.test"
 
 
+FRONTEND_ORG = "00000000-0000-0000-0000-000000000099"
+
+
 @pytest.fixture
-def app():
-    return create_app(TestConfig)
+def app(tmp_path):
+    class DatabaseConfig(TestConfig):
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{tmp_path / 'main.db'}"
+    application = create_app(DatabaseConfig)
+    with application.app_context():
+        engine = db.engine
+        @event.listens_for(engine, "connect")
+        def attach(conn, _):
+            for name in ["public", schema_name_for_organisation(FRONTEND_ORG)]:
+                conn.execute(f'ATTACH DATABASE ? AS "{name}"', (str(tmp_path / (name + '.db')),))
+        db.metadata.create_all(engine.execution_options(schema_translate_map={"tenant":schema_name_for_organisation(FRONTEND_ORG)}))
+    yield application
+    with application.app_context():
+        db.session.remove()
+        engine.dispose()
 
 
 def signed_in_client(app, monkeypatch, role):
-    monkeypatch.setattr(app.login_manager, "_user_callback", lambda user_id: PreviewUser())
-    monkeypatch.setattr(decorators, "current_membership", lambda: SimpleNamespace(role=role))
+    with app.app_context():
+        user = User(id=PreviewUser.id,email=PreviewUser.email,password_hash="test-only")
+        organisation = Organisation(id=FRONTEND_ORG,legal_name="Provider")
+        role_record = Role(name=role)
+        db.session.add_all([user,organisation,role_record])
+        db.session.flush()
+        db.session.add(Membership(user_id=user.id,organisation_id=FRONTEND_ORG,role_id=role_record.id))
+        db.session.commit()
     client = app.test_client()
     with client.session_transaction() as session:
         session["_user_id"] = PreviewUser.id
         session["_fresh"] = True
+        session["organisation_id"] = FRONTEND_ORG
     return client
 
 
@@ -64,10 +90,9 @@ def test_empty_pages_render_without_fictional_records(app, monkeypatch, role, pa
 def test_worker_import_has_no_fake_result(app, monkeypatch):
     html = signed_in_client(app, monkeypatch, Roles.ORGANISATION_ADMIN).get("/staff/").get_data(as_text=True)
     assert "No workers yet" in html
-    assert 'id="import-modal"' in html
+    assert '/migration/upload?record_type=staff' in html
     assert "T. Alvarez" not in html
-    assert "12" not in html.split('id="import-modal"', 1)[1]
-    assert "Review import</button>" in html
+    assert "Import workers</a>" in html
 
 
 def test_setup_has_no_sample_company_or_assessed_requirements(app, monkeypatch):

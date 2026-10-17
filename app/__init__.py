@@ -1,14 +1,22 @@
 from flask import Flask
 from dotenv import load_dotenv
+from pathlib import Path
 
 from app.config import Config
 from app.extensions import db, login_manager, migrate
 
-def create_app(config_object=Config):
-    load_dotenv()
+ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
+
+
+def create_app(config_object=None):
+    # Respect an explicit process/deployment override; otherwise use this project's file.
+    load_dotenv(ENV_FILE, override=False, encoding="utf-8-sig")
 
     app = Flask(__name__)
-    app.config.from_object(config_object)
+    if config_object is None:
+        app.config.from_mapping(Config.from_environment())
+    else:
+        app.config.from_object(config_object)
 
     db.init_app(app)
     login_manager.init_app(app)
