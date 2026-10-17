@@ -46,3 +46,4 @@ ROLE_CAPABILITIES = {
 
 
 def can(role: str, capability: str) -> bool:
+    return capability in ROLE_CAPABILITIES.get(role, set())
