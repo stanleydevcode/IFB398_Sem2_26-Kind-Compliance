@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Incidents · Kind Compliance{% endblock %}
+{% block content %}
+<div class="kc-head"><div><h1>{{ 'Incidents' if role == 'staff' else 'Incidents & complaints' }}</h1><p>{{ "Report something that happened and follow what you've reported" if role == 'staff' else 'Every incident and complaint from report to closure' }}</p></div><a class="btn btn-kc" href="{{ url_for('incidents.new') }}"><i class="bi bi-plus-lg me-1"></i>Report an incident</a></div>
+{% include "shared/frontend_notice.html" %}
+{% if role != 'staff' %}<div class="kc-tabs" role="tablist" aria-label="Incident sections"><button class="active" data-tab="open" role="tab" aria-selected="true">Open</button><button data-tab="incidents" role="tab" aria-selected="false">Incidents</button><button data-tab="complaints" role="tab" aria-selected="false">Complaints</button><button data-tab="reportable" role="tab" aria-selected="false">Reportable</button><button data-tab="closed" role="tab" aria-selected="false">Closed</button></div>{% endif %}
+<section class="kc-panel mt-4"><div class="kc-panel-head"><h2>{{ 'My reports' if role == 'staff' else 'Incident register' }}</h2></div><div class="table-responsive"><table class="table kc-table"><thead><tr><th>Reference</th><th>Date</th><th>Participant</th><th>Category</th><th>Status</th>{% if role != 'staff' %}<th>Owner</th>{% endif %}</tr></thead><tbody></tbody></table></div><div class="kc-empty"><i class="bi bi-inbox"></i><div class="fw-medium">No reports yet</div><div class="small">Submitted reports will appear here when incident reporting is connected.</div></div></section>
+{% endblock %}
+{% block scripts %}{% if role != 'staff' %}<script src="{{ url_for('static', filename='js/empty_tabs.js') }}"></script>{% endif %}{% endblock %}

@@ -1,0 +1,6 @@
+﻿source_reference,first_name,last_name,email,phone,job_title,start_date,employment_type,is_active
+S-001,Alex,Example,alex@example.test,,Updated support role,,,
+S-004,Robin,Demonstration,robin@example.test,,Support worker,,,
+S-005,,MissingFirstName,missing@example.test,,,,,
+S-006,Email,Correction,bad-email,,,,,
+S-004,Duplicate,Reference,other@example.test,,,,,

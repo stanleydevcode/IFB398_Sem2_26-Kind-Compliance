@@ -1,0 +1,39 @@
+{% if ui_can_edit_care %}<div class="modal fade" id="care-modal" tabindex="-1" aria-labelledby="cr-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content" id="care-form" novalidate="" data-preview-form="">
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="cr-title">Edit care requirements</h5><div class="small text-secondary">{{ participant.name }}</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="cr-text">Care requirements</label>
+        <textarea id="cr-text" required class="form-control" rows="6">{{ participant.care|join("\n") }}</textarea>
+        <label class="form-label mt-3" for="cr-why">Reason for change</label>
+        <input id="cr-why" class="form-control" required>
+        <div class="invalid-feedback">A reason is required. It's kept in the change history.</div>
+      </div>
+      <p class="small text-secondary px-3 mb-2">Form preview only. No records are saved.</p><div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Preview changes</button></div>
+    </form>
+  </div>
+</div>{% endif %}
+<div class="modal fade" id="consent-modal" tabindex="-1" aria-labelledby="cs-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" id="consent-form" data-preview-form="" novalidate="">
+      <div class="modal-header"><div><h5 class="modal-title fs-6 fw-semibold" id="cs-title">Record consent</h5><div class="small text-secondary">{{ participant.name }}</div></div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="form-label" for="cs-what">Consent for</label>
+        <select id="cs-what" class="form-select mb-3">
+          <option>Collect and store personal information</option><option>Share with family</option><option>Share with GP</option><option>Share with other providers</option>
+        </select>
+        <div class="row g-3">
+          <div class="col-6"><label class="form-label" for="cs-status">Status</label><select id="cs-status" class="form-select"><option>Given</option><option>Withdrawn</option></select></div>
+          <div class="col-6"><label class="form-label" for="cs-date">Date</label><input id="cs-date" type="date" class="form-control" required></div>
+          <div class="col-12"><label class="form-label" for="cs-who">Given by</label>
+            <select id="cs-who" class="form-select"><option>{{ participant.name }} (participant)</option><option>Nominee</option><option>Guardian</option></select></div>
+        </div>
+        <label class="kc-drop mt-3"><i class="bi bi-paperclip"></i><span class="fw-medium">Attach the signed form</span><input type="file" class="form-control form-control-sm" accept=".pdf,image/*" aria-label="Signed consent form"></label>
+      </div>
+      <p class="small text-secondary px-3 mb-2">Form preview only. No records are saved.</p><div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-kc">Save</button></div>
+    </form>
+  </div>
+</div>

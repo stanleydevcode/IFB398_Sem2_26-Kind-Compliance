@@ -1,0 +1,2 @@
+﻿source_reference,category,description,occurred_at,reported_at,severity,status,reportability,location,immediate_response,investigation_notes,outcome,closed_at,reporter_reference,participant_reference
+INC-BAD-01,test,FICTIONAL TEST: missing timezone and invalid severity.,2025-01-01T09:00:00,2025-01-01T10:00:00,urgent,closed,requires_review,,,,,,,

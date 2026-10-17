@@ -1,0 +1,11 @@
+.venv/
+kind/
+.tmp-kind/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+instance/
+uploads/
+*.log
+.DS_Store

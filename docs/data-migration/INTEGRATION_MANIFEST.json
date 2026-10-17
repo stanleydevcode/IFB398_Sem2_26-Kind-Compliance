@@ -1,0 +1,246 @@
+{
+  "description": "Overlay for uploaded Kind Compliance snapshot; preserve local environment and Docker configuration.",
+  "updated_existing_files": [
+    {
+      "path": "app/blueprints/migration/routes.py",
+      "sha256": "37e1b080d71df1e4d21832d6afc48f9b8348de331383d9a3c2f633c0a35e6937",
+      "original_sha256": "e4aa64464c6c94340a7af405a5bc4a1e5568abf581f6710c12e594b89da838d6"
+    },
+    {
+      "path": "app/cli.py",
+      "sha256": "a3fcbdbb7f63442b5168e7a4fb3762acc9ba8819fadb1c117e63a9718d224ab3",
+      "original_sha256": "ca4e590910a43cad5b4bbe15e91fb0c526fc4a722abdc468e0e67c0d29672143"
+    },
+    {
+      "path": "app/models/__init__.py",
+      "sha256": "ede8ab7e9e1e4cb2ab472b86a5105300e420c3533ee703b6be9b05f68c425b35",
+      "original_sha256": "ddce895980b7817a0140a34d2979d587471e9c8ab1799f5934daadb0279d003b"
+    },
+    {
+      "path": "app/services/permissions.py",
+      "sha256": "de134fd1d9ce197b69a8ce8df047d37e025de0662a9c9cd1e8405759d923267b",
+      "original_sha256": "7930157b5af04850b8cf42a4bbd9f1d51840ccfd36f6aece2b6eb17f2b9c567d"
+    },
+    {
+      "path": "app/services/ui.py",
+      "sha256": "833e8e3b28424fa5f334dfae9bde9763c81737b8ef121e8df2e593c488c064f0",
+      "original_sha256": "b6d495b582381c67c94ebf317590dac74e8cb74f6101a9a0199fee1df7a0b003"
+    },
+    {
+      "path": "app/templates/base.html",
+      "sha256": "26102abcf74d91e5e8be4475bfc199fb14fcbc084a141de53b2b6e9102680acc",
+      "original_sha256": "9e72fe3ca241f040459dc8780c888cc428b5c2e0116fc70aa7858b37d2087be5"
+    },
+    {
+      "path": "app/templates/documents/index.html",
+      "sha256": "54f6004503d8c6245e70e6910d927f6e6e7aea73ee1f10536844fac40b360bd8",
+      "original_sha256": "4d0394b42be19f6aa30dda17a34bc19ed48863c1f15c25fe04b7344a9a457008"
+    }
+  ],
+  "new_files": [
+    {
+      "path": "MIGRATION_START_HERE.md",
+      "sha256": "2255150d7f9b0db8f71d926084b3fb066c6037b62c0393da7fb15c3b5d1a473f"
+    },
+    {
+      "path": "app/models/migration.py",
+      "sha256": "cbd1d5129c6b97d7d5e1de5e206b652f2f99e9e61b6084d5ecfb967cc61c8507"
+    },
+    {
+      "path": "app/services/migration/__init__.py",
+      "sha256": "ca598d5a76d90a9c320cc896684f3a1ce3a7010036aae2b42974416ffdd24c42"
+    },
+    {
+      "path": "app/services/migration/commands.py",
+      "sha256": "fd3d453065c8618ca1e1cf5abe5bf710909aee0f5b65e1388b372038f474748d"
+    },
+    {
+      "path": "app/services/migration/definitions.py",
+      "sha256": "6ecfe652788fd45407b085c8e5dd5fde7d3a97b0d7fbc7c28c3798209f3f6e2a"
+    },
+    {
+      "path": "app/services/migration/documents.py",
+      "sha256": "ed3e67f53845950d308fa19133fcf853445fa2ecb35ea399e4cb42811d2d157f"
+    },
+    {
+      "path": "app/services/migration/engine.py",
+      "sha256": "d7f9c63a19076c00b4c4eb36e8d9d8b88d68efd0591e1fd1ac814935fb1441f5"
+    },
+    {
+      "path": "app/services/migration/reader.py",
+      "sha256": "283dee843c52a5c1897bc48ff9d0dc6282ad3d39f490904e6b34d2764ef55d13"
+    },
+    {
+      "path": "app/services/migration/storage.py",
+      "sha256": "ee97ecbcfa1a153c55ece258081fa43106219c8ff8c8159580139dbebbb61b78"
+    },
+    {
+      "path": "app/static/css/migration.css",
+      "sha256": "0f1078553fea2f6d5466c7dd07fbd98cf1e4d23c8b4dd5f12dc134805001a053"
+    },
+    {
+      "path": "app/static/js/migration.js",
+      "sha256": "92e3434ea36fcd030e0ec03a375dcb783999bcd7abfbee28b560146157f85731"
+    },
+    {
+      "path": "app/templates/migration/document.html",
+      "sha256": "bb06899d43b82ca5e1f30cec2f2e080f0c9203c78455cc2fbe2cc1b24df98443"
+    },
+    {
+      "path": "app/templates/migration/documents.html",
+      "sha256": "18c03ea3855d096871fd8c118bfee7019fdc41089b04089bbfbacb642ae9ebe0"
+    },
+    {
+      "path": "app/templates/migration/error.html",
+      "sha256": "bf25d5bf78719659ba9288645d4c843c3d449086d71af9f3607c5c736822f56c"
+    },
+    {
+      "path": "app/templates/migration/index.html",
+      "sha256": "d2889aa977334eedd85ac9814324dffde2f024ef90fcf3e8fe1d783d67429309"
+    },
+    {
+      "path": "app/templates/migration/layout.html",
+      "sha256": "eb9334ced460531eb9c78fc62805cc29e8a9084a9f807ea9839c3d350aaefe4b"
+    },
+    {
+      "path": "app/templates/migration/mapping.html",
+      "sha256": "ae051b47efd802f5d2dac78e50a19d5ab78abd1b5e61c7cf0c156841008bd62f"
+    },
+    {
+      "path": "app/templates/migration/preview.html",
+      "sha256": "467ab8e69a9b4e0653562d0840d3bd5296b34fdbf2070b9fcff64e99231c30e0"
+    },
+    {
+      "path": "app/templates/migration/records.html",
+      "sha256": "ee6d50e0a80cb5196d02f84da82fc317f0fa0df65c31bb0dec4b747340a033ef"
+    },
+    {
+      "path": "app/templates/migration/row.html",
+      "sha256": "8fd47d4b1663c59eeab6f6796b259ec99e1ea3d95cf882ce8d83388e02316b78"
+    },
+    {
+      "path": "app/templates/migration/upload.html",
+      "sha256": "9e922088a185c2bbf349f23120061f3f5f3187bb08be0c315ac1efc5612d5d1a"
+    },
+    {
+      "path": "docs/data-migration/CHANGELOG.md",
+      "sha256": "770db78bf0d44afcc59d22a5f91413ddaacb8c342c71e6895f02a2cf81599594"
+    },
+    {
+      "path": "docs/data-migration/README.md",
+      "sha256": "eb4ecb4ab1bbcdd686241dff4fadb8e9ddb354d2dde1b2d23ce19cd029308569"
+    },
+    {
+      "path": "docs/data-migration/VERIFICATION.md",
+      "sha256": "bcbbf9f602e5c41a2019de52d4156115848296c8cd580ea4bc60931b63ad8ab7"
+    },
+    {
+      "path": "examples/migration/README.md",
+      "sha256": "58803f99933f418cf29cbc5955dcee642a94dbe3007ba2d0ef82fb6d1499e309"
+    },
+    {
+      "path": "examples/migration/documents/first_aid_expired_C001.pdf",
+      "sha256": "8be472bbbef939bffbe3809944c368ee8f37fb7d9711f5a68c3243bc56edc6ab"
+    },
+    {
+      "path": "examples/migration/documents/historical_incident_form_INC2024001.pdf",
+      "sha256": "07b4eb3b8917ab0bcf27018ddebd31655b7891d6fc1bf8c02fc6956c27be801a"
+    },
+    {
+      "path": "examples/migration/documents/policy_v1_2024.pdf",
+      "sha256": "e35deda02e616b4cac8c89e65ba35b002942a1d432c5fd4064529d7474d5f06e"
+    },
+    {
+      "path": "examples/migration/documents/policy_v2_2026.docx",
+      "sha256": "c91ef5a6be16a6ef224bee2179f0345fc29ef1e589e2f4ce6c7ae36a2efcd0c3"
+    },
+    {
+      "path": "examples/migration/documents/scanned_incident_INC2024001.png",
+      "sha256": "d7e3df1c194262ddc357d29486bddb3546351d01787b7f878207480e11b4ad8e"
+    },
+    {
+      "path": "examples/migration/history/01_staff_history.csv",
+      "sha256": "570c3dcadd2fee1994dacddb6ea16508fcd338f18d012e75089280265984b698"
+    },
+    {
+      "path": "examples/migration/history/02_participants_history.csv",
+      "sha256": "21e4d55016f3abcded017df4367563a979b1f880bf3074d288d5c35b81479eb8"
+    },
+    {
+      "path": "examples/migration/history/03_credentials_history.csv",
+      "sha256": "33d0e8efd6b2347a0e30d4e2c4567f05a009933b0a57ecdd89f204a9c7cdcfc6"
+    },
+    {
+      "path": "examples/migration/history/04_incidents_history.csv",
+      "sha256": "27ea614965f6f2a2ba8302a45c08aa3672c8fc5bf3a8926ffc06bddc5dbfd97a"
+    },
+    {
+      "path": "examples/migration/history/05_complaints_history.csv",
+      "sha256": "13a49e6086e7267b1b3ed8cfb1a7eda5a42d6c1b7e41382241005e24d045d202"
+    },
+    {
+      "path": "examples/migration/history/06_risks_history.csv",
+      "sha256": "28df3a81492b4d83f7043dcafc36eb6ec203e28f2ef845bb65deaadcaec42b77"
+    },
+    {
+      "path": "examples/migration/history/09_column_mapping.json",
+      "sha256": "e5fdeac868a8ecbaf834574282b8dc8856eab923b9338175c2ae0ab09e5478a3"
+    },
+    {
+      "path": "examples/migration/history/09_provider_columns_staff.csv",
+      "sha256": "9625ca724ce26872268f2e075c49a7fd78bbc455d9c9be6dc37e75dc6654bc2a"
+    },
+    {
+      "path": "examples/migration/history/09_provider_columns_staff.xlsx",
+      "sha256": "78d840fc775818be73891258a4113fa2de3f94c17ab4c2fcb39d6f848d9b3083"
+    },
+    {
+      "path": "examples/migration/review_cases/07_staff_needs_review.csv",
+      "sha256": "e9d9546ebaab723f01114fe6cb0e832ec643e76a35ed4896e0ffedb5767fcb1e"
+    },
+    {
+      "path": "examples/migration/review_cases/08_staff_reviewed_update.csv",
+      "sha256": "03ff54eae5a95336a842e499f1ac420aeaa4775a2a14a66283d2c16d8e876f60"
+    },
+    {
+      "path": "examples/migration/review_cases/10_incident_bad_dates.csv",
+      "sha256": "c2ba1d079dff17dfe13efdc0bb2858edc7e8e49cc091b3428250f10fb93b1a9d"
+    },
+    {
+      "path": "examples/migration/review_cases/11_duplicate_headers.csv",
+      "sha256": "6508bb39f1182ac54361a66959f21530e3ad1ccfe2e527dd56eee456bd191c21"
+    },
+    {
+      "path": "examples/migration/templates/complaint.csv",
+      "sha256": "63c8ce33f7eacf82a1647581b4192f1b680986f138639d254bc635267175d394"
+    },
+    {
+      "path": "examples/migration/templates/credential.csv",
+      "sha256": "a1b5f7b81a48f946eb3bd12e2e7783163f195ba0921a426ebf8c99bd6420b623"
+    },
+    {
+      "path": "examples/migration/templates/incident.csv",
+      "sha256": "63c8ce33f7eacf82a1647581b4192f1b680986f138639d254bc635267175d394"
+    },
+    {
+      "path": "examples/migration/templates/participant.csv",
+      "sha256": "275a17b33293927eb628a13d75598dd75d5ddc18b115f58d779dd722aa7028f7"
+    },
+    {
+      "path": "examples/migration/templates/risk.csv",
+      "sha256": "145ab55918e48ff2018cff7e642634707384e4a5914501e6e754ad9ce61b1051"
+    },
+    {
+      "path": "examples/migration/templates/staff.csv",
+      "sha256": "9e26186bc2bfb86651eef68f983cd4ee388cd8a04447139322a3ad2525b6d7f3"
+    },
+    {
+      "path": "tests/migration/conftest.py",
+      "sha256": "f8b197304372a3df01c2d87b9ee9f99a12621952613b6165630bea3c9b9e7c1a"
+    },
+    {
+      "path": "tests/migration/test_workflow.py",
+      "sha256": "a50c4208829916cc206744e18f5e8c3dc4a679f36696f1934ff4512209c332e3"
+    }
+  ]
+}

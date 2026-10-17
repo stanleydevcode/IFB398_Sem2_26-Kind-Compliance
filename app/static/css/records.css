@@ -1,0 +1,31 @@
+/* Additions to the original Kind Compliance theme for live record pages. */
+.kc-tabs a {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--kc-ink-2);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.kc-tabs a:hover { color: var(--kc-ink); }
+.kc-tabs a.active { color: var(--kc-action); border-bottom-color: var(--kc-action); font-weight: 600; }
+.kc-tabs a.active .count { background: #E6F4F1; color: var(--kc-action); }
+.kc-tabs a:focus-visible { outline: 2px solid var(--kc-action); outline-offset: -3px; }
+.kc-avatar-small { width: 32px; height: 32px; font-size: .72rem; }
+.kc-avatar-profile { width: 56px; height: 56px; font-size: 1.05rem; }
+.kc-wrap, .kc-dl dd { overflow-wrap: anywhere; }
+.kc-prewrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+.kc-note { min-width: 260px; }
+.kc-record-form { width: 100%; max-width: 960px; }
+.kc-record-form > .kc-panel-body { padding: 20px; }
+.kc-form-actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 20px; border-top: 1px solid var(--kc-line-soft); }
+.kc-form-actions .form-text { flex-basis: 100%; margin-top: 0; }
+.kc-review { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--kc-line); }
+@media (max-width: 767px) {
+  .kc-avatar-profile { width: 44px; height: 44px; font-size: .9rem; }
+  .kc-record-form .kc-panel-body { padding: 16px; }
+  .kc-panel-head { flex-wrap: wrap; }
+}

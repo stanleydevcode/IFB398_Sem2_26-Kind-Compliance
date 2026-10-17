@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}Create account | Kind Compliance{% endblock %}
+
+{% block content %}
+<div class="auth">
+
+  <img
+    class="auth-logo"
+    src="{{ url_for('static', filename='img/kind-compliance-logo.png') }}"
+    alt="Kind Compliance"
+  >
+
+  <section class="auth-card">
+
+    <h1>Create account</h1>
+
+    <p class="lede">
+      Set up your organisation and administrator account.
+    </p>
+
+    <form method="post">
+
+      <div class="mb-3">
+        <label for="organisation_name" class="form-label">
+          Organisation name
+        </label>
+
+        <input
+          id="organisation_name"
+          class="form-control"
+          name="organisation_name"
+          type="text"
+          autocomplete="organization"
+          required
+        >
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">
+          Work email
+        </label>
+
+        <input
+          id="email"
+          class="form-control"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+        >
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">
+          Password
+        </label>
+
+        <div class="pw-wrap">
+
+          <input
+            id="password"
+            class="form-control"
+            name="password"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            required
+          >
+
+          <button
+            type="button"
+            class="pw-toggle"
+            data-password-toggle="password"
+            aria-label="Show password"
+          >
+            <i class="bi bi-eye"></i>
+          </button>
+
+        </div>
+
+        <div class="form-text">
+          Minimum 8 characters.
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="confirm_password" class="form-label">
+          Confirm password
+        </label>
+
+        <div class="pw-wrap">
+
+          <input
+            id="confirm_password"
+            class="form-control"
+            name="confirm_password"
+            type="password"
+            minlength="8"
+            autocomplete="new-password"
+            required
+          >
+
+          <button
+            type="button"
+            class="pw-toggle"
+            data-password-toggle="confirm_password"
+            aria-label="Show password"
+          >
+            <i class="bi bi-eye"></i>
+          </button>
+
+        </div>
+
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-kc w-100"
+      >
+        Create account
+      </button>
+
+    </form>
+
+    <p class="text-center mt-4 mb-0 auth-meta">
+      Already have an account?
+      <a href="{{ url_for('auth.login') }}">
+        Sign in
+      </a>
+    </p>
+
+  </section>
+
+  <footer class="auth-foot">
+
+    <p class="mb-1">
+      &copy; 2026 Kind Compliance. All rights reserved.
+    </p>
+
+    <a href="#">Terms of Use</a>
+    <span class="mx-1">|</span>
+    <a href="#">Privacy Policy</a>
+
+  </footer>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.querySelectorAll("[data-password-toggle]").forEach(function (button) {
+    button.addEventListener("click", function () {
+      const input = document.getElementById(
+        button.dataset.passwordToggle
+      );
+
+      const showing = input.type === "text";
+
+      input.type = showing ? "password" : "text";
+
+      button.innerHTML = showing
+        ? '<i class="bi bi-eye"></i>'
+        : '<i class="bi bi-eye-slash"></i>';
+    });
+  });
+</script>
+{% endblock %}

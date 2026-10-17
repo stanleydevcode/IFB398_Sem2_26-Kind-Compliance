@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Report an incident · Kind Compliance{% endblock %}
+{% block content %}
+<div class="kc-head"><div><div class="kc-crumb"><a href="{{ url_for('incidents.index') }}">Incidents</a> / New report</div><h1>Report an incident</h1><p>Record what happened for review</p></div></div>
+{% include "shared/frontend_notice.html" %}
+<section class="kc-panel"><div class="kc-panel-head"><h2>Incident details</h2></div><form class="kc-panel-body"><div class="row g-3">
+  <div class="col-md-6"><label for="inc-date" class="form-label">Date</label><input id="inc-date" type="date" class="form-control"></div>
+  <div class="col-md-6"><label for="inc-category" class="form-label">Category</label><select id="inc-category" class="form-select"><option value="">Choose a category</option><option>Injury</option><option>Complaint</option><option>Other</option></select></div>
+  <div class="col-12"><label for="inc-participant" class="form-label">Participant</label><select id="inc-participant" class="form-select" disabled><option>No participants available yet</option></select></div>
+  <div class="col-12"><label for="inc-description" class="form-label">What happened?</label><textarea id="inc-description" class="form-control" rows="5"></textarea></div>
+  <div class="col-12"><label for="inc-action" class="form-label">Immediate action taken</label><textarea id="inc-action" class="form-control" rows="3"></textarea></div>
+</div><p class="small text-secondary mt-3">Incident submission is not connected yet. This form does not save or send anything.</p><div class="d-flex justify-content-end gap-2"><a class="btn btn-outline-kc" href="{{ url_for('incidents.index') }}">Cancel</a><button type="button" class="btn btn-kc" disabled>Submit report</button></div></form></section>
+{% endblock %}

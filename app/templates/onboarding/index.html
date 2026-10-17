@@ -1,0 +1,426 @@
+{% extends "base.html" %}
+{% block title %}Setup · Kind Compliance{% endblock %}
+{% block content %}
+{% include "shared/frontend_notice.html" %}
+
+
+<div class="kc-head">
+  <div>
+    <h1>Organisation setup</h1>
+    <p id="setup-sub">0 of 5 steps done (preview only)</p>
+  </div>
+  <a class="btn btn-outline-kc" href="{{ url_for('dashboard.index') }}">Exit preview</a>
+</div>
+
+
+<ol class="kc-steps" id="steps">
+
+    <li class="{{ '' }}" data-step-link="profile">
+      <a href="#step-profile">
+        <span class="n"><i class="bi bi-check-lg"></i><span>1</span></span>
+        <span class="t"><b>Organisation profile</b><small>Legal identity</small></span>
+      </a>
+    </li>
+
+    <li class="{{ '' }}" data-step-link="insurance">
+      <a href="#step-insurance">
+        <span class="n"><i class="bi bi-check-lg"></i><span>2</span></span>
+        <span class="t"><b>Corporate insurance</b><small>Public liability</small></span>
+      </a>
+    </li>
+
+    <li class="{{ '' }}" data-step-link="groups">
+      <a href="#step-groups">
+        <span class="n"><i class="bi bi-check-lg"></i><span>3</span></span>
+        <span class="t"><b>Registration groups</b><small>Scope of service</small></span>
+      </a>
+    </li>
+
+    <li class="{{ '' }}" data-step-link="people">
+      <a href="#step-people">
+        <span class="n"><i class="bi bi-check-lg"></i><span>4</span></span>
+        <span class="t"><b>Key personnel</b><small>Screening and roles</small></span>
+      </a>
+    </li>
+
+    <li class="{{ '' }}" data-step-link="rules">
+      <a href="#step-rules">
+        <span class="n"><i class="bi bi-check-lg"></i><span>5</span></span>
+        <span class="t"><b>Operating rules</b><small>Sign-off rules</small></span>
+      </a>
+    </li>
+
+</ol>
+
+
+<section class="kc-panel kc-step" id="step-profile" data-step="profile">
+  <div class="kc-panel-head">
+    <h2><span class="kc-num">1</span>Organisation profile</h2>
+    <div class="d-flex align-items-center gap-2"><span class="kc-pill {{ 'neutral' }}" data-pill>Not started</span><button class="btn btn-sm btn-outline-kc" data-edit>Edit</button></div>
+  </div>
+  <div class="kc-panel-body" data-view>
+    <dl class="kc-sumgrid">
+      <div><dt>Legal name</dt><dd data-show="legal">{{ '—' }}</dd></div>
+      <div><dt>Trading name</dt><dd data-show="trading">{{ '—' }}</dd></div>
+      <div><dt>ABN</dt><dd data-show="abn">{{ '—' }}</dd></div>
+      <div><dt>NDIS registration number</dt><dd data-show="ndis">{{ '—' }}</dd></div>
+      <div><dt>Organisation type</dt><dd data-show="type">{{ '—' }}</dd></div>
+      <div><dt>State</dt><dd data-show="state">{{ '—' }}</dd></div>
+      <div><dt>Primary contact</dt><dd><span data-show="contact">{{ '—' }}</span><span class="d-block small text-secondary" data-show="email">{{ '—' }}</span><span class="d-block small text-secondary" data-show="phone">{{ '—' }}</span></dd></div>
+    </dl>
+  </div>
+  <form class="kc-panel-body" data-form hidden novalidate>
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label" for="o-legal">Legal name</label><input id="o-legal" name="legal" class="form-control" value="{{ '' }}" required><div class="invalid-feedback">Enter the legal name.</div></div>
+      <div class="col-md-6"><label class="form-label" for="o-trading">Trading name</label><input id="o-trading" name="trading" class="form-control" value="{{ '' }}"></div>
+      <div class="col-md-3"><label class="form-label" for="o-abn">ABN</label><input id="o-abn" name="abn" class="form-control" value="{{ '' }}" required pattern="[0-9 ]{11,14}"><div class="invalid-feedback">Enter an 11-digit ABN.</div></div>
+      <div class="col-md-3"><label class="form-label" for="o-ndis">NDIS registration number</label><input id="o-ndis" name="ndis" class="form-control" value="{{ '' }}" required><div class="invalid-feedback">Enter the registration number.</div></div>
+      <div class="col-md-3"><label class="form-label" for="o-type">Organisation type</label>
+        <select id="o-type" name="type" class="form-select"><option value="">Choose an organisation type</option><option>Sole trader</option><option>Partnership</option><option>Company (body corporate)</option><option>Trust</option><option>Incorporated association</option></select></div>
+      <div class="col-md-3"><label class="form-label" for="o-state">State</label>
+        <select id="o-state" name="state" class="form-select"><option value="">Choose a state</option><option>Queensland</option><option>New South Wales</option><option>Victoria</option><option>South Australia</option><option>Western Australia</option><option>Tasmania</option><option>Northern Territory</option><option>Australian Capital Territory</option></select></div>
+      <div class="col-md-4"><label class="form-label" for="o-contact">Primary contact</label><input id="o-contact" name="contact" class="form-control" value="{{ '' }}" required><div class="invalid-feedback">Enter a contact name.</div></div>
+      <div class="col-md-4"><label class="form-label" for="o-email">Email</label><input id="o-email" name="email" type="email" class="form-control" value="{{ '' }}" required><div class="invalid-feedback">Enter a valid email.</div></div>
+      <div class="col-md-4"><label class="form-label" for="o-phone">Phone</label><input id="o-phone" name="phone" class="form-control" value="{{ '' }}"></div>
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button type="button" class="btn btn-outline-kc" data-cancel>Cancel</button>
+      <button type="submit" class="btn btn-kc">Save</button>
+    </div>
+  </form>
+</section>
+
+
+<section class="kc-panel kc-step" id="step-insurance" data-step="insurance">
+  <div class="kc-panel-head">
+    <h2><span class="kc-num">2</span>Corporate insurance</h2>
+    <div class="d-flex align-items-center gap-2"><span class="kc-pill {{ 'neutral' }}" data-pill>Not started</span><button class="btn btn-sm btn-outline-kc" data-bs-toggle="modal" data-bs-target="#ins-modal"><i class="bi bi-plus-lg me-1"></i>Add another policy</button></div>
+  </div>
+  <div class="table-responsive">
+    <table class="table kc-table" id="ins-table">
+      <thead><tr><th>Policy</th><th>Insurer</th><th>Policy number</th><th>Cover</th><th>Expires</th><th>Certificate</th><th></th></tr></thead>
+      <tbody><tr data-empty-row><td colspan="7"><div class="kc-empty">No records added yet.</div></td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+
+<section class="kc-panel kc-step" id="step-groups" data-step="groups">
+  <div class="kc-panel-head">
+    <h2><span class="kc-num">3</span>Registration groups</h2>
+    <div class="d-flex align-items-center gap-2"><span class="kc-pill {{ 'neutral' }}" data-pill>Not started</span><button class="btn btn-sm btn-outline-kc" data-edit>Change groups</button></div>
+  </div>
+
+  <div class="kc-panel-body" data-view>
+    <dl class="kc-sumgrid mb-3">
+      <div><dt>Groups selected</dt><dd data-sum="groups">0</dd></div>
+      <div><dt>Audit pathway</dt><dd data-sum="pathway">—</dd></div>
+      <div><dt>Required documents</dt><dd data-sum="total">Not assessed</dd></div>
+      <div><dt>Not uploaded yet</dt><dd><a href="{{ url_for('documents.index') }}#missing" data-sum="missing">Not assessed</a></dd></div>
+    </dl>
+    <div class="kc-chips" data-sum="chips">No groups selected.</div>
+  </div>
+
+  <form class="kc-panel-body" data-form hidden novalidate id="groups-form">
+    <div class="row g-4">
+      <div class="col-lg-8">
+
+        <h3 class="kc-sub">Selected</h3>
+        <div class="kc-reg-grid"><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0107" >
+            <span><span class="d-flex justify-content-between gap-2"><b>0107</b><small>Core</small></span>
+              <span class="nm">Assistance with daily personal activities</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0104" >
+            <span><span class="d-flex justify-content-between gap-2"><b>0104</b><small>Core + Module 1</small></span>
+              <span class="nm">High intensity daily personal activities</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0110" >
+            <span><span class="d-flex justify-content-between gap-2"><b>0110</b><small>Core + Module 2</small></span>
+              <span class="nm">Specialist positive behaviour support</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0132" >
+            <span><span class="d-flex justify-content-between gap-2"><b>0132</b><small>Core + Module 4</small></span>
+              <span class="nm">Specialised support coordination</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0136" >
+            <span><span class="d-flex justify-content-between gap-2"><b>0136</b><small>Core</small></span>
+              <span class="nm">Group and centre-based activities</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0138" >
+            <span><span class="d-flex justify-content-between gap-2"><b>0138</b><small>Core + Module 5A</small></span>
+              <span class="nm">Assistance with supported independent living</span></span>
+          </label></div>
+
+        <button class="kc-more" type="button" data-bs-toggle="collapse" data-bs-target="#rg-other" aria-expanded="false">
+          <i class="bi bi-chevron-right"></i>Other certification groups <span>9</span></button>
+        <div class="collapse" id="rg-other"><div class="kc-reg-grid pt-2"><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0102">
+            <span><span class="d-flex justify-content-between gap-2"><b>0102</b><small>Core</small></span>
+              <span class="nm">Assistance to access and maintain employment or higher education</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0106">
+            <span><span class="d-flex justify-content-between gap-2"><b>0106</b><small>Core</small></span>
+              <span class="nm">Assistance in coordinating or managing life stages, transitions and supports</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0115">
+            <span><span class="d-flex justify-content-between gap-2"><b>0115</b><small>Core</small></span>
+              <span class="nm">Assistance with daily life tasks in a group or shared living arrangement</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0117">
+            <span><span class="d-flex justify-content-between gap-2"><b>0117</b><small>Core</small></span>
+              <span class="nm">Development of daily living and life skills</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0118">
+            <span><span class="d-flex justify-content-between gap-2"><b>0118</b><small>Core + Module 3</small></span>
+              <span class="nm">Early intervention supports for early childhood</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0125">
+            <span><span class="d-flex justify-content-between gap-2"><b>0125</b><small>Core</small></span>
+              <span class="nm">Participation in community, social and civic activities</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0131">
+            <span><span class="d-flex justify-content-between gap-2"><b>0131</b><small>Core + Module 5</small></span>
+              <span class="nm">Specialist disability accommodation</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0133">
+            <span><span class="d-flex justify-content-between gap-2"><b>0133</b><small>Core</small></span>
+              <span class="nm">Specialised supported employment</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0137">
+            <span><span class="d-flex justify-content-between gap-2"><b>0137</b><small>Core</small></span>
+              <span class="nm">Providing an NDIS digital platform service</span></span>
+          </label></div></div>
+
+        <button class="kc-more" type="button" data-bs-toggle="collapse" data-bs-target="#rg-ver" aria-expanded="false">
+          <i class="bi bi-chevron-right"></i>Verification groups <span>23</span></button>
+        <div class="collapse" id="rg-ver"><div class="kc-reg-grid pt-2"><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0101">
+            <span><span class="d-flex justify-content-between gap-2"><b>0101</b><small>Module 6</small></span>
+              <span class="nm">Accommodation / tenancy assistance</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0103">
+            <span><span class="d-flex justify-content-between gap-2"><b>0103</b><small>Module 6</small></span>
+              <span class="nm">Assistive products for personal care and safety</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0105">
+            <span><span class="d-flex justify-content-between gap-2"><b>0105</b><small>Module 6</small></span>
+              <span class="nm">Personal mobility equipment</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0108">
+            <span><span class="d-flex justify-content-between gap-2"><b>0108</b><small>Module 6</small></span>
+              <span class="nm">Assistance with travel / transport arrangements</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0109">
+            <span><span class="d-flex justify-content-between gap-2"><b>0109</b><small>Module 6</small></span>
+              <span class="nm">Vehicle modifications</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0111">
+            <span><span class="d-flex justify-content-between gap-2"><b>0111</b><small>Module 6</small></span>
+              <span class="nm">Home modifications</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0112">
+            <span><span class="d-flex justify-content-between gap-2"><b>0112</b><small>Module 6</small></span>
+              <span class="nm">Assistive equipment for recreation</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0113">
+            <span><span class="d-flex justify-content-between gap-2"><b>0113</b><small>Module 6</small></span>
+              <span class="nm">Vision equipment</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0114">
+            <span><span class="d-flex justify-content-between gap-2"><b>0114</b><small>Module 6</small></span>
+              <span class="nm">Community nursing care</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0116">
+            <span><span class="d-flex justify-content-between gap-2"><b>0116</b><small>Module 6</small></span>
+              <span class="nm">Innovative community participation</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0119">
+            <span><span class="d-flex justify-content-between gap-2"><b>0119</b><small>Module 6</small></span>
+              <span class="nm">Specialised hearing services</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0120">
+            <span><span class="d-flex justify-content-between gap-2"><b>0120</b><small>Module 6</small></span>
+              <span class="nm">Household tasks</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0121">
+            <span><span class="d-flex justify-content-between gap-2"><b>0121</b><small>Module 6</small></span>
+              <span class="nm">Interpreting and translation</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0122">
+            <span><span class="d-flex justify-content-between gap-2"><b>0122</b><small>Module 6</small></span>
+              <span class="nm">Hearing equipment</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0123">
+            <span><span class="d-flex justify-content-between gap-2"><b>0123</b><small>Module 6</small></span>
+              <span class="nm">Assistive products for household tasks</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0124">
+            <span><span class="d-flex justify-content-between gap-2"><b>0124</b><small>Module 6</small></span>
+              <span class="nm">Communication and information equipment</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0126">
+            <span><span class="d-flex justify-content-between gap-2"><b>0126</b><small>Module 6</small></span>
+              <span class="nm">Exercise physiology and personal training</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0127">
+            <span><span class="d-flex justify-content-between gap-2"><b>0127</b><small>Module 6</small></span>
+              <span class="nm">Management of funding for supports in participant plans</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0128">
+            <span><span class="d-flex justify-content-between gap-2"><b>0128</b><small>Module 6</small></span>
+              <span class="nm">Therapeutic supports</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0129">
+            <span><span class="d-flex justify-content-between gap-2"><b>0129</b><small>Module 6</small></span>
+              <span class="nm">Specialised driver training</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0130">
+            <span><span class="d-flex justify-content-between gap-2"><b>0130</b><small>Module 6</small></span>
+              <span class="nm">Assistance animals</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0134">
+            <span><span class="d-flex justify-content-between gap-2"><b>0134</b><small>Module 6</small></span>
+              <span class="nm">Hearing services</span></span>
+          </label><label class="kc-reg">
+            <input type="checkbox" class="form-check-input" value="0135">
+            <span><span class="d-flex justify-content-between gap-2"><b>0135</b><small>Module 6</small></span>
+              <span class="nm">Customised prosthetics</span></span>
+          </label></div></div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="kc-unlock">
+          <h3>Example document requirements</h3>
+          <div class="kc-unlock-top">
+            <div><b id="u-groups">0</b><span>Groups</span></div>
+            <div><b id="u-pathway">Not assessed</b><span>Audit pathway</span></div>
+          </div>
+          <ul id="u-rows"></ul>
+          <div class="kc-unlock-total"><span>Total required</span><b id="u-total">Not assessed</b></div>
+          <p class="small text-secondary mb-0 mt-2">Illustrative counts from the prototype. Final requirements need the agreed backend rules.</p>
+        </div>
+      </div>
+    </div>
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <button type="button" class="btn btn-outline-kc" data-cancel>Cancel</button>
+      <button type="submit" class="btn btn-kc">Save groups</button>
+    </div>
+  </form>
+</section>
+
+
+<section class="kc-panel kc-step" id="step-people" data-step="people">
+  <div class="kc-panel-head">
+    <h2><span class="kc-num">4</span>Key personnel</h2>
+    <div class="d-flex align-items-center gap-2"><span class="kc-pill {{ 'neutral' }}" data-pill>Not started</span></div>
+  </div>
+  <div class="table-responsive">
+    <table class="table kc-table" id="kp-table">
+      <thead><tr><th>Name</th><th>Position</th><th>Platform role</th><th>NDIS Worker Screening</th><th>Login</th></tr></thead>
+      <tbody><tr data-empty-row><td colspan="7"><div class="kc-empty">No records added yet.</div></td></tr></tbody>
+    </table>
+  </div>
+  <form class="kc-panel-body border-top" id="kp-form" novalidate>
+    <h3 class="kc-sub mt-0">Add a person</h3>
+    <div class="row g-3">
+      <div class="col-md-4"><label class="form-label" for="k-name">Full name</label><input id="k-name" class="form-control" required><div class="invalid-feedback">Enter their name.</div></div>
+      <div class="col-md-4"><label class="form-label" for="k-pos">Position</label><input id="k-pos" class="form-control" required><div class="invalid-feedback">Enter their position.</div></div>
+      <div class="col-md-4"><label class="form-label" for="k-role">Platform role</label>
+        <select id="k-role" class="form-select"><option>Organization Administrator</option><option selected>Compliance Manager</option><option>Staff Member</option></select></div>
+      <div class="col-md-4"><label class="form-label" for="k-email">Email</label><input id="k-email" type="email" class="form-control" required><div class="invalid-feedback">Enter a valid email.</div></div>
+      <div class="col-md-4"><label class="form-label" for="k-phone">Phone</label><input id="k-phone" class="form-control"></div>
+      <div class="col-md-2"><label class="form-label" for="k-scr">Screening</label>
+        <select id="k-scr" class="form-select"><option>Cleared</option><option>Pending</option><option>Not started</option></select></div>
+      <div class="col-md-2" id="k-exp-wrap"><label class="form-label" for="k-exp">Expiry</label><input id="k-exp" type="date" class="form-control"></div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center gap-2 mt-4">
+      <button type="submit" class="btn btn-outline-kc"><i class="bi bi-person-plus me-1"></i>Preview person and invitation</button>
+      <button type="button" class="btn btn-kc" id="people-done">Continue</button>
+    </div>
+  </form>
+</section>
+
+
+<section class="kc-panel kc-step" id="step-rules" data-step="rules">
+  <div class="kc-panel-head">
+    <h2><span class="kc-num">5</span>Operating rules</h2>
+    <div class="d-flex align-items-center gap-2"><span class="kc-pill {{ 'neutral' }}" data-pill>Not started</span></div>
+  </div>
+  <form class="kc-panel-body" id="rules-form" novalidate>
+    <div class="row g-3">
+      <div class="col-md-4"><label class="form-label" for="r-sig">Digital signature on service logs</label>
+        <select id="r-sig" class="form-select"><option>Required</option><option>Not required</option></select></div>
+      <div class="col-md-4"><label class="form-label" for="r-sign">Sign-off person</label>
+        <select id="r-sign" required class="form-select"><option value="">Choose a person</option>{% for w in workers %}<option>{{ w.name }}</option>{% endfor %}</select></div>
+      <div class="col-md-4"><label class="form-label" for="r-esc">Escalation contact</label>
+        <select id="r-esc" required class="form-select"><option value="">Choose a person</option>{% for w in workers %}<option>{{ w.name }}</option>{% endfor %}</select></div>
+      <div class="col-md-4"><label class="form-label" for="r-ret">Record retention</label>
+        <select id="r-ret" class="form-select"><option>5 years</option><option selected>7 years</option><option>10 years</option></select></div>
+      <div class="col-md-4"><label class="form-label" for="r-rev">Compliance review</label>
+        <select id="r-rev" class="form-select"><option>Weekly</option><option selected>Monthly</option><option>Quarterly</option></select></div>
+      <div class="col-md-4"><label class="form-label" for="r-dual">Priority evidence approval</label>
+        <select id="r-dual" class="form-select"><option>Two approvers</option><option>One approver</option></select></div>
+
+      <div class="col-12">
+        <span class="form-label d-block">Credential reminders</span>
+        <div class="kc-remind">
+
+            <div class="kc-remind-row">
+              <select class="form-select form-select-sm" aria-label="Days before expiry"><option selected>90</option><option>60</option><option>30</option><option>14</option><option>7</option></select>
+              <span class="text-secondary small">days before expiry</span>
+              <select class="form-select form-select-sm" aria-label="Who is reminded"><option selected>Worker</option><option>Worker and manager</option><option>Manager</option><option>Manager by SMS</option></select>
+            </div>
+
+            <div class="kc-remind-row">
+              <select class="form-select form-select-sm" aria-label="Days before expiry"><option>90</option><option>60</option><option selected>30</option><option>14</option><option>7</option></select>
+              <span class="text-secondary small">days before expiry</span>
+              <select class="form-select form-select-sm" aria-label="Who is reminded"><option>Worker</option><option selected>Worker and manager</option><option>Manager</option><option>Manager by SMS</option></select>
+            </div>
+
+            <div class="kc-remind-row">
+              <select class="form-select form-select-sm" aria-label="Days before expiry"><option>90</option><option>60</option><option>30</option><option>14</option><option selected>7</option></select>
+              <span class="text-secondary small">days before expiry</span>
+              <select class="form-select form-select-sm" aria-label="Who is reminded"><option>Worker</option><option>Worker and manager</option><option>Manager</option><option selected>Manager by SMS</option></select>
+            </div>
+
+        </div>
+      </div>
+
+      <div class="col-12"><label class="form-label" for="r-more">Additional operating rules</label>
+        <textarea id="r-more" class="form-control" rows="3"></textarea></div>
+    </div>
+    <div class="d-flex justify-content-end mt-4">
+      <button type="submit" class="btn btn-kc">Finish setup</button>
+    </div>
+  </form>
+</section>
+
+
+<div class="modal fade" id="ins-modal" tabindex="-1" aria-labelledby="in-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" id="ins-form" novalidate>
+      <div class="modal-header"><h5 class="modal-title fs-6 fw-semibold" id="in-title">Add a policy</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <label class="kc-drop mb-3" for="in-file" id="in-drop"><i class="bi bi-cloud-arrow-up"></i>
+          <span class="fw-medium" id="in-file-name">Upload the certificate of currency</span>
+          <input type="file" id="in-file" class="form-control form-control-sm" accept=".pdf,image/*"></label>
+        <div class="row g-3">
+          <div class="col-6"><label class="form-label" for="in-type">Policy</label>
+            <select id="in-type" class="form-select"><option>Public liability</option><option>Professional indemnity</option><option>Workers compensation</option><option>Other</option></select></div>
+          <div class="col-6"><label class="form-label" for="in-insurer">Insurer</label><input id="in-insurer" class="form-control" required><div class="invalid-feedback">Enter the insurer.</div></div>
+          <div class="col-6"><label class="form-label" for="in-policy">Policy number</label><input id="in-policy" class="form-control" required><div class="invalid-feedback">Enter the policy number.</div></div>
+          <div class="col-6"><label class="form-label" for="in-cover">Cover</label><input id="in-cover" class="form-control" placeholder="$10,000,000"></div>
+          <div class="col-6"><label class="form-label" for="in-exp">Expiry date</label><input id="in-exp" type="date" class="form-control" required><div class="invalid-feedback">Enter the expiry date.</div></div>
+        </div>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-kc" data-bs-dismiss="modal">Cancel</button><button type="submit" class="btn btn-kc">Save policy</button></div>
+    </form>
+  </div>
+</div>
+
+
+
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/setup.js') }}"></script>{% endblock %}
