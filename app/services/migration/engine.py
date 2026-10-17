@@ -24,6 +24,8 @@ RELATIONS = {"staff_reference": ("staff", "staff_id"),
              "participant_reference": ("participant", "participant_id"),
              "owner_reference": ("staff", "owner_staff_id")}
 FINAL = {"imported", "skipped"}
+DATE_RANGES = (("issue_date", "expiry_date"), ("plan_start_date", "plan_end_date"),
+               ("occurred_at", "reported_at"), ("occurred_at", "closed_at"))
 
 
 def lock_imports(session, organisation_id):
@@ -47,6 +49,34 @@ def snapshot(record):
 
 def fingerprint(record):
     return hashlib.sha256(json.dumps(snapshot(record), sort_keys=True, default=str).encode()).hexdigest()
+
+
+def date_range_errors(values):
+    """Check incoming or merged dates without modifying the stored record.
+
+    Normalisation handles malformed fields. Datetimes are compared in UTC;
+    SQLite returns stored UTC timestamps without their timezone information.
+    """
+    errors = []
+    for start, end in DATE_RANGES:
+        if not values.get(start) or not values.get(end):
+            continue
+        try:
+            if start.endswith("_at"):
+                endpoints = []
+                for key in (start, end):
+                    value = values[key]
+                    value = value if isinstance(value, datetime) else datetime.fromisoformat(value)
+                    endpoints.append(value.replace(tzinfo=timezone.utc) if value.tzinfo is None
+                                     else value.astimezone(timezone.utc))
+            else:
+                endpoints = [value if isinstance(value, date) else date.fromisoformat(value)
+                             for value in (values[start], values[end])]
+        except (TypeError, ValueError):
+            continue  # Field-format errors are already reported by normalise().
+        if endpoints[1] < endpoints[0]:
+            errors.append(f"{end} cannot precede {start}.")
+    return errors
 
 
 def source_target(session, system, kind, reference):
@@ -144,10 +174,7 @@ def normalise(job, supplied):
                 hint = " Choose: " + ", ".join(field.choices) if field.choices else " Check the value/date format and timezone."
                 errors.append(f"{field.label} is invalid.{hint}")
         data[key] = value
-    for start, end in (("issue_date", "expiry_date"), ("plan_start_date", "plan_end_date"),
-                       ("occurred_at", "reported_at"), ("occurred_at", "closed_at")):
-        if data.get(start) and data.get(end) and data[end] < data[start]:
-            errors.append(f"{end} cannot precede {start}.")
+    errors.extend(date_range_errors(data))
     if data.get("date_of_birth") and data["date_of_birth"] > date.today().isoformat():
         errors.append("Date of birth cannot be in the future.")
     if job.record_type == "credential":
@@ -189,10 +216,15 @@ def validate_row(session, row):
         target = next((x for x in matches if x.id == row.target_id), None)
         if target is None:
             errors.append("Select a current duplicate candidate before choosing update.")
-        elif row.target_snapshot and fingerprint(target) != row.target_snapshot:
+        elif not row.target_snapshot or fingerprint(target) != row.target_snapshot:
             errors.append("Destination changed since review. Open the row and review it again.")
         if not row.decision_reason:
             errors.append("An update reason is required.")
+        if not errors:
+            # Blanks preserve existing values; validate exactly that merged result.
+            # destination_values() reads row.data, so use its normalised form.
+            row.data = data
+            errors.extend(date_range_errors({**snapshot(target), **destination_values(session, row)}))
     elif row.decision == "create_new":
         if not row.decision_reason:
             errors.append("Explain why this is a separate record.")
@@ -226,23 +258,28 @@ def apply_mapping(session, job, mapping, date_format, actor):
           {"mapped_fields": list(mapping), "ignored_columns": [h for h in job.headers if h not in mapping.values()]})
 
 
-def edit_row(session, row, data, decision, target_id, reason, actor):
+def edit_row(session, row, data, decision, target_id, reason, actor, target_snapshot=None):
     if row.status in FINAL or row.job.status in {"mapping", "cancelled"}:
         raise MigrationError("This row cannot be changed.")
     if decision not in {"create", "create_new", "update", "skip"}:
         raise MigrationError("Invalid duplicate decision.")
     if len(reason) > 2000:
         raise MigrationError("Keep the review reason under 2,000 characters.")
+    if decision == "update":
+        # Compare with the snapshot shown on GET, never a new snapshot taken on POST.
+        record = session.scalar(select(MODELS[row.job.record_type]).where(
+            MODELS[row.job.record_type].id == target_id).with_for_update()
+            .execution_options(populate_existing=True)) if target_id else None
+        if not record or not target_snapshot or fingerprint(record) != target_snapshot:
+            raise MigrationError("Destination changed since the review page was opened. Reload and review the latest record before updating.")
     row.data, row.decision, row.decision_reason = data, decision, reason
     row.target_id = target_id or None
-    row.target_snapshot = None
+    row.target_snapshot = target_snapshot if decision == "update" else None
     if decision == "skip":
         if not reason:
             raise MigrationError("Record a reason for skipping this row.")
         row.status = "skipped"
     else:
-        record = session.get(MODELS[row.job.record_type], target_id) if target_id else None
-        row.target_snapshot = fingerprint(record) if record else None
         validate_row(session, row)
     audit(session, actor, "migration.row_reviewed", "migration_row", row.id, {"decision": decision})
     refresh_status(row.job)
@@ -310,10 +347,16 @@ def approve_rows(session, job, row_ids, actor, signoff):
         values = destination_values(session, row)
         model = MODELS[job.record_type]
         if row.decision == "update":
-            record = session.scalar(select(model).where(model.id == row.target_id).with_for_update())
+            record = session.scalar(select(model).where(model.id == row.target_id).with_for_update()
+                                    .execution_options(populate_existing=True))
             if record is None or fingerprint(record) != row.target_snapshot:
                 raise MigrationError("Destination changed. Review the update again.")
             before = snapshot(record)
+            final_errors = date_range_errors({**before, **values})
+            if final_errors:
+                row.errors, row.status = final_errors, "invalid"
+                row.approved_by = row.approved_at = None
+                continue
             for key, value in values.items():
                 setattr(record, key, value)
         else:

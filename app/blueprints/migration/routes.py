@@ -11,6 +11,7 @@ from functools import wraps
 from flask import (Blueprint, abort, current_app, flash, g, redirect, render_template,
                    request, send_file, session, url_for)
 from flask_login import current_user
+from itsdangerous import BadData, URLSafeSerializer
 from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -23,7 +24,7 @@ from app.services.migration import storage
 from app.services.migration.definitions import DEFINITIONS, LABELS
 from app.services.migration.reader import MigrationError, read_table
 from app.services.migration.engine import (MODELS, apply_mapping, approve_rows, edit_row, audit,
-                                           lock_imports, label, snapshot)
+                                           lock_imports, label, snapshot, fingerprint)
 from app.services.migration.documents import upload_document, review_document, date_condition
 
 bp = Blueprint("migration", __name__, url_prefix="/migration")
@@ -105,7 +106,27 @@ def row_or_404(job, row_id):
 
 def revision(row):
     return hashlib.sha256(json.dumps([row.data, row.decision, row.status, row.target_id,
-                                     row.decision_reason], sort_keys=True).encode()).hexdigest()
+                                     row.decision_reason, row.target_snapshot], sort_keys=True).encode()).hexdigest()
+
+
+def review_serializer():
+    return URLSafeSerializer(current_app.secret_key, salt="migration-reviewed-targets-v1")
+
+
+def reviewed_target(row, target_id):
+    """Recover the signed target fingerprint displayed in this specific form."""
+    try:
+        context = review_serializer().loads(request.form.get("review_token", ""))
+    except BadData as exc:
+        raise MigrationError("The review context is missing or invalid. Reload the row and review the target again.") from exc
+    scope = {"organisation_id": g.migration_org, "job_id": row.job_id,
+             "row_id": row.id, "revision": revision(row)}
+    if not isinstance(context, dict) or any(context.get(key) != value for key, value in scope.items()):
+        raise MigrationError("This review context belongs to a different or changed row. Reload and review it again.")
+    target_snapshot = context.get("targets", {}).get(target_id)
+    if not target_snapshot:
+        raise MigrationError("Choose a target displayed on this review page. Reload to review other candidates.")
+    return target_snapshot
 
 
 @bp.get("/")
@@ -183,17 +204,24 @@ def row_review(job_id, row_id):
         if request.form.get("revision") != revision(row):
             raise MigrationError("This row changed in another window. Reload and review the latest values.")
         data = {key: request.form.get("field_" + key, "") for key in DEFINITIONS[job.record_type]}
-        edit_row(g.migration_db, row, data, request.form.get("decision", "create"),
-                 request.form.get("target_id", ""), request.form.get("reason", "").strip(), current_user.id)
+        decision = request.form.get("decision", "create")
+        target_id = request.form.get("target_id", "")
+        target_snapshot = reviewed_target(row, target_id) if decision == "update" else None
+        edit_row(g.migration_db, row, data, decision, target_id,
+                 request.form.get("reason", "").strip(), current_user.id, target_snapshot=target_snapshot)
         return redirect(url_for("migration.preview", job_id=job.id))
     candidates = []
     for item in row.candidates:
         record = g.migration_db.get(MODELS[job.record_type], item["id"])
         if record:
-            candidates.append({"id": record.id, "label": label(record), "values": snapshot(record)})
+            candidates.append({"id": record.id, "label": label(record), "values": snapshot(record),
+                               "fingerprint": fingerprint(record)})
+    review_token = review_serializer().dumps({"organisation_id": g.migration_org, "job_id": job.id,
+        "row_id": row.id, "revision": revision(row),
+        "targets": {candidate["id"]: candidate["fingerprint"] for candidate in candidates}})
     changes = g.migration_db.scalars(select(MigrationChange).filter_by(row_id=row.id)).all()
     return render_template("migration/row.html", job=job, row=row, fields=DEFINITIONS[job.record_type],
-                           revision=revision(row), candidates=candidates, changes=changes)
+                           revision=revision(row), review_token=review_token, candidates=candidates, changes=changes)
 
 
 @bp.post("/<job_id>/approve")

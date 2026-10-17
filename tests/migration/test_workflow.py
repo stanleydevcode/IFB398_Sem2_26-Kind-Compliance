@@ -55,6 +55,9 @@ def review(client, job_id, row, data=None, decision="create", target_id="", reas
     html=client.get(url).get_data(as_text=True)
     rev=re.search(r'name="revision" value="([^"]+)"',html).group(1)
     payload={"revision":rev,"decision":decision,"target_id":target_id,"reason":reason}
+    context=re.search(r'name="review_token" value="([^"]+)"',html)
+    if context:
+        payload["review_token"]=context.group(1)
     payload.update({"field_"+k:v for k,v in (data if data is not None else row["data"]).items()})
     return post(client,url,payload)
 
